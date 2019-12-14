@@ -1,36 +1,43 @@
 {
   "package": [
     {
+      "name": "MainActivity.java",
+      "type": "file",
+      "path": "/Users/harshavardhanp/Downloads/kumkiTest/app/src/main/java/com/example/dsc_onboarding/MainActivity.java"
+    },
+    {
       "name": "Adapter",
       "type": "directory",
+      "path": "/Users/harshavardhanp/Downloads/kumkiTest/app/src/main/java/com/example/dsc_onboarding/Adapter",
       "files": [
         {
           "name": "viewPageAdapter.java",
-          "type": "file"
+          "type": "file",
+          "path": "/Users/harshavardhanp/Downloads/kumkiTest/app/src/main/java/com/example/dsc_onboarding/Adapter/viewPageAdapter.java"
         }
       ]
     },
     {
       "name": "Fragment",
       "type": "directory",
+      "path": "/Users/harshavardhanp/Downloads/kumkiTest/app/src/main/java/com/example/dsc_onboarding/Fragment",
       "files": [
         {
           "name": "Frag1.java",
-          "type": "file"
+          "type": "file",
+          "path": "/Users/harshavardhanp/Downloads/kumkiTest/app/src/main/java/com/example/dsc_onboarding/Fragment/Frag1.java"
         },
         {
           "name": "Frag2.java",
-          "type": "file"
+          "type": "file",
+          "path": "/Users/harshavardhanp/Downloads/kumkiTest/app/src/main/java/com/example/dsc_onboarding/Fragment/Frag2.java"
         },
         {
           "name": "Frag3.java",
-          "type": "file"
+          "type": "file",
+          "path": "/Users/harshavardhanp/Downloads/kumkiTest/app/src/main/java/com/example/dsc_onboarding/Fragment/Frag3.java"
         }
       ]
-    },
-    {
-      "name": "MainActivity.java",
-      "type": "file"
     }
   ]
 }
