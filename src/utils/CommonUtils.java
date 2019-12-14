@@ -9,7 +9,6 @@ import com.google.gson.JsonObject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import static utils.fileOperations.copyFolder;
 
 public class CommonUtils {
 
@@ -49,14 +48,6 @@ public class CommonUtils {
                     }
                 }
             }
-        }
-    }
-
-    public static void backupProject(File sourceFolder,File destinationFolder) {
-        try{
-            copyFolder(sourceFolder,destinationFolder);
-        }catch (Exception ie){
-            System.out.println(ie.getMessage());
         }
     }
 }
