@@ -1,0 +1,57 @@
+
+Project
+I/P: Working source code
+O/P: Semantically equal obfuscated code
+
+
+Identifier in Java program may denote
+    • a package
+    • a top-level type (either a class or an interface)
+    • a nested type (either a class or an interface)
+    • a field
+    • a method
+    • a parameter (of a method, a constructor, or an exception handler)
+    • a local variable
+
+Parameter and local variable are not available in the jvm compiled bytecode.
+
+
+
+package name
+    - inbuilt package
+    - user defined package
+
+class name:
+    - implements or extends
+        - user defined interface or class
+        - inbuilt interface or class
+
+Method name:
+    - user defined
+    - inbuilt (@override)
+
+Variables:
+    - no cases
+
+Constants:
+    - base64 encoding and corresponding method addition
+    - encryption and decrpytion
+
+
+
+
+methods
+
+
+Identifiers that cannot be obfuscated:
+    Exception group 1:
+    The instance method that implements an abstract method of a superclass (or a superinterface) that is outside the obfuscation scope.
+
+    Exception group 2:
+    The instance method that overrides an inherited method of a superclass that is outside the obfuscation scope.
+
+    Exception group 3:
+    The instance method that serves as a callback function
+
+
+
