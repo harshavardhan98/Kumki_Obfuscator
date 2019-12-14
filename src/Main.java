@@ -11,14 +11,15 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args){
-        //String projectDirectory = "/Users/harshavardhanp/Downloads/dsc3";
-        String projectDirectory = "C:\\Users\\Logesh Dinakaran\\OneDrive\\Desktop\\kumkiTest";
+        String projectDirectory,packageName;
+        projectDirectory = "/Users/harshavardhanp/Downloads/kumkiTest";
+        //projectDirectory = "C:\\Users\\Logesh Dinakaran\\OneDrive\\Desktop\\kumkiTest";
 
-        //projectDirectory += "/app/src/main/java/";
-        projectDirectory += "\\app\\src\\main\\java\\";
+        projectDirectory += "/app/src/main/java/";
+        //projectDirectory += "\\app\\src\\main\\java\\";
 
-        //String packageName = "com/example/dsc_onboarding";
-        String packageName = "com\\example\\dsc_onboarding";
+        packageName = "com/example/dsc_onboarding";
+        //packageName = "com\\example\\dsc_onboarding";
 
         File f=new File(projectDirectory + packageName);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();

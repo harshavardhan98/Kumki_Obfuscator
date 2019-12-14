@@ -11,8 +11,8 @@ public class fileOperations {
 
         //https://www.inf.unibz.it/~calvanese/teaching/06-07-ip/lecture-notes/uni09/node12.html
 
-        File f1 = new File("oldname.txt");
-        File f2 = new File("newname.txt");
+        File f1 = new File(oldName);
+        File f2 = new File(newName);
         boolean b = f1.renameTo(f2);
 
     }
@@ -50,6 +50,14 @@ public class fileOperations {
             //Copy the file content from one place to another
             Files.copy(sourceFolder.toPath(), destinationFolder.toPath(), StandardCopyOption.REPLACE_EXISTING);
             System.out.println("File copied :: " + destinationFolder);
+        }
+    }
+
+    public static void backupProject(File sourceFolder,File destinationFolder) {
+        try{
+            copyFolder(sourceFolder,destinationFolder);
+        }catch (Exception ie){
+            System.out.println(ie.getMessage());
         }
     }
 
