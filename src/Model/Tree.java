@@ -1,5 +1,6 @@
 package Model;
 
+import java.io.File;
 import java.util.*;
 
 //https://stackoverflow.com/questions/3522454/java-tree-data-structure
@@ -103,3 +104,40 @@ public class Tree<T> {
         return s;
     }
 }
+
+    /*
+    Tree<String> t=new Tree<>("");
+    directoryInfo.buildTree(f.getAbsolutePath(),t);
+
+    System.out.println("\n\n");
+    System.out.println(t.toString());
+    System.out.println("\n\n");
+
+    for(Tree<String> i:t.getSubTrees()){
+        System.out.println(i.getHead());
+    }
+
+    System.out.println("\n\n");
+    Tree<String> temp= t.getTree("adapter");
+    for(Tree<String> i:temp.getSubTrees()){
+        System.out.println(i.getHead());
+    }
+    System.out.println("\n\n");
+    */
+
+    /*
+    public static void buildTree(String path, Tree<String> t){
+        File folder=new File(path);
+        File[] files=folder.listFiles();
+
+        for(File file:files){
+            if(file.isFile() && file.getName().charAt(0)!='.'){
+                t.addLeaf(file.getName());
+            }
+            else if(file.isDirectory()){
+                t.addLeaf(file.getName());
+                buildTree(file.getAbsolutePath(),t.getTree(file.getName()));
+            }
+        }
+    }
+    */
