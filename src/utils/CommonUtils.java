@@ -1,6 +1,6 @@
-package Utils;
+package utils;
 
-import Model.FileSystem;
+import model.FileSystem;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -9,8 +9,9 @@ import com.google.gson.JsonObject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import static utils.fileOperations.copyFolder;
 
-public class directoryInfo {
+public class CommonUtils {
 
     public static void buildJson(String path, JsonArray pkgJA, boolean flag, List<FileSystem> filesList) {
         File folder = new File(path);
@@ -51,22 +52,11 @@ public class directoryInfo {
         }
     }
 
-    public static void listFiles(String path, int level) {
-        File folder = new File(path);
-        File[] files = folder.listFiles();
-
-        for (File file : files) {
-            if (file.isFile()) {
-                for(int i=0;i<level;i++)
-                    System.out.print(" ");
-
-                if(file.getName().charAt(0)!='.')
-                    System.out.println(file.getName());
-            }
-            else if (file.isDirectory()) {
-                System.out.println(file.getName());
-                listFiles(file.getAbsolutePath(),level+2);
-            }
+    public static void backupProject(File sourceFolder,File destinationFolder) {
+        try{
+            copyFolder(sourceFolder,destinationFolder);
+        }catch (Exception ie){
+            System.out.println(ie.getMessage());
         }
     }
 }

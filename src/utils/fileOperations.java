@@ -1,4 +1,4 @@
-package Utils;
+package utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,14 +53,23 @@ public class fileOperations {
         }
     }
 
-    public static void backupProject(File sourceFolder,File destinationFolder) {
-        try{
-            copyFolder(sourceFolder,destinationFolder);
-        }catch (Exception ie){
-            System.out.println(ie.getMessage());
+    public static void listFiles(String path, int level) {
+        File folder = new File(path);
+        File[] files = folder.listFiles();
+
+        for (File file : files) {
+            if (file.isFile()) {
+                for(int i=0;i<level;i++)
+                    System.out.print(" ");
+
+                if(file.getName().charAt(0)!='.')
+                    System.out.println(file.getName());
+            }
+            else if (file.isDirectory()) {
+                System.out.println(file.getName());
+                listFiles(file.getAbsolutePath(),level+2);
+            }
         }
     }
-
-
 
 }

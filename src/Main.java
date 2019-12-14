@@ -1,13 +1,10 @@
-import Model.FileSystem;
-import Utils.directoryInfo;
+import utils.CommonUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
     public static void main(String[] args){
@@ -26,7 +23,7 @@ public class Main {
         JsonObject rootJO = new JsonObject();
         JsonArray pkgJA = new JsonArray();
 
-        directoryInfo.buildJson(f.getAbsolutePath(), pkgJA,false, null);
+        CommonUtils.buildJson(f.getAbsolutePath(), pkgJA,false, null);
 
         rootJO.add("package", pkgJA);
         System.out.println(gson.toJson(rootJO));
