@@ -20,7 +20,7 @@ import static utils.fileOperations.copy;
 
 public class Main {
     public static void main(String[] args){
-        analyseProjectStructure();
+        //analyseProjectStructure();
         //backupProject();
 
         /*List<String> result = Unix4j.cat(Constants.projectRootDirectory + Constants.packageName + "MainActivity.java").grep("import").sed("s/import/logesh/g").toStringList();

@@ -9,4 +9,6 @@ public class Constants {
 
     //public static String packageName = "com/example/dsc_onboarding/";
     public static String packageName = "com\\example\\dsc_onboarding\\";
+
+    public static String keyValue = "givemearupee";
 }
