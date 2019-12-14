@@ -1,3 +1,5 @@
+import org.unix4j.Unix4j;
+import org.unix4j.unix.Grep;
 import utils.CommonUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,7 +15,10 @@ import static utils.fileOperations.copy;
 public class Main {
     public static void main(String[] args){
         //analyseProjectStructure();
-        backupProject();
+        //backupProject();
+
+        String result = Unix4j.cat(Constants.projectRootDirectory + Constants.packageName + "MainActivity.java").grep(Grep.Options.n, "import").toStringResult();
+        System.out.println(result);
     }
 
     private static void analyseProjectStructure() {
