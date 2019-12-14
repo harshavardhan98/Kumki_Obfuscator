@@ -1,8 +1,11 @@
 package Utils;
 
+import Model.FileSystem;
 import Model.Tree;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class directoryInfo {
 
@@ -51,5 +54,21 @@ public class directoryInfo {
         }
     }
 
+    public static void buildJson(String path, FileSystem fs) {
+        File folder = new File(path);
+        File[] files = folder.listFiles();
 
+        if(files != null) {
+            for (File file : files) {
+                if(!file.getName().startsWith(".")) {
+                    if (file.isFile()) {
+
+                    }
+                    else if (file.isDirectory()) {
+
+                    }
+                }
+            }
+        }
+    }
 }
