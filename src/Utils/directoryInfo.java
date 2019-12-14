@@ -1,14 +1,11 @@
-package src.Utils;
+package Utils;
 
 import Model.FileSystem;
 import Model.Tree;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class directoryInfo {
-
 
     public static void listFiles(String path, int level)
     {
