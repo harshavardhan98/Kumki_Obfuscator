@@ -67,7 +67,7 @@ Identifiers that cannot be obfuscated:
         *   Step 2: Dependency data is stored as HashMap<String,IdentifierDependency>
                     key="Frag1.java"  value="HashMap<String,ArrayList<String>> hm"
                                                |->  key="file name in the project"  value="List of lines where Frag1.java occurs"
-        *   Step 3: Call the renameClasses Method to populate the dependency data for each file and renames the classes
+        *   Step 3: Call the renameAllFiles Method to populate the dependency data for each file and renames the classes
         *   Step 4: Use the printDependencyDataOfIdentifier function to print the dependency data of all the identifiers
         *
         * */
@@ -75,7 +75,7 @@ Identifiers that cannot be obfuscated:
         // get the list of class files
         ArrayList<FileSystem> fsTemp=parseFileStructureJson(jsonStructurePath);
         ArrayList<String> classList=new ArrayList<>();
-        getClassList(fsTemp,classList);
+        getFilesList(fsTemp,classList);
 
         // Initialisation of dependency data
         HashMap<String, IdentifierDependency> dependencyData=new HashMap<>();
@@ -85,7 +85,7 @@ Identifiers that cannot be obfuscated:
         }
 
         // parsing the project to get the dependency data
-        fileOperations.renameClasses(classList,Constants.projectRootDirectory + Constants.packageName,dependencyData);
+        fileOperations.renameAllFiles(classList,Constants.projectRootDirectory + Constants.packageName,dependencyData);
 
         // printing the dependency data for each identifier
         for(String i:classList){
@@ -109,7 +109,7 @@ Identifiers that cannot be obfuscated:
     }
 
 
-  public static void replaceClassName(ArrayList<String> classList,String filePath,HashMap<String,IdentifierDependency> dependencyData){
+  public static void renameFile(ArrayList<String> classList,String filePath,HashMap<String,IdentifierDependency> dependencyData){
 
         File f;
         for(String i:classList){
@@ -124,7 +124,7 @@ Identifiers that cannot be obfuscated:
     }
 
 
-    public static void renameClasses(ArrayList<String> classList, String BackUpProjectPath,HashMap<String,IdentifierDependency> dependencyData){
+    public static void renameAllFiles(ArrayList<String> classList, String BackUpProjectPath,HashMap<String,IdentifierDependency> dependencyData){
 
         File folder = new File(BackUpProjectPath);
         File[] files = folder.listFiles();
@@ -133,13 +133,13 @@ Identifiers that cannot be obfuscated:
             if (file.isFile()) {
                 if(file.getName().charAt(0)!='.'){
                     //System.out.println(file.getAbsolutePath());
-                    replaceClassName(classList,file.getAbsolutePath(),dependencyData);
+                    renameFile(classList,file.getAbsolutePath(),dependencyData);
                 }
 
             }
             else if (file.isDirectory()) {
                 System.out.println(file.getName());
-                renameClasses(classList,file.getAbsolutePath(),dependencyData);
+                renameAllFiles(classList,file.getAbsolutePath(),dependencyData);
                 //list(file.getAbsolutePath(),le);
             }
         }

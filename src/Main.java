@@ -1,30 +1,21 @@
-import model.FileSystem;
-import org.unix4j.Unix4j;
-import org.unix4j.unix.Grep;
-import org.unix4j.unix.sed.SedOptions;
-import utils.CommonUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import utils.Constants;
+import utils.*;
+import static utils.CommonUtils.*;
+import static utils.FileOperation.*;
+
+import model.*;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
-
-import static utils.CommonUtils.*;
-import static utils.fileOperations.copy;
 
 public class Main {
     public static void main(String[] args){
         analyseProjectStructure();
-        //backupProject();
-
-        Unix4j.cat(Constants.projectRootDirectory + Constants.packageName + "MainActivity.java").sed("s/import/logesh/g").toFile(Constants.projectRootDirectory + Constants.packageName + "MainActivity1.java");
+        backupProject();
 
         /*Main obj = new Main();
         ArrayList<String> list = getMethods(obj);
@@ -34,8 +25,8 @@ public class Main {
         ArrayList<String> list = getIdentifiers(obj);
         System.out.println(list.toString());*/
 
-        getDependencyData(Constants.projectDirectory + "originalFileStructure.json");
-        //analyseProjectStructure();
+        getDependencyData();
+        analyseProjectStructure();
     }
 
     private static void analyseProjectStructure() {
@@ -49,7 +40,7 @@ public class Main {
         String fileStructureJS = gson.toJson(rootJO);
         //System.out.println(fileStructureJS);
 
-        File file = new File(Constants.projectDirectory + "originalFileStructure.json");
+        File file = new File(Constants.projectDirectory + Constants.fileStructureJsonPath);
         try {
             FileWriter fr = new FileWriter(file);
             fr.write(fileStructureJS);
@@ -72,10 +63,26 @@ public class Main {
             else
                 Constants.backupProjectDirectory += "\\";       //Windows
 
-            copy(sourceFolder, destinationFolder);
+            copyFolder(sourceFolder, destinationFolder);
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public static void getDependencyData() {
+        /*
+         *   Algorithm:
+         *   Step 1: Parses the json file and gets the list of java class files
+         *   Step 2: Call the renameAllFiles Method to populate the dependency data for each file and renames the classes
+         * */
+
+        // get the list of class files
+        ArrayList<FileSystem> fsTemp = parseFileStructureJson(Constants.projectDirectory + Constants.fileStructureJsonPath);
+        ArrayList<String> classList = new ArrayList<>();
+        getFilesList(fsTemp, classList);
+
+        // rename all the java class
+        renameAllFiles(classList, Constants.projectRootDirectory + Constants.packageName);
     }
 }
