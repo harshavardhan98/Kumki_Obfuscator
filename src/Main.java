@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import static utils.CommonUtils.*;
 import static utils.fileOperations.copy;
 
 public class Main {
@@ -23,18 +24,17 @@ public class Main {
         //analyseProjectStructure();
         //backupProject();
 
-        /*List<String> result = Unix4j.cat(Constants.projectRootDirectory + Constants.packageName + "MainActivity.java").grep("import").sed("s/import/logesh/g").toStringList();
-        System.out.println(result.toString());*/
+        Unix4j.cat(Constants.projectRootDirectory + Constants.packageName + "MainActivity.java").sed("s/import/logesh/g").toFile(Constants.projectRootDirectory + Constants.packageName + "MainActivity1.java");
 
         /*Main obj = new Main();
-        ArrayList<String> list = CommonUtils.getMethods(obj);
+        ArrayList<String> list = getMethods(obj);
         System.out.println(list.toString());*/
 
         /*FileSystem obj = new FileSystem();
-        ArrayList<String> list = CommonUtils.getIdentifiers(obj);
+        ArrayList<String> list = getIdentifiers(obj);
         System.out.println(list.toString());*/
 
-        CommonUtils.getDependencyData(Constants.projectDirectory + "originalFileStructure.json");
+        getDependencyData(Constants.projectDirectory + "originalFileStructure.json");
     }
 
     private static void analyseProjectStructure() {
@@ -43,7 +43,7 @@ public class Main {
         JsonObject rootJO = new JsonObject();
         JsonArray pkgJA = new JsonArray();
 
-        CommonUtils.buildJson(f.getAbsolutePath(), pkgJA,false, null);
+        buildJson(f.getAbsolutePath(), pkgJA,false, null);
         rootJO.add("package", pkgJA);
         String fileStructureJS = gson.toJson(rootJO);
         //System.out.println(fileStructureJS);
@@ -53,7 +53,7 @@ public class Main {
             FileWriter fr = new FileWriter(file);
             fr.write(fileStructureJS);
             fr.close();
-            System.out.println(file.getName() + " created");
+            //System.out.println(file.getName() + " created");
         }
         catch (Exception e){
             e.printStackTrace();
@@ -64,6 +64,13 @@ public class Main {
         try{
             File sourceFolder = new File(Constants.projectDirectory);
             File destinationFolder = new File(sourceFolder.getAbsolutePath() + "1");
+
+            Constants.backupProjectDirectory = destinationFolder.getAbsolutePath();
+            if(destinationFolder.getAbsolutePath().contains("/"))
+                Constants.backupProjectDirectory += "/";        //Linux
+            else
+                Constants.backupProjectDirectory += "\\";       //Windows
+
             copy(sourceFolder, destinationFolder);
         }
         catch (Exception e) {

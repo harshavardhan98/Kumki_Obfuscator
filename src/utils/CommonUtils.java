@@ -184,9 +184,9 @@ public class CommonUtils {
         * */
 
         // get the list of class files
-        ArrayList<FileSystem> fsTemp=CommonUtils.parseFileStructureJson(jsonStructurePath);
+        ArrayList<FileSystem> fsTemp=parseFileStructureJson(jsonStructurePath);
         ArrayList<String> classList=new ArrayList<>();
-        CommonUtils.getClassList(fsTemp,classList);
+        getClassList(fsTemp,classList);
 
         // Initialisation of dependency data
         HashMap<String, IdentifierDependency> dependencyData=new HashMap<>();
@@ -196,12 +196,12 @@ public class CommonUtils {
         }
 
         // parsing the project to get the dependency data
-        utils.fileOperations.renameClasses(classList,Constants.projectRootDirectory + Constants.packageName,dependencyData);
+        fileOperations.renameClasses(classList,Constants.projectRootDirectory + Constants.packageName,dependencyData);
 
         // printing the dependency data for each identifier
         for(String i:classList){
             File f=new File(i);
-            utils.CommonUtils.printDependencyDataOfIdentifier(f.getName(),dependencyData);
+            printDependencyDataOfIdentifier(f.getName(),dependencyData);
         }
 
         return dependencyData;
