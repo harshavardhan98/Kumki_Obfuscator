@@ -16,10 +16,15 @@ import java.util.List;
 
 public class fileOperations {
 
-    public static void rename(File sourceFolder, File destinationFolder){
+    public static void rename(String src, String dst){
         //https://www.inf.unibz.it/~calvanese/teaching/06-07-ip/lecture-notes/uni09/node12.html
+
+        File sourceFolder=new File(src);
+        File destinationFolder=new File(dst);
+
         sourceFolder.renameTo(destinationFolder);
     }
+
 
     public static void copy(File sourceFolder, File destinationFolder) {
         // https://howtodoinjava.com/java/io/how-to-copy-directories-in-java/
@@ -77,22 +82,25 @@ public class fileOperations {
     }
 
 
-    public static void replaceClassName(ArrayList<String> classList,String filePath,HashMap<String,IdentifierDependency> dependencyData){
+    public static void replaceClassName(ArrayList<String> classList,String filePath){
 
-        File f;
+
+        File f=new File(filePath);
+
         for(String i:classList){
-            f=new File(i);
-            IdentifierDependency id=dependencyData.get(f.getName());
-            List<String> result = Unix4j.cat(filePath).grep(Grep.Options.n,f.getName().substring(0,f.getName().lastIndexOf("."))).toStringList();
-            HashMap<String,ArrayList<String>> fileDependency=id.getEntries();
-            fileDependency.put(filePath,new ArrayList<>(result));
-            id.setEntries(fileDependency);
-            dependencyData.put(f.getName(),id);
+            // getting the classname(frag1.java) from the entire classPath
+            String className=i.substring(i.lastIndexOf(File.separator)+1);
+            // getting the frag1 from frag1.java
+            String pattern=className.substring(0,className.lastIndexOf("."));
+            String replacePattern="s/"+pattern+"/"+CommonUtils.getHexValue(className)+"/g";
+            Unix4j.cat(filePath).sed(replacePattern).toFile(filePath);
         }
+
+        //rename(f.getAbsolutePath(),f.getParent()+"/"+CommonUtils.getHexValue(f.getName())+".java");
     }
 
 
-    public static void renameClasses(ArrayList<String> classList, String BackUpProjectPath,HashMap<String,IdentifierDependency> dependencyData){
+    public static void renameClasses(ArrayList<String> classList, String BackUpProjectPath){
 
         File folder = new File(BackUpProjectPath);
         File[] files = folder.listFiles();
@@ -101,13 +109,13 @@ public class fileOperations {
             if (file.isFile()) {
                 if(file.getName().charAt(0)!='.'){
                     //System.out.println(file.getAbsolutePath());
-                    replaceClassName(classList,file.getAbsolutePath(),dependencyData);
+                    replaceClassName(classList,file.getAbsolutePath());
                 }
 
             }
             else if (file.isDirectory()) {
                 System.out.println(file.getName());
-                renameClasses(classList,file.getAbsolutePath(),dependencyData);
+                renameClasses(classList,file.getAbsolutePath());
                 //list(file.getAbsolutePath(),le);
             }
         }

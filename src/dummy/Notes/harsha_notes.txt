@@ -55,3 +55,95 @@ Identifiers that cannot be obfuscated:
 
 
 
+
+/*********************************************************************************************************************/
+
+    public static HashMap<String,IdentifierDependency> getDependencyData(String jsonStructurePath){
+
+        /*
+        *
+        *   Algorithm:
+        *   Step 1: Parses the json file and gets the list of java class files
+        *   Step 2: Dependency data is stored as HashMap<String,IdentifierDependency>
+                    key="Frag1.java"  value="HashMap<String,ArrayList<String>> hm"
+                                               |->  key="file name in the project"  value="List of lines where Frag1.java occurs"
+        *   Step 3: Call the renameClasses Method to populate the dependency data for each file and renames the classes
+        *   Step 4: Use the printDependencyDataOfIdentifier function to print the dependency data of all the identifiers
+        *
+        * */
+
+        // get the list of class files
+        ArrayList<FileSystem> fsTemp=parseFileStructureJson(jsonStructurePath);
+        ArrayList<String> classList=new ArrayList<>();
+        getClassList(fsTemp,classList);
+
+        // Initialisation of dependency data
+        HashMap<String, IdentifierDependency> dependencyData=new HashMap<>();
+        for(String i:classList){
+            File f=new File(i);
+            dependencyData.put(f.getName(),new IdentifierDependency(f.getName()));
+        }
+
+        // parsing the project to get the dependency data
+        fileOperations.renameClasses(classList,Constants.projectRootDirectory + Constants.packageName,dependencyData);
+
+        // printing the dependency data for each identifier
+        for(String i:classList){
+            File f=new File(i);
+            printDependencyDataOfIdentifier(f.getName(),dependencyData);
+        }
+
+        return dependencyData;
+    }
+
+    public static void printDependencyDataOfIdentifier(String identifierName, HashMap<String, IdentifierDependency> dependencyData){
+
+        HashMap<String,ArrayList<String>> data=dependencyData.get(identifierName).getEntries();
+
+        System.out.println("Dependencies of "+identifierName);
+        for(String i:data.keySet()){
+            ArrayList<String> lines=data.get(i);
+            for(String j:lines)
+                System.out.println("   "+j);
+        }
+    }
+
+
+  public static void replaceClassName(ArrayList<String> classList,String filePath,HashMap<String,IdentifierDependency> dependencyData){
+
+        File f;
+        for(String i:classList){
+            f=new File(i);
+            IdentifierDependency id=dependencyData.get(f.getName());
+            List<String> result = Unix4j.cat(filePath).grep(Grep.Options.n,f.getName().substring(0,f.getName().lastIndexOf("."))).toStringList();
+            HashMap<String,ArrayList<String>> fileDependency=id.getEntries();
+            fileDependency.put(filePath,new ArrayList<>(result));
+            id.setEntries(fileDependency);
+            dependencyData.put(f.getName(),id);
+        }
+    }
+
+
+    public static void renameClasses(ArrayList<String> classList, String BackUpProjectPath,HashMap<String,IdentifierDependency> dependencyData){
+
+        File folder = new File(BackUpProjectPath);
+        File[] files = folder.listFiles();
+
+        for (File file : files) {
+            if (file.isFile()) {
+                if(file.getName().charAt(0)!='.'){
+                    //System.out.println(file.getAbsolutePath());
+                    replaceClassName(classList,file.getAbsolutePath(),dependencyData);
+                }
+
+            }
+            else if (file.isDirectory()) {
+                System.out.println(file.getName());
+                renameClasses(classList,file.getAbsolutePath(),dependencyData);
+                //list(file.getAbsolutePath(),le);
+            }
+        }
+    }
+
+
+/***************************************************************************************************************************************/

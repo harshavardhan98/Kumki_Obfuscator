@@ -169,53 +169,21 @@ public class CommonUtils {
     }
 
 
-    public static HashMap<String,IdentifierDependency> getDependencyData(String jsonStructurePath){
-
+    public static void getDependencyData(String jsonStructurePath) {
         /*
-        *
         *   Algorithm:
         *   Step 1: Parses the json file and gets the list of java class files
-        *   Step 2: Dependency data is stored as HashMap<String,IdentifierDependency>
-                    key="Frag1.java"  value="HashMap<String,ArrayList<String>> hm"
-                                               |->  key="file name in the project"  value="List of lines where Frag1.java occurs"
-        *   Step 3: Call the renameClasses Method to populate the dependency data for each file and renames the classes
-        *   Step 4: Use the printDependencyDataOfIdentifier function to print the dependency data of all the identifiers
-        *
+        *   Step 2: Call the renameClasses Method to populate the dependency data for each file and renames the classes
         * */
 
         // get the list of class files
-        ArrayList<FileSystem> fsTemp=parseFileStructureJson(jsonStructurePath);
-        ArrayList<String> classList=new ArrayList<>();
-        getClassList(fsTemp,classList);
+        ArrayList<FileSystem> fsTemp = parseFileStructureJson(jsonStructurePath);
+        ArrayList<String> classList = new ArrayList<>();
+        getClassList(fsTemp, classList);
 
-        // Initialisation of dependency data
-        HashMap<String, IdentifierDependency> dependencyData=new HashMap<>();
-        for(String i:classList){
-            File f=new File(i);
-            dependencyData.put(f.getName(),new IdentifierDependency(f.getName()));
-        }
 
         // parsing the project to get the dependency data
-        fileOperations.renameClasses(classList,Constants.projectRootDirectory + Constants.packageName,dependencyData);
+        fileOperations.renameClasses(classList, Constants.projectRootDirectory + Constants.packageName);
 
-        // printing the dependency data for each identifier
-        for(String i:classList){
-            File f=new File(i);
-            printDependencyDataOfIdentifier(f.getName(),dependencyData);
-        }
-
-        return dependencyData;
-    }
-
-    public static void printDependencyDataOfIdentifier(String identifierName, HashMap<String, IdentifierDependency> dependencyData){
-
-        HashMap<String,ArrayList<String>> data=dependencyData.get(identifierName).getEntries();
-
-        System.out.println("Dependencies of "+identifierName);
-        for(String i:data.keySet()){
-            ArrayList<String> lines=data.get(i);
-            for(String j:lines)
-                System.out.println("   "+j);
-        }
     }
 }

@@ -21,7 +21,7 @@ import static utils.fileOperations.copy;
 
 public class Main {
     public static void main(String[] args){
-        //analyseProjectStructure();
+        analyseProjectStructure();
         //backupProject();
 
         Unix4j.cat(Constants.projectRootDirectory + Constants.packageName + "MainActivity.java").sed("s/import/logesh/g").toFile(Constants.projectRootDirectory + Constants.packageName + "MainActivity1.java");
@@ -35,6 +35,7 @@ public class Main {
         System.out.println(list.toString());*/
 
         getDependencyData(Constants.projectDirectory + "originalFileStructure.json");
+        //analyseProjectStructure();
     }
 
     private static void analyseProjectStructure() {
