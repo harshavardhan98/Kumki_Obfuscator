@@ -1,4 +1,5 @@
 import model.FileSystem;
+import model.IdentifierDependency;
 import org.unix4j.Unix4j;
 import org.unix4j.unix.Grep;
 import org.unix4j.unix.sed.SedOptions;
@@ -7,20 +8,26 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import utils.Constants;
+import utils.*;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static utils.fileOperations.copy;
 
 public class Main {
     public static void main(String[] args){
-        analyseProjectStructure();
+
+
+        CommonUtils.getDependencyData(Constants.jsonStructurePath);
+
+
+        //analyseProjectStructure();
         //backupProject();
 
         /*List<String> result = Unix4j.cat(Constants.projectRootDirectory + Constants.packageName + "MainActivity.java").grep("import").sed("s/import/logesh/g").toStringList();

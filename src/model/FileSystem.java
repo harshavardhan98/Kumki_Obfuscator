@@ -5,7 +5,18 @@ import java.util.List;
 public class FileSystem {
     private String name;
     private String type;
+    private String path;
     private List<FileSystem> files;
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+
 
     public String getName() {
         return name;
