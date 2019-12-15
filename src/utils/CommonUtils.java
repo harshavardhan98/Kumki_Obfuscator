@@ -138,7 +138,7 @@ public class CommonUtils {
     public static void getFilesList(ArrayList<FileSystem> fs, ArrayList<String> classList){
         for(FileSystem f : fs) {
             if(f.getType().equals("file") && f.getName().endsWith(".java")){
-                classList.add(f.getPath() + "/" + f.getName());
+                classList.add(f.getPath() + File.separator + f.getName());
             }
             else
                 getFilesList(new ArrayList<>(f.getFiles()), classList);

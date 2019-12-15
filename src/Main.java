@@ -14,8 +14,8 @@ import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args){
-        analyseProjectStructure();
         backupProject();
+        analyseProjectStructure();
 
         /*Main obj = new Main();
         ArrayList<String> list = getMethods(obj);
@@ -57,12 +57,7 @@ public class Main {
             File sourceFolder = new File(Constants.projectDirectory);
             File destinationFolder = new File(sourceFolder.getAbsolutePath() + "1");
 
-            Constants.backupProjectDirectory = destinationFolder.getAbsolutePath();
-            if(destinationFolder.getAbsolutePath().contains("/"))
-                Constants.backupProjectDirectory += "/";        //Linux
-            else
-                Constants.backupProjectDirectory += "\\";       //Windows
-
+            Constants.backupProjectDirectory = destinationFolder.getAbsolutePath() + File.separator;
             copyFolder(sourceFolder, destinationFolder);
         }
         catch (Exception e) {

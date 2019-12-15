@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
@@ -65,24 +66,33 @@ public class FileOperation {
             // getting the frag1 from frag1.java
             String className = fileName.substring(0, fileName.lastIndexOf("."));
 
-            String replaceString = "s/" + className + File.separator + CommonUtils.getHexValue(fileName) + "/g";
+            String replaceString = "s/" + className + "/" + CommonUtils.getHexValue(className) + "/g";
             Unix4j.cat(filePath).sed(replaceString).toFile(temp);
 
+            //Copy and delete file
+
             try {
-                FileInputStream fis = new FileInputStream(temp.getAbsolutePath());
-                FileOutputStream fos = new FileOutputStream(f.getAbsolutePath());
-
-                int b;
-                while ((b = fis.read()) != -1)
-                    fos.write(b);
-
-                fis.close();
-                fos.close();
-
-                temp.delete();
-            } catch (Exception e) {
+                Files.copy(temp.toPath(), f.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+            catch (Exception e){
                 e.printStackTrace();
             }
+
+            try {
+                Files.delete(temp.toPath());
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+
+            //move file
+
+            /*try {
+                Files.move(temp.toPath(), f.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }*/
         }
 
         renameFolder(f.getAbsolutePath(), f.getParent() + File.separator + CommonUtils.getHexValue(f.getName()) + ".java");
@@ -97,7 +107,8 @@ public class FileOperation {
                 if (file.isFile()) {
                     if (!file.getName().startsWith("."))
                         renameFile(classList, file.getAbsolutePath());
-                } else if (file.isDirectory())
+                }
+                else if (file.isDirectory())
                     renameAllFiles(classList, file.getAbsolutePath());
             }
         }
