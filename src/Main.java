@@ -33,6 +33,8 @@ public class Main {
         /*FileSystem obj = new FileSystem();
         ArrayList<String> list = CommonUtils.getIdentifiers(obj);
         System.out.println(list.toString());*/
+
+        CommonUtils.getDependencyData(Constants.projectDirectory + "originalFileStructure.json");
     }
 
     private static void analyseProjectStructure() {

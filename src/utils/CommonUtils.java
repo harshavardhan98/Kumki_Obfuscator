@@ -137,7 +137,6 @@ public class CommonUtils {
             System.out.println(results);
             System.out.println("\n\n");
 
-
             FileSystem[] fileSystems=gson.fromJson(results,FileSystem[].class);
 
             for(FileSystem f:fileSystems)
@@ -184,14 +183,10 @@ public class CommonUtils {
         *
         * */
 
-
-
         // get the list of class files
         ArrayList<FileSystem> fsTemp=CommonUtils.parseFileStructureJson(jsonStructurePath);
         ArrayList<String> classList=new ArrayList<>();
         CommonUtils.getClassList(fsTemp,classList);
-
-
 
         // Initialisation of dependency data
         HashMap<String, IdentifierDependency> dependencyData=new HashMap<>();
@@ -201,7 +196,7 @@ public class CommonUtils {
         }
 
         // parsing the project to get the dependency data
-        utils.fileOperations.renameClasses(classList,Constants.backUpProjectRootDirectory+Constants.packageName,dependencyData);
+        utils.fileOperations.renameClasses(classList,Constants.projectRootDirectory + Constants.packageName,dependencyData);
 
         // printing the dependency data for each identifier
         for(String i:classList){
@@ -211,8 +206,6 @@ public class CommonUtils {
 
         return dependencyData;
     }
-
-
 
     public static void printDependencyDataOfIdentifier(String identifierName, HashMap<String, IdentifierDependency> dependencyData){
 
@@ -225,5 +218,4 @@ public class CommonUtils {
                 System.out.println("   "+j);
         }
     }
-
 }
