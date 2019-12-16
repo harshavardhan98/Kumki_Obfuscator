@@ -72,7 +72,6 @@ public class FileOperation {
         * */
 
         String fileContent="";
-
         try{
             BufferedReader reader = new BufferedReader(new FileReader(filePath));
             StringBuilder stringBuilder = new StringBuilder();
@@ -82,64 +81,54 @@ public class FileOperation {
                 stringBuilder.append(line);
                 stringBuilder.append(ls);
             }
+
             // delete the last new line separator
             stringBuilder.deleteCharAt(stringBuilder.length() - 1);
             reader.close();
-
             fileContent = stringBuilder.toString();
-
-        }catch(IOException ie){
-
+        }
+        catch(Exception ie){
             System.out.println(ie.getMessage());
         }
 
-        //System.out.println(fileContent);
-
-
         Map<String,String> tokens = new HashMap<>();
-        for(String i:classList) {
-            String className=CommonUtils.getFileNameFromFilePath(i);
+        for(String i : classList) {
+            String className = CommonUtils.getClassNameFromFilePath(i);
             tokens.put(className,CommonUtils.getHexValue(className));
         }
 
-        // step 3:  Create pattern of the format "%(pattern1|pattern2)%"
+        // step 3:  Create pattern of the format "(pattern1|pattern2)"
         String patternString = "(";
+        for(String i : tokens.keySet())
+            patternString += i + "|";
 
-        for(String i:tokens.keySet()){
-            patternString+=i+"|";
-        }
-        patternString= patternString.substring(0,patternString.length() - 1);
+        patternString = patternString.substring(0,patternString.length() - 1);
         patternString += ")";
-
-
 
         Pattern pattern = Pattern.compile(patternString);
         Matcher matcher = pattern.matcher(fileContent);
 
         StringBuffer sb = new StringBuffer();
-        while(matcher.find()) {
+        while(matcher.find())
             matcher.appendReplacement(sb, tokens.get(matcher.group(1)));
-        }
         matcher.appendTail(sb);
-        System.out.println(sb.toString());
-
+        //System.out.println(sb.toString());
 
         // step 4
-        try (PrintWriter out = new PrintWriter(filePath)) {
+        try {
+            PrintWriter out = new PrintWriter(filePath);
             out.println(sb.toString());
             out.close();
-            System.out.println(filePath);
+            //System.out.println(filePath);
 
             // step 5
-            File f=new File(filePath);
-            renameFolder(filePath, f.getParent() + File.separator + CommonUtils.getHexValue(CommonUtils.getFileNameFromFilePath(filePath)) + ".java");
+            File f = new File(filePath);
+            renameFolder(filePath,f.getParent() + File.separator + CommonUtils.getHexValue(CommonUtils.getClassNameFromFilePath(filePath)) + ".java");
 
-        }catch(Exception e){
+        }
+        catch(Exception e) {
             System.out.println(e.getMessage());
         }
-
-
-
     }
 
     public static void renameAllFiles(ArrayList<String> classList, String projectPath) {

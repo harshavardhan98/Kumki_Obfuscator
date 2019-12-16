@@ -146,8 +146,14 @@ public class CommonUtils {
     }
 
     public static String getFileNameFromFilePath(String filePath){
-        //  usr/Desktop/file1.java -> file1
+        //  usr/Desktop/file1.java -> file1.java
         String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
-        return fileName.substring(0, fileName.lastIndexOf("."));
+        return fileName;
     }
-}
+
+
+    public static String getClassNameFromFilePath(String filePath){
+        //  usr/Desktop/file1.java -> file1
+        String fileName = getFileNameFromFilePath(filePath);
+        return fileName.substring(0, fileName.lastIndexOf("."));
+    }}
