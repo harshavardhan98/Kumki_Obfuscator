@@ -134,7 +134,6 @@ public class CommonUtils {
 
     /****************************************************************************/
     //Returns the list of files in the project
-
     public static void getFilesList(ArrayList<FileSystem> fs, ArrayList<String> classList){
         for(FileSystem f : fs) {
             if(f.getType().equals("file") && f.getName().endsWith(".java")){
@@ -144,6 +143,24 @@ public class CommonUtils {
                 getFilesList(new ArrayList<>(f.getFiles()), classList);
         }
     }
+
+
+    // returns the list of folders in the project
+    public static void getFolderList(ArrayList<FileSystem> fs,ArrayList<String> folderList){
+
+        for(FileSystem f:fs){
+            if(f.getType().equals("directory")){
+                folderList.add(f.getPath()+File.separator+f.getName());
+                getFolderList(new ArrayList<>(f.getFiles()),folderList);
+            }
+        }
+    }
+
+
+    /****************************************************************************/
+
+
+
 
     public static String getFileNameFromFilePath(String filePath){
         //  usr/Desktop/file1.java -> file1.java
@@ -156,4 +173,6 @@ public class CommonUtils {
         //  usr/Desktop/file1.java -> file1
         String fileName = getFileNameFromFilePath(filePath);
         return fileName.substring(0, fileName.lastIndexOf("."));
-    }}
+    }
+
+}

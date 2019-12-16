@@ -1,6 +1,5 @@
 package utils;
 
-import org.unix4j.Unix4j;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -55,7 +54,7 @@ public class FileOperation {
     }
 
     /****************************************************************************/
-    //rename
+    //rename classes
 
     public static void renameFile(ArrayList<String> classList, String filePath) {
         /*
@@ -147,12 +146,99 @@ public class FileOperation {
         }
     }
 
+    /****************************************************************************/
+
+    public static void renamePackageInFiles(ArrayList<String> packageList, String filePath) {
+
+        String fileContent="";
+        try{
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line = null;
+            String ls = System.getProperty("line.separator");
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(ls);
+            }
+
+            // delete the last new line separator
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+            reader.close();
+            fileContent = stringBuilder.toString();
+        }
+        catch(Exception ie){
+            System.out.println(ie.getMessage());
+        }
+
+        Map<String,String> tokens = new HashMap<>();
+        for(String i : packageList) {
+            String packageName = CommonUtils.getFileNameFromFilePath(i);
+            tokens.put(packageName,CommonUtils.getHexValue(packageName));
+        }
+
+        // step 3:  Create pattern of the format "(pattern1|pattern2)"
+        String patternString = "(";
+        for(String i : tokens.keySet())
+            patternString += i + "|";
+
+        patternString = patternString.substring(0,patternString.length() - 1);
+        patternString += ")";
+
+        Pattern pattern = Pattern.compile(patternString);
+        Matcher matcher = pattern.matcher(fileContent);
+
+        StringBuffer sb = new StringBuffer();
+        while(matcher.find())
+            matcher.appendReplacement(sb, tokens.get(matcher.group(1)));
+        matcher.appendTail(sb);
+        System.out.println(sb.toString());
+
+        // step 4
+        try {
+            PrintWriter out = new PrintWriter(filePath);
+            out.println(sb.toString());
+            out.close();
+            //System.out.println(filePath);
+        }
+        catch(Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void renameDirectory(ArrayList<String> folderList,String projectPath) {
+        File folder = new File(projectPath);
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()){
+                    renameDirectory(folderList,file.getAbsolutePath());
+                    renameFolder(file.getAbsolutePath(),file.getParent()+File.separator+CommonUtils.getHexValue(file.getName()));
+                }
+                else if(file.isFile()){
+                    renamePackageInFiles(folderList,file.getAbsolutePath());
+                }
+            }
+        }
+    }
+
+
+
+
+    /****************************************************************************/
+
+
     public static void renameFolder(String src, String dst) {
         //https://www.inf.unibz.it/~calvanese/teaching/06-07-ip/lecture-notes/uni09/node12.html
 
         File sourceFolder = new File(src);
         File destinationFolder = new File(dst);
-
-        sourceFolder.renameTo(destinationFolder);
+        if(sourceFolder.renameTo(destinationFolder))
+            System.out.println("Renaming works");
+        else
+            System.out.println("Renaming failed");
     }
+
+
+
 }

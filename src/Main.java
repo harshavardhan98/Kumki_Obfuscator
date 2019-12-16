@@ -14,8 +14,8 @@ import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args){
-        backupProject();
-        analyseProjectStructure();
+        //backupProject();
+        //analyseProjectStructure();
 
         /*Main obj = new Main();
         ArrayList<String> list = getMethods(obj);
@@ -25,7 +25,8 @@ public class Main {
         ArrayList<String> list = getIdentifiers(obj);
         System.out.println(list.toString());*/
 
-        getDependencyData();
+        //getDependencyData();
+        renamePackage();
         analyseProjectStructure();
     }
 
@@ -79,5 +80,18 @@ public class Main {
 
         // rename all the java class
         renameAllFiles(classList, Constants.projectRootDirectory + Constants.packageName);
+    }
+
+    public static void renamePackage(){
+
+        // get the list of folders
+        ArrayList<FileSystem> fsTemp = parseFileStructureJson(Constants.projectDirectory + Constants.fileStructureJsonPath);
+        ArrayList<String> folderList = new ArrayList<>();
+        getFolderList(fsTemp,folderList);
+
+
+        // rename the folders
+        FileOperation.renameDirectory(folderList,Constants.projectRootDirectory+Constants.packageName);
+
     }
 }
