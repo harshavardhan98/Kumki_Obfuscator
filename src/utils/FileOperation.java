@@ -2,13 +2,15 @@ package utils;
 
 import org.unix4j.Unix4j;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FileOperation {
 
@@ -56,46 +58,88 @@ public class FileOperation {
     //rename
 
     public static void renameFile(ArrayList<String> classList, String filePath) {
-        File f = new File(filePath);
-        File temp = new File(f.getParent() + File.separator + "kumkiTemp.java");
+        /*
+        *   Algorithm:
+        *     Step 1:  Read the file to a string
+        *     Step 2:  Form a hashmap with the class name as key and replacement string as value
+        *     Step 3:  Create the regex pattern with all the class name to be replaced and use regex matcher to replace the patterns
+        *     Step 4:  Write the string to file using fileWriter
+        *     Step 5:  Rename the file (Make sure all the streams to the file are closed)
+        *
+        *      Reference:
+        *           1. https://stackoverflow.com/a/1326962/10664312  -> regex matcher
+        *           2. https://www.journaldev.com/875/java-read-file-to-string -> reading a file to a string
+        * */
 
-        for (String path : classList) {
-            // getting the fileName(frag1.java) from the entire classPath
-            String fileName = path.substring(path.lastIndexOf(File.separator) + 1);
+        String fileContent="";
 
-            // getting the frag1 from frag1.java
-            String className = fileName.substring(0, fileName.lastIndexOf("."));
-
-            String replaceString = "s/" + className + "/" + CommonUtils.getHexValue(className) + "/g";
-            Unix4j.cat(filePath).sed(replaceString).toFile(temp);
-
-            //Copy and delete file
-
-            try {
-                Files.copy(temp.toPath(), f.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        try{
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line = null;
+            String ls = System.getProperty("line.separator");
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(ls);
             }
-            catch (Exception e){
-                e.printStackTrace();
-            }
+            // delete the last new line separator
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+            reader.close();
 
-            try {
-                Files.delete(temp.toPath());
-            }
-            catch (Exception e){
-                e.printStackTrace();
-            }
+            fileContent = stringBuilder.toString();
 
-            //move file
+        }catch(IOException ie){
 
-            /*try {
-                Files.move(temp.toPath(), f.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }
-            catch (Exception e){
-                e.printStackTrace();
-            }*/
+            System.out.println(ie.getMessage());
         }
 
-        renameFolder(f.getAbsolutePath(), f.getParent() + File.separator + CommonUtils.getHexValue(f.getName()) + ".java");
+        //System.out.println(fileContent);
+
+
+        Map<String,String> tokens = new HashMap<>();
+        for(String i:classList) {
+            String className=CommonUtils.getFileNameFromFilePath(i);
+            tokens.put(className,CommonUtils.getHexValue(className));
+        }
+
+        // step 3:  Create pattern of the format "%(pattern1|pattern2)%"
+        String patternString = "(";
+
+        for(String i:tokens.keySet()){
+            patternString+=i+"|";
+        }
+        patternString= patternString.substring(0,patternString.length() - 1);
+        patternString += ")";
+
+
+
+        Pattern pattern = Pattern.compile(patternString);
+        Matcher matcher = pattern.matcher(fileContent);
+
+        StringBuffer sb = new StringBuffer();
+        while(matcher.find()) {
+            matcher.appendReplacement(sb, tokens.get(matcher.group(1)));
+        }
+        matcher.appendTail(sb);
+        System.out.println(sb.toString());
+
+
+        // step 4
+        try (PrintWriter out = new PrintWriter(filePath)) {
+            out.println(sb.toString());
+            out.close();
+            System.out.println(filePath);
+
+            // step 5
+            File f=new File(filePath);
+            renameFolder(filePath, f.getParent() + File.separator + CommonUtils.getHexValue(CommonUtils.getFileNameFromFilePath(filePath)) + ".java");
+
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+
+
+
     }
 
     public static void renameAllFiles(ArrayList<String> classList, String projectPath) {

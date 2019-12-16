@@ -144,4 +144,10 @@ public class CommonUtils {
                 getFilesList(new ArrayList<>(f.getFiles()), classList);
         }
     }
+
+    public static String getFileNameFromFilePath(String filePath){
+        //  usr/Desktop/file1.java -> file1
+        String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+        return fileName.substring(0, fileName.lastIndexOf("."));
+    }
 }

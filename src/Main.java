@@ -14,8 +14,8 @@ import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args){
-        backupProject();
-        analyseProjectStructure();
+        //backupProject();
+        //analyseProjectStructure();
 
         /*Main obj = new Main();
         ArrayList<String> list = getMethods(obj);
