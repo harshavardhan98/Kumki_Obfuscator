@@ -1,6 +1,7 @@
 package utils;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class Constants {
     public static String projectDirectory = "/Users/harshavardhanp/Desktop/fyp/kumkiTest/";
@@ -13,4 +14,8 @@ public class Constants {
     public static String packageName = "com" + File.separator + "example" + File.separator + "dsc_onboarding" + File.separator;
 
     public static String keyValue = "givemearupee";
+
+
+    public static ArrayList<String> classList=new ArrayList<>();
+
 }

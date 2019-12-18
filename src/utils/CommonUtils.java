@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -174,5 +175,34 @@ public class CommonUtils {
         String fileName = getFileNameFromFilePath(filePath);
         return fileName.substring(0, fileName.lastIndexOf("."));
     }
+
+    /****************************************************************************/
+
+    public static void loadClassList(){
+
+        System.out.println("I am here");
+        ArrayList<String> temp=new ArrayList<>();
+        BufferedReader reader;
+
+        try{
+            reader = new BufferedReader(new FileReader("src/utils/androidClassList.txt"));
+            String line = reader.readLine();
+
+            while (line != null) {
+                System.out.println(line);
+                // read next line
+                line = reader.readLine();
+                temp.add(line);
+            }
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Constants.classList.addAll(temp);
+
+    }
+
 
 }

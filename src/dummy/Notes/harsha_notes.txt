@@ -147,3 +147,7 @@ Identifiers that cannot be obfuscated:
 
 
 /***************************************************************************************************************************************/
+
+Note: Method to check if a given word is a KeyWord:
+    -> import javax.lang.model.SourceVersion;
+    -> SourceVersion.isKeyword("void");

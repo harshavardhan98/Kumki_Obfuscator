@@ -5,9 +5,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -178,8 +176,11 @@ public class FileOperation {
 
         // step 3:  Create pattern of the format "(pattern1|pattern2)"
         String patternString = "(";
-        for(String i : tokens.keySet())
-            patternString += i + "|";
+        for(String i : tokens.keySet()){
+            // do not rename packages with names same as that of android class
+            if(Collections.binarySearch(Constants.classList,i)==-1)
+                patternString += i + "|";
+        }
 
         patternString = patternString.substring(0,patternString.length() - 1);
         patternString += ")";
@@ -213,7 +214,9 @@ public class FileOperation {
             for (File file : files) {
                 if (file.isDirectory()){
                     renameDirectory(folderList,file.getAbsolutePath());
-                    renameFolder(file.getAbsolutePath(),file.getParent()+File.separator+CommonUtils.getHexValue(file.getName()));
+
+                    if(Collections.binarySearch(Constants.classList,file.getName())==-1)
+                        renameFolder(file.getAbsolutePath(),file.getParent()+File.separator+CommonUtils.getHexValue(file.getName()));
                 }
                 else if(file.isFile()){
                     renamePackageInFiles(folderList,file.getAbsolutePath());
