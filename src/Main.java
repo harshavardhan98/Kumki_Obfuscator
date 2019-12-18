@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import utils.*;
 import static utils.CommonUtils.*;
 import static utils.FileOperation.*;
-
+import javax.lang.model.SourceVersion;
 import model.*;
 
 import java.io.File;
@@ -14,8 +14,13 @@ import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args){
-        //backupProject();
-        //analyseProjectStructure();
+
+        analyseProjectStructure();
+        backupProject();
+
+        SourceVersion.isKeyword("void");
+
+
 
         /*Main obj = new Main();
         ArrayList<String> list = getMethods(obj);
@@ -26,8 +31,8 @@ public class Main {
         System.out.println(list.toString());*/
 
         //getDependencyData();
-        renamePackage();
-        analyseProjectStructure();
+        //renamePackage();
+        //analyseProjectStructure();
     }
 
     private static void analyseProjectStructure() {
