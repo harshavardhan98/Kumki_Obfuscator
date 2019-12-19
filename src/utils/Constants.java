@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class Constants {
-    public static String projectDirectory = "/Users/harshavardhanp/Desktop/fyp/kumkiTest/";
+    public static String projectDirectory = "/Users/harshavardhanp/final_year_project/fyp/kumkiTest/";
     //public static String projectDirectory ="D:\\Users\\Desktop\\fyp\\kumkiTest\\";
     //public static String projectDirectory = "C:\\Users\\Logesh Dinakaran\\OneDrive\\Desktop\\kumkiTest\\";
 

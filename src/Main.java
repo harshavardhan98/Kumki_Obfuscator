@@ -16,8 +16,8 @@ public class Main {
     public static void main(String[] args){
 
 
-        //analyseProjectStructure();
-        //backupProject();
+        analyseProjectStructure();
+        backupProject();
         loadClassList();
 
 

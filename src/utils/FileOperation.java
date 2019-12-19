@@ -178,7 +178,7 @@ public class FileOperation {
         String patternString = "(";
         for(String i : tokens.keySet()){
             // do not rename packages with names same as that of android class
-            if(Collections.binarySearch(Constants.classList,i)==-1)
+            if(Collections.binarySearch(Constants.classList,i)<=-1)
                 patternString += i + "|";
         }
 
@@ -215,7 +215,7 @@ public class FileOperation {
                 if (file.isDirectory()){
                     renameDirectory(folderList,file.getAbsolutePath());
 
-                    if(Collections.binarySearch(Constants.classList,file.getName())==-1)
+                    if(Collections.binarySearch(Constants.classList,file.getName())<=-1)
                         renameFolder(file.getAbsolutePath(),file.getParent()+File.separator+CommonUtils.getHexValue(file.getName()));
                 }
                 else if(file.isFile()){
