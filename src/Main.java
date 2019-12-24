@@ -11,6 +11,11 @@ import model.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args){
@@ -19,7 +24,7 @@ public class Main {
         analyseProjectStructure();
         backupProject();
         loadClassList();
-
+        renameMethods();
 
 
         /*Main obj = new Main();
@@ -31,7 +36,7 @@ public class Main {
         System.out.println(list.toString());*/
 
         //getDependencyData();
-        renamePackage();
+        //renamePackage();
         //analyseProjectStructure();
     }
 
@@ -97,6 +102,44 @@ public class Main {
 
         // rename the folders
         FileOperation.renameDirectory(folderList,Constants.projectRootDirectory+Constants.packageName);
+
+    }
+
+    public static void renameMethods(){
+        /*
+        *   O.P: Renames all the method name except overridden methods of inbuilt android classes and class constructors
+        *   Algorithm:
+        *   Step 1: Parse all the files. When parsing a file store the name of the file and the class it extends
+        *   Step 2: If it extends a class which is a part of android SDK do not rename its override methods
+        *   Step 3: For each method that matches the regular expression
+        *           3.1. Check if it a constructor if so do not rename it
+        *           3.2. Check if the method is overridden and the parent class is a user defined class then add the method to set of methods
+        *           3.3. If the method is user defined add it to the set of methods
+        *   Step 4: Now generate the regular expression matcher and visit all the files and rename the matched strings accordingly
+        * */
+        ArrayList<FileSystem> fsTemp = parseFileStructureJson(Constants.projectDirectory + Constants.fileStructureJsonPath);
+        ArrayList<String> classList = new ArrayList<>();
+        getFilesList(fsTemp, classList);
+
+        HashSet<String> methodList=new HashSet<>();
+        FileOperation.collectMethodNames(Constants.projectRootDirectory+Constants.packageName,methodList);
+
+        HashMap<String,String> newNames=new HashMap<>();
+        for(String s:methodList)
+            newNames.put(s,getHexValue(s));
+
+        String patternString = "(";
+        for(String i : newNames.keySet()){
+                patternString += i + "|";
+        }
+
+        if(patternString.length()>1)
+            patternString = patternString.substring(0,patternString.length() - 1);
+        patternString += ")";
+
+        Pattern pattern = Pattern.compile(patternString);
+
+       FileOperation.renameMethodNames(Constants.projectRootDirectory+Constants.packageName,newNames,pattern);
 
     }
 }

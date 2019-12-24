@@ -225,6 +225,165 @@ public class FileOperation {
         }
     }
 
+    /****************************************************************************/
+
+
+    public static void collectMethodNameInFiles(String filePath,HashSet<String> methodList){
+        String className=CommonUtils.getClassNameFromFilePath(filePath);
+        String parentClass="";
+        boolean canOverrideMethodsBeRenamed=true;
+        BufferedReader reader;
+
+
+        Pattern pattern = Pattern.compile("(public|private|static|protected)? ([A-Za-z0-9<>.]+) ([A-Za-z0-9]+)\\(");
+        // regex logic                  ->  Access Modifier                     return type       method Name
+
+        boolean isOverriden=false;
+
+
+
+        try {
+
+            reader = new BufferedReader(new FileReader(filePath));
+            String line = reader.readLine();
+
+            while (line != null) {
+
+                Matcher m = pattern.matcher(line);
+
+                // check if the method is a constructor
+
+                if(line.trim().equals("@Override")){
+                    isOverriden=true;
+                    line = reader.readLine();
+                }
+
+                else if(line.contains("extends")){
+                    String[] splited = line.split("\\s+");
+
+                    int i=0;
+                    for(i=0;i<splited.length;i++)
+                        if(splited[i].equals("extends"))
+                            break;
+                    parentClass=splited[i+1];
+
+                    if(Collections.binarySearch(Constants.classList,parentClass)>=0)
+                        canOverrideMethodsBeRenamed=false;
+
+                    System.out.println("It extends the class : "+splited[i+1]);
+                }
+
+                else if(m.find()){
+
+                    // do not rename the constructor
+                    if(m.group(3).equals(className))
+                        ;
+                    // rename the methods which are override by user defined class
+                    else if(isOverriden && canOverrideMethodsBeRenamed) {
+                        isOverriden = false;
+                        methodList.add(m.group(3));
+                    }
+                    // do not rename methods which override android innerclass
+                    else if(isOverriden)
+                        isOverriden=false;
+                    // rename for all other cases
+                    else{
+                        //System.out.println(m.group(3));
+                        methodList.add(m.group(3));
+                    }
+
+                }
+
+                // read next line
+                line = reader.readLine();
+            }
+
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
+    }
+
+    public static void collectMethodNames(String projectPath,HashSet<String> methodList){
+        File folder = new File(projectPath);
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()){
+                    collectMethodNames(file.getAbsolutePath(),methodList);
+                }
+                else if(file.isFile()){
+                    collectMethodNameInFiles(file.getAbsolutePath(),methodList);
+                }
+            }
+        }
+    }
+
+    public static void renameMethodNameInFiles(String filePath,HashMap<String,String> newNames,Pattern pattern){
+
+        String fileContent="";
+        try{
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line = null;
+            String ls = System.getProperty("line.separator");
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(ls);
+            }
+
+            // delete the last new line separator
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+            reader.close();
+            fileContent = stringBuilder.toString();
+        }
+        catch(Exception ie){
+            System.out.println(ie.getMessage());
+        }
+
+
+        Matcher matcher = pattern.matcher(fileContent);
+        StringBuffer sb = new StringBuffer();
+        while(matcher.find())
+            matcher.appendReplacement(sb, newNames.get(matcher.group(1)));
+        matcher.appendTail(sb);
+        System.out.println(sb.toString());
+
+        // step 4
+        try {
+            PrintWriter out = new PrintWriter(filePath);
+            out.println(sb.toString());
+            out.close();
+            //System.out.println(filePath);
+        }
+        catch(Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+
+    public static void renameMethodNames(String projectPath,HashMap<String,String> newNames,Pattern pattern){
+        File folder = new File(projectPath);
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()){
+                    renameMethodNames(file.getAbsolutePath(),newNames,pattern);
+                }
+                else if(file.isFile()){
+                    renameMethodNameInFiles(file.getAbsolutePath(),newNames,pattern);
+                }
+            }
+        }
+    }
+
 
 
 
