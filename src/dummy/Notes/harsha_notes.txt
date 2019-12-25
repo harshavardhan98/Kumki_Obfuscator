@@ -177,3 +177,9 @@ Note: Method to check if a given word is a KeyWord:
         *   2. did not check the cases encountered classes implements multiple interfaces
         *   3. What happens for mathods defined inside the 3rd party android library
         * */
+
+    /*
+         *   Algorithm:
+         *   Step 1: Parses the json file and gets the list of java class files
+         *   Step 2: Call the renameAllFiles Method to populate the dependency data for each file and renames the classes
+         * */
