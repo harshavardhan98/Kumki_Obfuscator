@@ -1,5 +1,6 @@
 package utils;
 
+import com.sun.tools.javac.Main;
 import model.FileSystem;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -151,9 +152,9 @@ public class CommonUtils {
         return fileName;
     }
 
-
     public static String getClassNameFromFilePath(String filePath){
         //  usr/Desktop/file1.java -> file1
         String fileName = getFileNameFromFilePath(filePath);
         return fileName.substring(0, fileName.lastIndexOf("."));
-    }}
+    }
+}
