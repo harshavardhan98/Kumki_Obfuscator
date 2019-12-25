@@ -72,20 +72,22 @@ public class Main {
         loadPredefinedClassList();
         ArrayList<FileSystem> fsTemp = parseFileStructureJson(projectDirectory + fileStructureJsonPath);
         getFilesList(fsTemp, classList, folderList);
+
+
+        for(String s:folderList)
+            if(Collections.binarySearch(predefinedClassList,s)>=0)
+                // todo remove this string s
+
     }
 
     /***********************************************************/
 
     public static void PackageObfuscation() {
 
-        ArrayList<String> modifiedFolderList= folderList;
 
-        for(String s:folderList)
-            if(Collections.binarySearch(predefinedClassList,s)<0)
-                modifiedFolderList.add(s);
 
         // rename the folders
-        FileOperation.renameDirectory(Constants.projectRootDirectory+Constants.packageName,modifiedFolderList);
+        FileOperation.renameDirectory(Constants.projectRootDirectory+Constants.packageName);
     }
 
     public static void ClassObfuscation(){

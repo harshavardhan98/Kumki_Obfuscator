@@ -135,7 +135,7 @@ public class FileOperation {
             for (File file : files) {
                 if (file.isFile()) {
                     if (!file.getName().startsWith("."))
-                        renameFile(file.getAbsolutePath(), classList);
+                        renameFile(file.getAbsolutePath(),classList);
                 }
                 else if (file.isDirectory())
                     renameAllFiles(file.getAbsolutePath());
@@ -144,19 +144,19 @@ public class FileOperation {
     }
 
     /**************************************/
-    public static void renameDirectory(String projectPath,ArrayList<String> folderList) {
+    public static void renameDirectory(String projectPath) {
         File folder = new File(projectPath);
         File[] files = folder.listFiles();
 
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    renameDirectory(file.getAbsolutePath(),folderList);
+                    renameDirectory(file.getAbsolutePath());
 
                     if (Collections.binarySearch(Constants.predefinedClassList, file.getName()) <= -1)
                         renameFolder(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(file.getName()));
                 } else if (file.isFile())
-                    renameFile(file.getAbsolutePath(),folderList);
+                    renameFile(file.getAbsolutePath(),Constants.folderList);
             }
         }
     }
