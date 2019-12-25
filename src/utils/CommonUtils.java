@@ -1,6 +1,5 @@
 package utils;
 
-import com.sun.tools.javac.Main;
 import model.FileSystem;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,6 +9,7 @@ import com.google.gson.JsonObject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -135,7 +135,6 @@ public class CommonUtils {
 
     /****************************************************************************/
     //Returns the list of files in the project
-
     public static void getFilesList(ArrayList<FileSystem> fs, ArrayList<String> classList){
         for(FileSystem f : fs) {
             if(f.getType().equals("file") && f.getName().endsWith(".java")){
@@ -146,15 +145,64 @@ public class CommonUtils {
         }
     }
 
+
+    // returns the list of folders in the project
+    public static void getFolderList(ArrayList<FileSystem> fs,ArrayList<String> folderList){
+
+        for(FileSystem f:fs){
+            if(f.getType().equals("directory")){
+                folderList.add(f.getPath()+File.separator+f.getName());
+                getFolderList(new ArrayList<>(f.getFiles()),folderList);
+            }
+        }
+    }
+
+
+    /****************************************************************************/
+
+
+
+
     public static String getFileNameFromFilePath(String filePath){
         //  usr/Desktop/file1.java -> file1.java
         String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
         return fileName;
     }
 
+
     public static String getClassNameFromFilePath(String filePath){
         //  usr/Desktop/file1.java -> file1
         String fileName = getFileNameFromFilePath(filePath);
         return fileName.substring(0, fileName.lastIndexOf("."));
     }
+
+    /****************************************************************************/
+
+    public static void loadClassList(){
+
+        System.out.println("I am here");
+        ArrayList<String> temp=new ArrayList<>();
+        BufferedReader reader;
+
+        try{
+            reader = new BufferedReader(new FileReader("src/utils/androidClassList.txt"));
+            String line = reader.readLine();
+
+            while (line != null) {
+                //System.out.println(line);
+                // read next line
+                line = reader.readLine();
+                temp.add(line);
+            }
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Constants.classList.addAll(temp);
+
+    }
+
+
 }

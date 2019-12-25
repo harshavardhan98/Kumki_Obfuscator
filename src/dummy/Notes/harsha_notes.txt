@@ -147,3 +147,33 @@ Identifiers that cannot be obfuscated:
 
 
 /***************************************************************************************************************************************/
+
+Note: Method to check if a given word is a KeyWord:
+    -> import javax.lang.model.SourceVersion;
+    -> SourceVersion.isKeyword("void");
+
+/***************************************************************************************************************************************/
+
+    Method Renaming of android project
+
+     /*
+        *   O.P: Renames all the method name except overridden methods of inbuilt android classes and class constructors
+        *   Algorithm:
+        *   1. parse all the class file and build the regular expression containing all the method name to be
+        *
+        *   Cases to handle:
+        *   1. Renaming the method in the declaration
+        *   2. A user defined class overrides another user defined class which means the method renamed in parent class must also be renamed in the
+        *      child class.
+        *   3. Renaming the method when it is invoked by the corresponding object. We must not rename the method if it is not renamed in the definition
+        *      of the class
+        *
+        *      e.g: btn1.performClick() -> here performClick must not be renamed as it is a method of the parent class
+        *           => We must determine the class of the variable. If the class belongs to an inbuilt android class or belongs to an external library
+        *              do not rename it else rename it
+        *
+        *   Cases not handled:
+        *   1. if the method defined by the custom class is same as that of override method of a android SDK class
+        *   2. did not check the cases encountered classes implements multiple interfaces
+        *   3. What happens for mathods defined inside the 3rd party android library
+        * */
