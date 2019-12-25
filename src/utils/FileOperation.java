@@ -56,7 +56,7 @@ public class FileOperation {
     /****************************************************************************/
     //rename
 
-    public static void renameFile(String filePath) {
+    public static void renameFile(String filePath,ArrayList<String> data) {
         /*
          *   Algorithm:
          *     Step 1:  Read the file to a string
@@ -94,7 +94,7 @@ public class FileOperation {
         Map<String, String> tokens = new HashMap<>();
         StringBuilder patternString = new StringBuilder("(");
 
-        for (String i : classList) {
+        for (String i :data) {
             String className = CommonUtils.getClassNameFromFilePath(i);
 
             tokens.put(className, CommonUtils.getHexValue(className));
@@ -135,7 +135,7 @@ public class FileOperation {
             for (File file : files) {
                 if (file.isFile()) {
                     if (!file.getName().startsWith("."))
-                        renameFile(file.getAbsolutePath());
+                        renameFile(file.getAbsolutePath(), classList);
                 }
                 else if (file.isDirectory())
                     renameAllFiles(file.getAbsolutePath());
@@ -144,78 +144,19 @@ public class FileOperation {
     }
 
     /**************************************/
-
-    public static void renamePackageInFiles(ArrayList<String> packageList, String filePath) {
-        String fileContent = "";
-
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(filePath));
-            StringBuilder stringBuilder = new StringBuilder();
-            String line = null;
-            String ls = System.getProperty("line.separator");
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append(ls);
-            }
-
-            // delete the last new line separator
-            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-            reader.close();
-            fileContent = stringBuilder.toString();
-        } catch (Exception ie) {
-            System.out.println(ie.getMessage());
-        }
-
-        Map<String, String> tokens = new HashMap<>();
-        for (String i : packageList) {
-            String packageName = CommonUtils.getFileNameFromFilePath(i);
-            tokens.put(packageName, CommonUtils.getHexValue(packageName));
-        }
-
-        // step 3:  Create pattern of the format "(pattern1|pattern2)"
-        String patternString = "(";
-        for (String i : tokens.keySet()) {
-            // do not rename packages with names same as that of android class
-            if (Collections.binarySearch(classList, i) <= -1)
-                patternString += i + "|";
-        }
-
-        patternString = patternString.substring(0, patternString.length() - 1);
-        patternString += ")";
-
-        Pattern pattern = Pattern.compile(patternString);
-        Matcher matcher = pattern.matcher(fileContent);
-
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find())
-            matcher.appendReplacement(sb, tokens.get(matcher.group(1)));
-        matcher.appendTail(sb);
-        System.out.println(sb.toString());
-
-        // step 4
-        try {
-            PrintWriter out = new PrintWriter(filePath);
-            out.println(sb.toString());
-            out.close();
-            //System.out.println(filePath);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public static void renameDirectory(String projectPath) {
+    public static void renameDirectory(String projectPath,ArrayList<String> folderList) {
         File folder = new File(projectPath);
         File[] files = folder.listFiles();
 
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    renameDirectory(file.getAbsolutePath());
+                    renameDirectory(file.getAbsolutePath(),folderList);
 
                     if (Collections.binarySearch(Constants.predefinedClassList, file.getName()) <= -1)
                         renameFolder(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(file.getName()));
                 } else if (file.isFile())
-                    renamePackageInFiles(Constants.folderList, file.getAbsolutePath());
+                    renameFile(file.getAbsolutePath(),folderList);
             }
         }
     }
@@ -227,6 +168,8 @@ public class FileOperation {
         File destinationFolder = new File(dst);
         sourceFolder.renameTo(destinationFolder);
     }
+
+    /**************************************/
 
     public static void renameMethodNameInFiles(String filePath, HashMap<String, String> newNames, Pattern pattern) {
 

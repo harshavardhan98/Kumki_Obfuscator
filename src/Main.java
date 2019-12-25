@@ -12,6 +12,7 @@ import java.util.*;
 
 import model.*;
 import utils.Constants;
+import utils.FileOperation;
 
 import static utils.CommonUtils.*;
 import static utils.Constants.*;
@@ -76,8 +77,15 @@ public class Main {
     /***********************************************************/
 
     public static void PackageObfuscation() {
-        renameDirectory(projectRootDirectory + packageName);
-        analyseProjectStructure();
+
+        ArrayList<String> modifiedFolderList= folderList;
+
+        for(String s:folderList)
+            if(Collections.binarySearch(predefinedClassList,s)<0)
+                modifiedFolderList.add(s);
+
+        // rename the folders
+        FileOperation.renameDirectory(Constants.projectRootDirectory+Constants.packageName,modifiedFolderList);
     }
 
     public static void ClassObfuscation(){
