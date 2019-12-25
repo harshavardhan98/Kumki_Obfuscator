@@ -127,6 +127,24 @@ public class FileOperation {
         }
     }
 
+    public static void renameAllFiles(String projectPath) {
+        File folder = new File(projectPath);
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile()) {
+                    if (!file.getName().startsWith("."))
+                        renameFile(file.getAbsolutePath());
+                }
+                else if (file.isDirectory())
+                    renameAllFiles(file.getAbsolutePath());
+            }
+        }
+    }
+
+    /**************************************/
+
     public static void renamePackageInFiles(ArrayList<String> packageList, String filePath) {
         String fileContent = "";
 
