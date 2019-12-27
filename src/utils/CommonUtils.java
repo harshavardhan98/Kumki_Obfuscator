@@ -7,8 +7,10 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
+import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
@@ -147,9 +149,27 @@ public class CommonUtils {
                 try {
                     File file = new File(f.getPath() + File.separator + f.getName());
                     CompilationUnit cu = JavaParser.parse(file);
-                    TypeSolver typeSolver = new CombinedTypeSolver(new ReflectionTypeSolver(), new JavaParserTypeSolver(file));
-                    new MethodVisitor().visit(cu, null);
-                    //cu.accept(new TypeCalculatorVisitor(), JavaParserFacade.get(typeSolver));
+
+                    //Get method & method calls & store it in constant variables
+                    //cu.accept(new MethodVisitor(), null);     //(using JaveParser)
+
+                    TypeSolver tp = new TypeSolver() {
+                        @Override
+                        public TypeSolver getParent() {
+                            return null;
+                        }
+
+                        @Override
+                        public void setParent(TypeSolver typeSolver) {
+
+                        }
+
+                        @Override
+                        public SymbolReference<ResolvedReferenceTypeDeclaration> tryToSolveType(String s) {
+                            return null;
+                        }
+                    };
+                    cu.accept(new TypeCalculatorVisitor(), JavaParserFacade.get(tp));   //(using SymbolSolver)
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -163,21 +183,7 @@ public class CommonUtils {
 
     /****************************************************************************/
 
-    public static String getFileNameFromFilePath(String filePath) {
-        //  usr/Desktop/file1.java -> file1.java
-        String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
-        return fileName;
-    }
-
-    public static String getClassNameFromFilePath(String filePath) {
-        //  usr/Desktop/file1.java -> file1
-        String fileName = getFileNameFromFilePath(filePath);
-        return fileName.substring(0, fileName.lastIndexOf("."));
-    }
-
-    /****************************************************************************/
-
-    public static class MethodVisitor extends VoidVisitorAdapter<JavaParserFacade> {
+    public static class MethodVisitor extends VoidVisitorAdapter {
         /*@Override
         public void visit(MethodDeclaration n, Object arg) {
             //Methods list
@@ -196,23 +202,34 @@ public class CommonUtils {
         }*/
 
         @Override
-        public void visit(MethodCallExpr n, JavaParserFacade javaParserFacade) {
+        public void visit(MethodCallExpr n, Object arg) {
             //Method Calls
-            System.out.println("Call: " + n);
+            System.out.println("Call: " + n.getNameAsString());
             methodCall.add(n.getNameAsString());
         }
     }
 
-    /*static class TypeCalculatorVisitor extends VoidVisitorAdapter<JavaParserFacade> {
+    public static class TypeCalculatorVisitor extends VoidVisitorAdapter<JavaParserFacade> {
         @Override
         public void visit(MethodCallExpr n, JavaParserFacade javaParserFacade) {
             super.visit(n, javaParserFacade);
-            System.out.println(n.toString() + " has type " + javaParserFacade.getType(n).describe());
-            if (javaParserFacade.getType(n).isReferenceType()) {
-                for (ResolvedReferenceType ancestor : javaParserFacade.getType(n).asReferenceType().getAllAncestors()) {
-                    System.out.println("Ancestor " + ancestor.describe());
-                }
-            }
+            System.out.println(n.getNameAsString());
         }
-    }*/
+    }
+
+    /****************************************************************************/
+
+    public static String getFileNameFromFilePath(String filePath) {
+        //  usr/Desktop/file1.java -> file1.java
+        String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+        return fileName;
+    }
+
+    public static String getClassNameFromFilePath(String filePath) {
+        //  usr/Desktop/file1.java -> file1
+        String fileName = getFileNameFromFilePath(filePath);
+        return fileName.substring(0, fileName.lastIndexOf("."));
+    }
+
+    /****************************************************************************/
 }
