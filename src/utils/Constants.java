@@ -2,6 +2,7 @@ package utils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Constants {
     //public static String projectDirectory = "/Users/harshavardhanp/final_year_project/fyp/kumkiTest/";
@@ -18,6 +19,8 @@ public class Constants {
     //Vignere cipher key
 
     public static String keyValue = "givemearupee";
+    public static int isFile = 0;
+    public static int isMethod = 1;
 
     /**************************************************************************/
     //Android predefined classes
@@ -29,6 +32,8 @@ public class Constants {
 
     public static ArrayList<String> classList = new ArrayList<>();
     public static ArrayList<String> folderList = new ArrayList<>();
+    public static HashSet<String> methodList = new HashSet<>();
+    public static HashSet<String> methodCall = new HashSet<>();
 
     /**************************************************************************/
 }

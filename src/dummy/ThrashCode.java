@@ -167,6 +167,6 @@ public class ThrashCode {
 
         Pattern pattern = Pattern.compile(patternString);
 
-        FileOperation.renameMethodNames(Constants.projectRootDirectory + Constants.packageName, newNames, pattern);
+        //FileOperation.renameMethodNames(Constants.projectRootDirectory + Constants.packageName, newNames, pattern);
     }
 }

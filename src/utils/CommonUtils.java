@@ -1,20 +1,30 @@
 package utils;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.stmt.ReturnStmt;
+import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.github.javaparser.resolution.types.ResolvedReferenceType;
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import model.FileSystem;
+import model.*;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
-import java.util.regex.Pattern;
 
-import static utils.Constants.folderList;
+import static utils.Constants.*;
 
 public class CommonUtils {
 
@@ -129,14 +139,25 @@ public class CommonUtils {
         return fs;
     }
 
-    public static void getFilesList(ArrayList<FileSystem> fs, ArrayList<String> classList, ArrayList<String> folderList) {
+    public static void getFilesList(ArrayList<FileSystem> fs) {
         for (FileSystem f : fs) {
-            if (f.getType().equals("file") && f.getName().endsWith(".java"))
+            if (f.getType().equals("file") && f.getName().endsWith(".java")) {
                 classList.add(f.getPath() + File.separator + f.getName());
+
+                try {
+                    File file = new File(f.getPath() + File.separator + f.getName());
+                    CompilationUnit cu = JavaParser.parse(file);
+                    TypeSolver typeSolver = new CombinedTypeSolver(new ReflectionTypeSolver(), new JavaParserTypeSolver(file));
+                    new MethodVisitor().visit(cu, null);
+                    //cu.accept(new TypeCalculatorVisitor(), JavaParserFacade.get(typeSolver));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             else if (f.getType().equals("directory"))
                 folderList.add(f.getPath() + File.separator + f.getName());
             if(f.getFiles() != null)
-                getFilesList(new ArrayList<>(f.getFiles()), classList, folderList);
+                getFilesList(new ArrayList<>(f.getFiles()));
         }
     }
 
@@ -155,4 +176,43 @@ public class CommonUtils {
     }
 
     /****************************************************************************/
+
+    public static class MethodVisitor extends VoidVisitorAdapter<JavaParserFacade> {
+        /*@Override
+        public void visit(MethodDeclaration n, Object arg) {
+            //Methods list
+            List<AnnotationExpr> annotationExprs = n.getAnnotations();
+            if(annotationExprs != null){
+                String annotations = annotationExprs.toString();
+                if(!annotations.contains("@Override")) {
+                    System.out.println("Method: " + n.getNameAsString());
+                    methodList.add(n.getNameAsString());
+                }
+            }
+            else {
+                System.out.println("Method: " + n.getNameAsString());
+                methodList.add(n.getNameAsString());
+            }
+        }*/
+
+        @Override
+        public void visit(MethodCallExpr n, JavaParserFacade javaParserFacade) {
+            //Method Calls
+            System.out.println("Call: " + n);
+            methodCall.add(n.getNameAsString());
+        }
+    }
+
+    /*static class TypeCalculatorVisitor extends VoidVisitorAdapter<JavaParserFacade> {
+        @Override
+        public void visit(MethodCallExpr n, JavaParserFacade javaParserFacade) {
+            super.visit(n, javaParserFacade);
+            System.out.println(n.toString() + " has type " + javaParserFacade.getType(n).describe());
+            if (javaParserFacade.getType(n).isReferenceType()) {
+                for (ResolvedReferenceType ancestor : javaParserFacade.getType(n).asReferenceType().getAllAncestors()) {
+                    System.out.println("Ancestor " + ancestor.describe());
+                }
+            }
+        }
+    }*/
 }
