@@ -118,8 +118,6 @@ public class FileOperation {
             matcher.appendReplacement(sb, matcher.group(0).replaceFirst(Pattern.quote(matcher.group(1)), tokens.get(matcher.group(1))));
         matcher.appendTail(sb);
 
-        //C:\Users\Logesh Dinakaran\OneDrive\Desktop\kumkiTest\app\src\main\java\com\example\dsc_onboarding
-
         // step 4
         try {
             PrintWriter out = new PrintWriter(filePath);
@@ -153,8 +151,8 @@ public class FileOperation {
                     if (!file.getName().startsWith(".")) {
                         if(opCode == isFile)
                             renameFile(file.getAbsolutePath(), classList, opCode);
-                        else if(opCode == isMethod)
-                            renameFile(file.getAbsolutePath(), new ArrayList<>(methodList), opCode);
+                        //else if(opCode == isMethod)
+                            //renameFile(file.getAbsolutePath(), new ArrayList<>(methodMap), opCode);
                     }
                 } else if (file.isDirectory())
                     renameAllFiles(file.getAbsolutePath(), opCode);

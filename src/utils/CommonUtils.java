@@ -7,14 +7,6 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
-import com.github.javaparser.resolution.types.ResolvedReferenceType;
-import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
-import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
-import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -83,7 +75,7 @@ public class CommonUtils {
     // Parses the JSON file
     // Stores the files & folders path into constant variables
 
-    public static void buildJson(String path, JsonArray pkgJA, boolean flag, List<FileSystem> filesList) {
+    public static void buildJson(String path, JsonArray pkgJA, boolean flag, ArrayList<FileSystem> filesList) {
         File folder = new File(path);
         File[] files = folder.listFiles();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -111,7 +103,7 @@ public class CommonUtils {
                         fs.setType("directory");
                         fs.setPath(file.getParent());
 
-                        List<FileSystem> fl = new ArrayList<>();
+                        ArrayList<FileSystem> fl = new ArrayList<>();
                         buildJson(file.getAbsolutePath(), pkgJA, true, fl);
                         fs.setFiles(fl);
 
@@ -146,74 +138,61 @@ public class CommonUtils {
             if (f.getType().equals("file") && f.getName().endsWith(".java")) {
                 classList.add(f.getPath() + File.separator + f.getName());
 
-                try {
+                /*try {
                     File file = new File(f.getPath() + File.separator + f.getName());
                     CompilationUnit cu = JavaParser.parse(file);
-
-                    //Get method & method calls & store it in constant variables
-                    //cu.accept(new MethodVisitor(), null);     //(using JaveParser)
-
-                    TypeSolver tp = new TypeSolver() {
-                        @Override
-                        public TypeSolver getParent() {
-                            return null;
-                        }
-
-                        @Override
-                        public void setParent(TypeSolver typeSolver) {
-
-                        }
-
-                        @Override
-                        public SymbolReference<ResolvedReferenceTypeDeclaration> tryToSolveType(String s) {
-                            return null;
-                        }
-                    };
-                    cu.accept(new TypeCalculatorVisitor(), JavaParserFacade.get(tp));   //(using SymbolSolver)
+                    cu.accept(new MethodVisitor(), f.getName());
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
+                }*/
             }
             else if (f.getType().equals("directory"))
                 folderList.add(f.getPath() + File.separator + f.getName());
             if(f.getFiles() != null)
-                getFilesList(new ArrayList<>(f.getFiles()));
+                getFilesList(f.getFiles());
         }
     }
 
     /****************************************************************************/
 
     public static class MethodVisitor extends VoidVisitorAdapter {
-        /*@Override
+        @Override
         public void visit(MethodDeclaration n, Object arg) {
             //Methods list
+            String fileName = (String) arg;
             List<AnnotationExpr> annotationExprs = n.getAnnotations();
             if(annotationExprs != null){
                 String annotations = annotationExprs.toString();
                 if(!annotations.contains("@Override")) {
-                    System.out.println("Method: " + n.getNameAsString());
-                    methodList.add(n.getNameAsString());
+                    //System.out.println("Method: " + fileName + "=>" + n.getNameAsString());
+                    addValues(fileName, n.getNameAsString());
                 }
             }
             else {
-                System.out.println("Method: " + n.getNameAsString());
-                methodList.add(n.getNameAsString());
+                //System.out.println("Method: " + fileName + "=>" + n.getNameAsString());
+                addValues(fileName, n.getNameAsString());
             }
-        }*/
+        }
 
         @Override
         public void visit(MethodCallExpr n, Object arg) {
             //Method Calls
             System.out.println("Call: " + n.getNameAsString());
-            methodCall.add(n.getNameAsString());
         }
-    }
 
-    public static class TypeCalculatorVisitor extends VoidVisitorAdapter<JavaParserFacade> {
-        @Override
-        public void visit(MethodCallExpr n, JavaParserFacade javaParserFacade) {
-            super.visit(n, javaParserFacade);
-            System.out.println(n.getNameAsString());
+        public void addValues(String fileName, String method){
+            ArrayList<String> methodList = new ArrayList<>();
+            if (methodMap.containsKey(fileName)) {
+                methodList = methodMap.get(fileName);
+                if(methodList == null)
+                    methodList = new ArrayList<String>();
+                methodList.add(method);
+            }
+            else {
+                methodList = new ArrayList<String>();
+                methodList.add(method);
+            }
+            methodMap.put(fileName, methodList);
         }
     }
 

@@ -2,7 +2,8 @@ package utils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Constants {
     //public static String projectDirectory = "/Users/harshavardhanp/final_year_project/fyp/kumkiTest/";
@@ -32,8 +33,7 @@ public class Constants {
 
     public static ArrayList<String> classList = new ArrayList<>();
     public static ArrayList<String> folderList = new ArrayList<>();
-    public static HashSet<String> methodList = new HashSet<>();
-    public static HashSet<String> methodCall = new HashSet<>();
+    public static Map<String, ArrayList<String>> methodMap = new HashMap<String, ArrayList<String>>();
 
     /**************************************************************************/
 }

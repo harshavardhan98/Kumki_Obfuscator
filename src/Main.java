@@ -1,11 +1,14 @@
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.*;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -17,7 +20,6 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static utils.CommonUtils.*;
 import static utils.Constants.*;
@@ -26,21 +28,94 @@ import static utils.FileOperation.*;
 public class Main {
     public static void main(String[] args) {
         //backupProject();
-        analyseProjectStructure();
+        //analyseProjectStructure();
         getDependencyData();
 
         //PackageObfuscation();
         //ClassObfuscation();
         //MethodObfuscation();
 
-        /*try {
-            File file = new File("C:\\Users\\Logesh Dinakaran\\OneDrive\\Desktop\\kumkiTest\\app\\src\\main\\java\\com\\example\\dsc_onboarding\\MainActivity.java");
-            CompilationUnit cu = JavaParser.parse(file);
-            cu.accept(new MethodVisitor(), null);
+        try {
+            for (String filePath : classList) {
+                //TODO: Comment out filePath
+                if (filePath.contains("MainActivity")) {
+                    File file = new File(filePath);
+                    CompilationUnit cu = JavaParser.parse(file);
+                    ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(file.getName())).orElse(null);
+                    if (clas != null) {
+                        List<FieldDeclaration> global_fields = clas.getFields();
+                        if(!global_fields.isEmpty()){
+                            for(FieldDeclaration field : global_fields) {
+                                List<VariableDeclarator> global_variables = field.getVariables();
+                                if(!global_variables.isEmpty())
+                                    for(VariableDeclarator variable : global_variables) {
+                                        String name = variable.getName().getIdentifier();
+                                        String type = variable.getType().asString();
 
+                                        int start_line_num = variable.getName().getRange().get().begin.line;
+                                        int start_col_num = variable.getName().getRange().get().begin.column;
+
+                                        int end_line_num = variable.getName().getRange().get().end.line;
+                                        int end_col_num = variable.getName().getRange().get().end.column;
+
+                                        System.out.println(name + "-" + type);
+                                    }
+                            }
+                        }
+
+                        List<MethodDeclaration> methods = clas.getMethods();
+                        if (!methods.isEmpty()) {
+                            for(MethodDeclaration method : methods) {
+                                if (method.getNameAsString().equals("onCreate")) {
+                                    String name = method.getName().getIdentifier();
+
+                                    Boolean isOverride = false;
+                                    List<AnnotationExpr> annotationExprs = method.getAnnotations();
+                                    if(annotationExprs != null){
+                                        String annotations = annotationExprs.toString();
+                                        if(annotations.contains("@Override")) {
+                                            isOverride = true;
+                                        }
+                                    }
+
+                                    int start_line_num = method.getName().getRange().get().begin.line;
+                                    int start_col_num = method.getName().getRange().get().begin.column;
+
+                                    int end_line_num = method.getName().getRange().get().end.line;
+                                    int end_col_num = method.getName().getRange().get().end.column;
+
+                                    BlockStmt block = method.getBody().orElse(null);
+                                    if (block != null) {
+                                        List<Statement> stList = block.getStatements();
+                                        if (!stList.isEmpty()) {
+                                            for(Statement st: stList){
+                                                if(st.isExpressionStmt()) {
+                                                    ExpressionStmt est = st.asExpressionStmt();
+                                                    if(est.isExpressionStmt()) {
+                                                        Expression exp = est.getExpression();
+                                                        if(exp.isMethodCallExpr()) {
+                                                            MethodCallExpr methodCall = exp.asMethodCallExpr();
+                                                            //Idemtify method call variable type as follows:
+                                                        }
+                                                    }
+                                                }
+                                                else{
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                    //}
+                                }
+                            }
+                        }
+                        System.out.println("came");
+                    }
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
     }
 
     /***********************************************************/
@@ -83,7 +158,8 @@ public class Main {
         ArrayList<FileSystem> fsTemp = parseFileStructureJson(projectDirectory + fileStructureJsonPath);
         getFilesList(fsTemp);
 
-        for (int i = 0; i < classList.size(); i++) {
+        //Comment out to filter non-user defined classNames
+        /*for (int i = 0; i < classList.size(); i++) {
             if (Collections.binarySearch(predefinedClassList, classList.get(i)) >= 0)
                 classList.remove(i--);
         }
@@ -91,7 +167,7 @@ public class Main {
         for (int i = 0; i < folderList.size(); i++) {
             if (Collections.binarySearch(predefinedClassList, folderList.get(i)) >= 0)
                 folderList.remove(i--);
-        }
+        }*/
     }
 
     /***********************************************************/
