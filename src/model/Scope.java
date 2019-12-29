@@ -72,4 +72,12 @@ public class Scope {
 
         return findDataTypeOfIdentifier(name, currentScope.parentScope);
     }
+
+    public static void setScope(Scope parentScope,Scope childScope){
+
+        childScope.setParentScope(parentScope);
+
+        if(parentScope!=null)
+            parentScope.addChildScope(childScope);
+    }
 };
