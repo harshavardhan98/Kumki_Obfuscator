@@ -12,7 +12,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import model.FileSystem;
+import model.ReplacementDataNode;
 import model.Scope;
+import utils.ClassObfuscatorUtils;
 import utils.ParserOperation;
 
 import java.io.File;
@@ -24,14 +26,16 @@ import static utils.Constants.*;
 import static utils.FileOperation.*;
 
 public class Main {
+
     public static void main(String[] args) {
-        //backupProject();
-        //analyseProjectStructure();
+
+        backupProject();
+        analyseProjectStructure();
         getDependencyData();
 
-        //PackageObfuscation();
-        //ClassObfuscation();
-        //MethodObfuscation();
+        PackageObfuscation();
+        ClassObfuscation();
+        MethodObfuscation();
 
         try {
             for (String filePath : classList) {
@@ -40,9 +44,7 @@ public class Main {
                     File file = new File(filePath);
                     CompilationUnit cu = JavaParser.parse(file);
                     ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(file.getName())).orElse(null);
-                    ParserOperation.setCurrentFile(file.getName());
-                    ParserOperation.handleClass(clas);
-
+                    ClassObfuscatorUtils.handleClass(clas);
                 }
             }
         } catch (Exception e) {
@@ -114,7 +116,23 @@ public class Main {
     }
 
     public static void MethodObfuscation() {
-        //renameAllFiles(projectRootDirectory + packageName, isMethod);
+
+        try {
+            for (String filePath : classList) {
+                //TODO: Comment out filePath
+                if (filePath.contains("MainActivity")) {
+                    File file = new File(filePath);
+                    CompilationUnit cu = JavaParser.parse(file);
+                    ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(file.getName())).orElse(null);
+                    ParserOperation.setCurrentFile(file.getName());
+                    ParserOperation.handleClass(clas);
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     /***********************************************************/
