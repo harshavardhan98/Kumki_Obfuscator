@@ -138,13 +138,13 @@ public class CommonUtils {
             if (f.getType().equals("file") && f.getName().endsWith(".java")) {
                 classList.add(f.getPath() + File.separator + f.getName());
 
-                /*try {
+                try {
                     File file = new File(f.getPath() + File.separator + f.getName());
                     CompilationUnit cu = JavaParser.parse(file);
                     cu.accept(new MethodVisitor(), f.getName());
                 } catch (Exception e) {
                     e.printStackTrace();
-                }*/
+                }
             }
             else if (f.getType().equals("directory"))
                 folderList.add(f.getPath() + File.separator + f.getName());
@@ -174,14 +174,8 @@ public class CommonUtils {
             }
         }
 
-        @Override
-        public void visit(MethodCallExpr n, Object arg) {
-            //Method Calls
-            System.out.println("Call: " + n.getNameAsString());
-        }
-
         public void addValues(String fileName, String method){
-            ArrayList<String> methodList = new ArrayList<>();
+            ArrayList<String> methodList;
             if (methodMap.containsKey(fileName)) {
                 methodList = methodMap.get(fileName);
                 if(methodList == null)
