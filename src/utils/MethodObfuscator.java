@@ -1,5 +1,7 @@
 package utils;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -23,11 +25,11 @@ import static utils.CommonUtils.*;
 import static utils.Constants.classList;
 import static utils.Constants.methodMap;
 
-public class ParserOperation {
+public class MethodObfuscator {
     private File currentFile;
     private ArrayList<ReplacementDataNode> arrayList;
 
-    public ParserOperation() {
+    public MethodObfuscator(){
         arrayList = new ArrayList<ReplacementDataNode>();
     }
 
@@ -49,6 +51,24 @@ public class ParserOperation {
 
     /*************************************************/
 
+    public void obfuscate(){
+        try {
+            for (String filePath : classList) {
+                File file = new File(filePath);
+                CompilationUnit cu = JavaParser.parse(file);
+                ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(file.getName())).orElse(null);
+                if(clas == null)
+                    clas = cu.getInterfaceByName(getClassNameFromFilePath(file.getName())).orElse(null);
+
+                currentFile = file;
+
+                handleClass(clas);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void handleClass(ClassOrInterfaceDeclaration clas) {
         if (clas != null) {
             Scope global_scope = new Scope();
@@ -64,11 +84,6 @@ public class ParserOperation {
                         for (VariableDeclarator variable : global_variables) {
                             String name = variable.getName().getIdentifier();
                             String type = variable.getType().asString();
-
-                            int start_line_num = variable.getType().getRange().get().begin.line;
-                            int start_col_num = variable.getType().getRange().get().begin.column;
-                            int end_col_num = variable.getType().getRange().get().end.column;
-
                             global_scope.setData(name, type);
                         }
                     }
@@ -78,14 +93,6 @@ public class ParserOperation {
             List<MethodDeclaration> methods = clas.getMethods();
             if (!methods.isEmpty()) {
                 for (MethodDeclaration method : methods) {
-                    String name = method.getName().getIdentifier();
-
-                    int start_line_num = method.getName().getRange().get().begin.line;
-                    int start_col_num = method.getName().getRange().get().begin.column;
-
-                    int end_line_num = method.getName().getRange().get().end.line;
-                    int end_col_num = method.getName().getRange().get().end.column;
-
                     BlockStmt block = method.getBody().orElse(null);
 
                     if (block != null) {
@@ -101,6 +108,12 @@ public class ParserOperation {
                         }
                     }
 
+                    String name = method.getName().getIdentifier();
+
+                    int start_line_num = method.getName().getRange().get().begin.line;
+                    int start_col_num = method.getName().getRange().get().begin.column;
+                    int end_col_num = method.getName().getRange().get().end.column;
+
                     if (!MethodVisitor.isOverride(method) || toBeReplaced(name)) {
                         ReplacementDataNode rnode = new ReplacementDataNode();
                         rnode.setLineNo(start_line_num);
@@ -112,7 +125,7 @@ public class ParserOperation {
                 }
             }
 
-            replaceInFiles();
+            FileOperation.replaceInFiles(currentFile, arrayList);
         }
     }
 
@@ -139,11 +152,6 @@ public class ParserOperation {
                 for (VariableDeclarator variable : variables) {
                     String vname = variable.getName().getIdentifier();
                     String vtype = variable.getType().asString();
-
-                    int vstart_line_num = variable.getName().getRange().get().begin.line;
-                    int vstart_col_num = variable.getName().getRange().get().begin.column;
-                    int vend_col_num = variable.getName().getRange().get().end.column;
-
                     parentScope.setData(vname, vtype);
                 }
             }
@@ -225,7 +233,7 @@ public class ParserOperation {
         //2. Check if method present in other files.
 
         Boolean flag = false;
-        ArrayList<String> temp = methodMap.get(getCurrentFile().getAbsolutePath());
+        ArrayList<String> temp = methodMap.get(currentFile.getAbsolutePath());
         if (temp != null) {
             if (Collections.binarySearch(temp, name) >= 0)
                 flag = true;
@@ -245,19 +253,5 @@ public class ParserOperation {
             }
         }
         return flag;
-    }
-
-    public void replaceInFiles() {
-        try {
-            List<String> fileContent = new ArrayList<>(Files.readAllLines(getCurrentFile().toPath()));
-            for (ReplacementDataNode r : getArrayList()) {
-                String temp = fileContent.get(r.getLineNo() - 1);
-                temp = temp.substring(0, r.getStartColNo() - 1) + r.getReplacementString() + temp.substring(r.getEndColNo());
-                fileContent.set(r.getLineNo() - 1, temp);
-            }
-            Files.write(getCurrentFile().toPath(), fileContent);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
     }
 }

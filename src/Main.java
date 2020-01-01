@@ -1,13 +1,9 @@
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import model.FileSystem;
-import model.ReplacementDataNode;
-import utils.ParserOperation;
+import utils.MethodObfuscator;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,7 +12,7 @@ import java.util.Collections;
 
 import static utils.CommonUtils.*;
 import static utils.Constants.*;
-import static utils.FileOperation.*;
+import static utils.FileOperation.copyFolder;
 
 public class Main {
 
@@ -84,21 +80,8 @@ public class Main {
     /***********************************************************/
     //Obfuscations
     public static void MethodObfuscation() {
-        try {
-            for (String filePath : classList) {
-                File file = new File(filePath);
-                CompilationUnit cu = JavaParser.parse(file);
-                ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(file.getName())).orElse(null);
-                if(clas == null)
-                    clas = cu.getInterfaceByName(getClassNameFromFilePath(file.getName())).orElse(null);
-
-                ParserOperation po = new ParserOperation();
-                po.setCurrentFile(file);
-                po.handleClass(clas);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        MethodObfuscator mo = new MethodObfuscator();
+        mo.obfuscate();
     }
 
     /***********************************************************/

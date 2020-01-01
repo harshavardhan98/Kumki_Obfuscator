@@ -1,15 +1,14 @@
 package utils;
 
+import model.ReplacementDataNode;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,5 +53,19 @@ public class FileOperation {
 
     /****************************************************************************/
 
+    public static void replaceInFiles(File file, ArrayList<ReplacementDataNode> arrayList) {
+        try {
+            List<String> fileContent = new ArrayList<>(Files.readAllLines(file.toPath()));
+            for (ReplacementDataNode r : arrayList) {
+                String temp = fileContent.get(r.getLineNo() - 1);
+                temp = temp.substring(0, r.getStartColNo() - 1) + r.getReplacementString() + temp.substring(r.getEndColNo());
+                fileContent.set(r.getLineNo() - 1, temp);
+            }
+            Files.write(file.toPath(), fileContent);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
+    /****************************************************************************/
 }
