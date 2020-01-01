@@ -4,19 +4,19 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import model.*;
+import model.FileSystem;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static utils.Constants.*;
 
@@ -24,7 +24,6 @@ public class CommonUtils {
 
     /****************************************************************************/
     //Vignere Cipher
-
     public static String getHexValue(String value) {
         value = value.toLowerCase();
         String keyValue = Constants.keyValue;
@@ -52,7 +51,7 @@ public class CommonUtils {
 
     /****************************************************************************/
 
-    public static void loadPredefinedClassList() {
+    public static ArrayList<String> loadPredefinedClassList() {
         ArrayList<String> temp = new ArrayList<>();
 
         try {
@@ -67,14 +66,14 @@ public class CommonUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Constants.predefinedClassList.addAll(temp);
+
+        return temp;
     }
 
     /****************************************************************************/
     // Build JSON file
     // Parses the JSON file
     // Stores the files & folders path into constant variables
-
     public static void buildJson(String path, JsonArray pkgJA, boolean flag, ArrayList<FileSystem> filesList) {
         File folder = new File(path);
         File[] files = folder.listFiles();
@@ -85,19 +84,15 @@ public class CommonUtils {
                 if (!file.getName().startsWith(".")) {
                     FileSystem fs = new FileSystem();
                     if (file.isFile()) {
-                        if (!flag) {
-                            fs.setName(file.getName());
-                            fs.setType("file");
-                            fs.setPath(file.getParent());
+                        fs.setName(file.getName());
+                        fs.setType("file");
+                        fs.setPath(file.getParent());
 
+                        if (!flag) {
                             JsonObject fsJO = gson.fromJson(gson.toJson(fs), JsonObject.class);
                             pkgJA.add(fsJO);
-                        } else {
-                            fs.setName(file.getName());
-                            fs.setType("file");
-                            fs.setPath(file.getParent());
+                        } else
                             filesList.add(fs);
-                        }
                     } else if (file.isDirectory()) {
                         fs.setName(file.getName());
                         fs.setType("directory");
@@ -125,8 +120,7 @@ public class CommonUtils {
 
             FileSystem[] fileSystems = gson.fromJson(pkgJA, FileSystem[].class);
             Collections.addAll(fs, fileSystems);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
 
@@ -141,14 +135,14 @@ public class CommonUtils {
                 try {
                     File file = new File(f.getPath() + File.separator + f.getName());
                     CompilationUnit cu = JavaParser.parse(file);
-                    cu.accept(new MethodVisitor(), f.getName());
+                    cu.accept(new MethodVisitor(), file.getAbsolutePath());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }
-            else if (f.getType().equals("directory"))
+            } else if (f.getType().equals("directory"))
                 folderList.add(f.getPath() + File.separator + f.getName());
-            if(f.getFiles() != null)
+
+            if (f.getFiles() != null)
                 getFilesList(f.getFiles());
         }
     }
@@ -159,34 +153,33 @@ public class CommonUtils {
         @Override
         public void visit(MethodDeclaration n, Object arg) {
             //Methods list
-            String fileName = (String) arg;
-            List<AnnotationExpr> annotationExprs = n.getAnnotations();
-            if(annotationExprs != null){
-                String annotations = annotationExprs.toString();
-                if(!annotations.contains("@Override")) {
-                    //System.out.println("Method: " + fileName + "=>" + n.getNameAsString());
-                    addValues(fileName, n.getNameAsString());
-                }
-            }
-            else {
-                //System.out.println("Method: " + fileName + "=>" + n.getNameAsString());
-                addValues(fileName, n.getNameAsString());
-            }
+            String filePath = (String) arg;
+            if(!isOverride(n))
+                addValues(filePath, n.getNameAsString());
         }
 
-        public void addValues(String fileName, String method){
+        public void addValues(String fileName, String method) {
             ArrayList<String> methodList;
             if (methodMap.containsKey(fileName)) {
                 methodList = methodMap.get(fileName);
-                if(methodList == null)
+                if (methodList == null)
                     methodList = new ArrayList<String>();
                 methodList.add(method);
-            }
-            else {
+            } else {
                 methodList = new ArrayList<String>();
                 methodList.add(method);
             }
             methodMap.put(fileName, methodList);
+        }
+
+        public static Boolean isOverride(MethodDeclaration n){
+            List<AnnotationExpr> annotationExprs = n.getAnnotations();
+            if (annotationExprs != null) {
+                String annotations = annotationExprs.toString();
+                if (annotations.contains("@Override"))
+                    return true;
+            }
+            return false;
         }
     }
 

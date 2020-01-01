@@ -6,9 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Constants {
-    public static String projectDirectory = "/Users/harshavardhanp/final_year_project/fyp/kumkiTest/";
-    //public static String projectDirectory ="D:\\Users\\Desktop\\fyp\\kumkiTest\\";
-    //public static String projectDirectory = "C:\\Users\\Logesh Dinakaran\\OneDrive\\Desktop\\kumkiTest\\";
+    //public static String projectDirectory = "/Users/harshavardhanp/final_year_project/fyp/kumkiTest/";
+    public static String projectDirectory = "C:\\Users\\Logesh Dinakaran\\OneDrive\\Desktop\\kumkiTest\\";
 
     public static String backupProjectDirectory = "";
     public static String packageName = "com" + File.separator + "example" + File.separator + "dsc_onboarding" + File.separator;
@@ -20,13 +19,6 @@ public class Constants {
     //Vignere cipher key
 
     public static String keyValue = "givemearupee";
-    public static int isFile = 0;
-    public static int isMethod = 1;
-
-    /**************************************************************************/
-    //Android predefined classes
-
-    public static ArrayList<String> predefinedClassList = new ArrayList<>();
 
     /**************************************************************************/
     //Obtained from the projectRootDirectory

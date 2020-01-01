@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Scope {
-    private int startLine;
-    private int endLine;
     private HashMap<String, String> data;
     private Scope parentScope;
     private ArrayList<Scope> childScope;
@@ -15,28 +13,16 @@ public class Scope {
         childScope = new ArrayList<Scope>();
     }
 
-    public int getStartLine() {
-        return startLine;
-    }
-
-    public void setStartLine(int startLine) {
-        this.startLine = startLine;
-    }
-
-    public int getEndLine() {
-        return endLine;
-    }
-
-    public void setEndLine(int endLine) {
-        this.endLine = endLine;
-    }
-
     public HashMap<String, String> getData() {
         return data;
     }
 
     public void setData(HashMap<String, String> data) {
         this.data = data;
+    }
+
+    public void setData(String vname, String vtype) {
+        this.data.put(vname, vtype);
     }
 
     public Scope getParentScope() {
@@ -55,29 +41,29 @@ public class Scope {
         this.childScope = childScope;
     }
 
-    public void addIdentifier(String vname, String vtype) {
-        data.put(vname, vtype);
-    }
-
-    public void addChildScope(Scope s) {
+    public void setChildScope(Scope s) {
         childScope.add(s);
     }
 
-    public static String findDataTypeOfIdentifier(String name, Scope currentScope) {
-        if (currentScope == null)
-            return null;
+    /***********************************************************/
 
-        if (currentScope.data.containsKey(name))
-            return currentScope.data.get(name);
+    public void setScope(Scope parentScope) {
+        // Set scope in both sides
+        // P -> C and C -> P
 
-        return findDataTypeOfIdentifier(name, currentScope.parentScope);
+        this.setParentScope(parentScope);
+
+        if (parentScope != null)
+            parentScope.setChildScope(this);
     }
 
-    public static void setScope(Scope parentScope,Scope childScope){
+    public String findDataTypeOfIdentifier(String name) {
+        if (data.containsKey(name))
+            return data.get(name);
 
-        childScope.setParentScope(parentScope);
-
-        if(parentScope!=null)
-            parentScope.addChildScope(childScope);
+        if(parentScope != null)
+            return parentScope.findDataTypeOfIdentifier(name);
+        else
+            return null;
     }
 };
