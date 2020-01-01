@@ -1,29 +1,33 @@
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import model.FileSystem;
-import utils.MethodObfuscator;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import model.*;
+import utils.*;
 import static utils.CommonUtils.*;
 import static utils.Constants.*;
-import static utils.FileOperation.copyFolder;
+import static utils.FileOperation.*;
 
 public class Main {
 
     private static int jsonFileNameCount = 0;
 
     public static void main(String[] args) {
-        backupProject();
+        //backupProject();
         analyseProjectStructure();
         getDependencyData();
 
-        MethodObfuscation();
+        //MethodObfuscation();
+        //ClassObfuscation();
+        PackageObfuscation();
     }
 
     /***********************************************************/
@@ -79,6 +83,16 @@ public class Main {
 
     /***********************************************************/
     //Obfuscations
+    public static void ClassObfuscation() {
+        ClassObfuscator co = new ClassObfuscator();
+        co.obfuscate();
+    }
+
+    public static void PackageObfuscation() {
+        PackageObfuscator po = new PackageObfuscator();
+        po.obfuscate(projectRootDirectory);
+    }
+
     public static void MethodObfuscation() {
         MethodObfuscator mo = new MethodObfuscator();
         mo.obfuscate();

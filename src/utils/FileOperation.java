@@ -52,20 +52,4 @@ public class FileOperation {
     }
 
     /****************************************************************************/
-
-    public static void replaceInFiles(File file, ArrayList<ReplacementDataNode> arrayList) {
-        try {
-            List<String> fileContent = new ArrayList<>(Files.readAllLines(file.toPath()));
-            for (ReplacementDataNode r : arrayList) {
-                String temp = fileContent.get(r.getLineNo() - 1);
-                temp = temp.substring(0, r.getStartColNo() - 1) + r.getReplacementString() + temp.substring(r.getEndColNo());
-                fileContent.set(r.getLineNo() - 1, temp);
-            }
-            Files.write(file.toPath(), fileContent);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    /****************************************************************************/
 }

@@ -11,6 +11,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import model.Obfuscator;
 import model.ReplacementDataNode;
 import model.Scope;
 
@@ -26,30 +27,8 @@ import static utils.Constants.classList;
 import static utils.Constants.methodMap;
 
 public class MethodObfuscator {
-    private File currentFile;
-    private ArrayList<ReplacementDataNode> arrayList;
 
-    public MethodObfuscator(){
-        arrayList = new ArrayList<ReplacementDataNode>();
-    }
-
-    public File getCurrentFile() {
-        return currentFile;
-    }
-
-    public void setCurrentFile(File currentFile) {
-        this.currentFile = currentFile;
-    }
-
-    public ArrayList<ReplacementDataNode> getArrayList() {
-        return arrayList;
-    }
-
-    public void setArrayList(ArrayList<ReplacementDataNode> arrayList) {
-        this.arrayList = arrayList;
-    }
-
-    /*************************************************/
+    private Obfuscator obfuscator;
 
     public void obfuscate(){
         try {
@@ -60,9 +39,10 @@ public class MethodObfuscator {
                 if(clas == null)
                     clas = cu.getInterfaceByName(getClassNameFromFilePath(file.getName())).orElse(null);
 
-                currentFile = file;
-
+                obfuscator = new Obfuscator();
+                obfuscator.setCurrentFile(file);
                 handleClass(clas);
+                obfuscator.replaceInFiles();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,13 +60,7 @@ public class MethodObfuscator {
 
                 for (FieldDeclaration field : global_fields) {
                     List<VariableDeclarator> global_variables = field.getVariables();
-                    if (!global_variables.isEmpty()) {
-                        for (VariableDeclarator variable : global_variables) {
-                            String name = variable.getName().getIdentifier();
-                            String type = variable.getType().asString();
-                            global_scope.setData(name, type);
-                        }
-                    }
+                    handleVariables(global_variables, global_scope);
                 }
             }
 
@@ -120,12 +94,10 @@ public class MethodObfuscator {
                         rnode.setStartColNo(start_col_num);
                         rnode.setEndColNo(end_col_num);
                         rnode.setReplacementString(getHexValue(name));
-                        arrayList.add(rnode);
+                        obfuscator.setArrayList(rnode);
                     }
                 }
             }
-
-            FileOperation.replaceInFiles(currentFile, arrayList);
         }
     }
 
@@ -147,14 +119,7 @@ public class MethodObfuscator {
         if (exp.isVariableDeclarationExpr()) {
             VariableDeclarationExpr vdexp = exp.asVariableDeclarationExpr();
             List<VariableDeclarator> variables = vdexp.getVariables();
-
-            if (!variables.isEmpty()) {
-                for (VariableDeclarator variable : variables) {
-                    String vname = variable.getName().getIdentifier();
-                    String vtype = variable.getType().asString();
-                    parentScope.setData(vname, vtype);
-                }
-            }
+            handleVariables(variables, parentScope);
         } else if (exp.isMethodCallExpr()) {
             MethodCallExpr methodCall = exp.asMethodCallExpr();
             String mname = methodCall.getName().getIdentifier();
@@ -176,7 +141,7 @@ public class MethodObfuscator {
                             rnode.setStartColNo(mstart_col_num);
                             rnode.setEndColNo(mend_col_num);
                             rnode.setReplacementString(getHexValue(mname));
-                            arrayList.add(rnode);
+                            obfuscator.setArrayList(rnode);
                             break;
                         }
                     }
@@ -189,9 +154,7 @@ public class MethodObfuscator {
                     rnode.setStartColNo(mstart_col_num);
                     rnode.setEndColNo(mend_col_num);
                     rnode.setReplacementString(getHexValue(mname));
-                    arrayList.add(rnode);
-
-                    System.out.println("replace " + mname);
+                    obfuscator.setArrayList(rnode);
                 }
             }
         }
@@ -228,12 +191,22 @@ public class MethodObfuscator {
         }
     }
 
+    public void handleVariables(List<VariableDeclarator> variables, Scope parentScope){
+        if (!variables.isEmpty()) {
+            for (VariableDeclarator variable : variables) {
+                String vname = variable.getName().getIdentifier();
+                String vtype = variable.getType().asString();
+                parentScope.setData(vname, vtype);
+            }
+        }
+    }
+
     public Boolean toBeReplaced(String name) {
         //1. Check if method present in current file.
         //2. Check if method present in other files.
 
         Boolean flag = false;
-        ArrayList<String> temp = methodMap.get(currentFile.getAbsolutePath());
+        ArrayList<String> temp = methodMap.get(obfuscator.getCurrentFile().getAbsolutePath());
         if (temp != null) {
             if (Collections.binarySearch(temp, name) >= 0)
                 flag = true;
