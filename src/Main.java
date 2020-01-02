@@ -21,7 +21,7 @@ public class Main {
     private static int jsonFileNameCount = 0;
 
     public static void main(String[] args) {
-        //backupProject();
+        backupProject();
         analyseProjectStructure();
         getDependencyData();
 

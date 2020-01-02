@@ -43,12 +43,12 @@ public class ClassObfuscator {
                 obfuscator.setCurrentFile(file);
                 handleClass(clas);
                 handleImport(cu, classes);
-                ///obfuscator.replaceInFiles();
+                obfuscator.replaceInFiles();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
+            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
 
