@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static utils.Constants.*;
+import static utils.FileOperation.getClassNameFromFilePath;
 
 public class CommonUtils {
 
@@ -185,16 +186,42 @@ public class CommonUtils {
 
     /****************************************************************************/
 
-    public static String getFileNameFromFilePath(String filePath) {
-        //  usr/Desktop/file1.java -> file1.java
-        String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
-        return fileName;
+    public static ArrayList<String> getClassName() {
+        ArrayList<String> classNameList = new ArrayList<>();
+        for (String s : classList) {
+            classNameList.add(getClassNameFromFilePath(s));
+        }
+        return classNameList;
     }
 
-    public static String getClassNameFromFilePath(String filePath) {
-        //  usr/Desktop/file1.java -> file1
-        String fileName = getFileNameFromFilePath(filePath);
-        return fileName.substring(0, fileName.lastIndexOf("."));
+    /****************************************************************************/
+
+    public static String getPackageNameFromPath(String path) {
+        String arr[] = path.split(File.separator, 100);
+
+        boolean javaFound = false;
+        String packageName = "";
+
+        for (String s : arr) {
+            if (s.equals("java")) {
+                javaFound = true;
+                continue;
+            }
+            if (javaFound)
+                packageName += s + ".";
+        }
+
+        packageName = packageName.substring(0, packageName.length() - 1);
+        return packageName;
+    }
+
+    public static ArrayList<String> getPackageName() {
+        ArrayList<String> packageNameToRename = new ArrayList<>();
+
+        for (String s : Constants.folderList)
+            packageNameToRename.add(getPackageNameFromPath(s));
+
+        return packageNameToRename;
     }
 
     /****************************************************************************/

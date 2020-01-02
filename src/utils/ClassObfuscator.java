@@ -1,12 +1,11 @@
 package utils;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.Range;
+import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.*;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -14,44 +13,42 @@ import model.Obfuscator;
 import model.ReplacementDataNode;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
-import static utils.CommonUtils.getClassNameFromFilePath;
+import static utils.CommonUtils.getClassName;
 import static utils.CommonUtils.getHexValue;
 import static utils.Constants.classList;
+import static utils.FileOperation.getClassNameFromFilePath;
 import static utils.FileOperation.renameFile;
 
 public class ClassObfuscator {
 
     private Obfuscator obfuscator;
 
-    public void obfuscate(String projectPath) {
-        File folder = new File(projectPath);
-        File[] files = folder.listFiles();
+    public void obfuscate() {
+        ArrayList<String> classes = getClassName();
 
-        if (files != null) {
-            for (File file : files) {
-                if (file.isFile()) {
-                    if (!file.getName().startsWith(".")) {
-                        try {
-                            CompilationUnit cu = JavaParser.parse(file);
-                            ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(file.getName())).orElse(null);
-                            if (clas == null)
-                                clas = cu.getInterfaceByName(getClassNameFromFilePath(file.getName())).orElse(null);
+        for (String s : classList) {
+            File file = new File(s);
+            String className = getClassNameFromFilePath(file.getName());
 
-                            obfuscator = new Obfuscator();
-                            obfuscator.setCurrentFile(file);
-                            handleClass(clas);
-                            obfuscator.replaceInFiles();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+            try {
+                CompilationUnit cu = JavaParser.parse(file);
+                ClassOrInterfaceDeclaration clas = cu.getClassByName(className).orElse(null);
+                if (clas == null)
+                    clas = cu.getInterfaceByName(className).orElse(null);
 
-                        renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(CommonUtils.getClassNameFromFilePath(file.getAbsolutePath())) + ".java");
-                    }
-                } else if (file.isDirectory())
-                    obfuscate(file.getAbsolutePath());
+                obfuscator = new Obfuscator();
+                obfuscator.setCurrentFile(file);
+                handleClass(clas);
+                handleImport(cu, classes);
+                obfuscator.replaceInFiles();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
 
@@ -146,7 +143,7 @@ public class ClassObfuscator {
     }
 
     public void handleExpression(Expression exp) {
-        if(exp == null)
+        if (exp == null)
             return;
 
         if (exp.isVariableDeclarationExpr()) {
@@ -160,12 +157,10 @@ public class ClassObfuscator {
                 for (Expression i : argList)
                     handleExpression(i);
             }
-        }
-        else if(exp.isThisExpr()) {
+        } else if (exp.isThisExpr()) {
             exp = exp.asThisExpr().getClassExpr().orElse(null);
             handleExpression(exp);
-        }
-        else if(exp.isNameExpr()){
+        } else if (exp.isNameExpr()) {
             String name = exp.asNameExpr().getName().getIdentifier();
             int vstart_line_num = exp.getRange().get().begin.line;
             int vstart_col_num = exp.getRange().get().begin.column;
@@ -180,8 +175,7 @@ public class ClassObfuscator {
                 rnode.setReplacementString(getHexValue(name));
                 obfuscator.setArrayList(rnode);
             }
-        }
-        else if (exp.isObjectCreationExpr()) {
+        } else if (exp.isObjectCreationExpr()) {
             ObjectCreationExpr expr = exp.asObjectCreationExpr();
             String type = expr.getType().getName().getIdentifier();
             int vstart_line_num = expr.getType().getRange().get().begin.line;
@@ -257,6 +251,47 @@ public class ClassObfuscator {
             rnode.setEndColNo(end_col_num);
             rnode.setReplacementString(getHexValue(name));
             obfuscator.setArrayList(rnode);
+        }
+    }
+
+    public void handleImport(CompilationUnit cu, ArrayList<String> replacementPattern) {
+        //com.example.dsc_onboarding.Adapter.viewPageAdapter -> com.example.dsc_onboarding.Adapter.xxx
+
+        for (int i = 0; i < cu.getImports().size(); i++) {
+            Name nm = cu.getImports().get(i).getName().getQualifier().orElse(null);
+            boolean isAsterisk = cu.getImports().get(i).isAsterisk();
+
+
+            if (!isAsterisk) {
+                try {
+                    String identifier = cu.getImports().get(i).getName().getIdentifier();
+
+                    for (String str : replacementPattern) {
+                        if (str.equals(identifier)) {
+                            TokenRange tokenRange = cu.getImports().get(i).getName().getTokenRange().orElse(null);
+                            if (tokenRange != null) {
+                                Range range = tokenRange.getEnd().getRange().orElse(null);
+                                if (range != null) {
+                                    int start_line_no = range.begin.line;
+                                    int start_col_no = range.begin.column;
+                                    int end_col_no = range.end.column;
+
+                                    ReplacementDataNode rnode = new ReplacementDataNode();
+                                    rnode.setLineNo(start_line_no);
+                                    rnode.setStartColNo(start_col_no);
+                                    rnode.setEndColNo(end_col_no);
+                                    rnode.setReplacementString(getHexValue(identifier));
+                                    obfuscator.setArrayList(rnode);
+                                }
+                            }
+                        }
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
     }
 

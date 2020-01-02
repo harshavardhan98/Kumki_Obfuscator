@@ -21,12 +21,12 @@ public class Main {
     private static int jsonFileNameCount = 0;
 
     public static void main(String[] args) {
-        backupProject();
+        //backupProject();
         analyseProjectStructure();
         getDependencyData();
 
-        //MethodObfuscation();
-        ClassObfuscation();
+        MethodObfuscation();
+        //ClassObfuscation();
         //PackageObfuscation();
     }
 
@@ -85,14 +85,14 @@ public class Main {
     //Obfuscations
     public static void ClassObfuscation() {
         ClassObfuscator co = new ClassObfuscator();
-        co.obfuscate(projectRootDirectory + packageName);
+        co.obfuscate();
         analyseProjectStructure();
         getDependencyData();
     }
 
     public static void PackageObfuscation() {
         PackageObfuscator po = new PackageObfuscator();
-        po.obfuscate(projectRootDirectory);
+        po.obfuscate();
         analyseProjectStructure();
         getDependencyData();
     }
