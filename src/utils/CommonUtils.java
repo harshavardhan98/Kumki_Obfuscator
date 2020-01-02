@@ -131,6 +131,7 @@ public class CommonUtils {
     public static void getFilesList(ArrayList<FileSystem> fs) {
         for (FileSystem f : fs) {
             if (f.getType().equals("file") && f.getName().endsWith(".java")) {
+                String path = f.getPath() + File.separator + f.getName();
                 classList.add(f.getPath() + File.separator + f.getName());
 
                 try {
@@ -140,8 +141,10 @@ public class CommonUtils {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (f.getType().equals("directory"))
+            } else if (f.getType().equals("directory")) {
+                String path = f.getPath() + File.separator + f.getName();
                 folderList.add(f.getPath() + File.separator + f.getName());
+            }
 
             if (f.getFiles() != null)
                 getFilesList(f.getFiles());
@@ -155,7 +158,7 @@ public class CommonUtils {
         public void visit(MethodDeclaration n, Object arg) {
             //Methods list
             String filePath = (String) arg;
-            if(!isOverride(n))
+            if (!isOverride(n))
                 addValues(filePath, n.getNameAsString());
         }
 
@@ -173,7 +176,7 @@ public class CommonUtils {
             methodMap.put(fileName, methodList);
         }
 
-        public static Boolean isOverride(MethodDeclaration n){
+        public static Boolean isOverride(MethodDeclaration n) {
             List<AnnotationExpr> annotationExprs = n.getAnnotations();
             if (annotationExprs != null) {
                 String annotations = annotationExprs.toString();
@@ -205,21 +208,15 @@ public class CommonUtils {
     /****************************************************************************/
 
     public static String getPackageNameFromPath(String path) {
-        String arr[] = path.split(File.separator, 100);
-
-        boolean javaFound = false;
-        String packageName = "";
-
-        for (String s : arr) {
-            if (s.equals("java")) {
-                javaFound = true;
-                continue;
-            }
-            if (javaFound)
-                packageName += s + ".";
+        String[] arr = path.split("java");
+        char[] myNameChars = arr[1].toCharArray();
+        myNameChars[0] = '\0';
+        for (int i = 1; i < myNameChars.length; i++) {
+            if(File.separator.equals(myNameChars[i] + ""))
+                myNameChars[i] = '.';
         }
 
-        packageName = packageName.substring(0, packageName.length() - 1);
+        packageName = String.valueOf(myNameChars);
         return packageName;
     }
 
