@@ -52,4 +52,12 @@ public class FileOperation {
     }
 
     /****************************************************************************/
+
+    public static void renameFile(String src, String dst) {
+        //https://www.inf.unibz.it/~calvanese/teaching/06-07-ip/lecture-notes/uni09/node12.html
+
+        File sourceFolder = new File(src);
+        File destinationFolder = new File(dst);
+        sourceFolder.renameTo(destinationFolder);
+    }
 }
