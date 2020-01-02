@@ -25,8 +25,8 @@ public class Main {
         analyseProjectStructure();
         getDependencyData();
 
-        //MethodObfuscation();
-        ClassObfuscation();
+        MethodObfuscation();
+        //ClassObfuscation();
         //PackageObfuscation();
     }
 

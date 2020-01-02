@@ -16,28 +16,27 @@ import model.ReplacementDataNode;
 import model.Scope;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static utils.CommonUtils.*;
-import static utils.FileOperation.*;
 import static utils.Constants.classList;
 import static utils.Constants.methodMap;
+import static utils.FileOperation.getClassNameFromFilePath;
 
 public class MethodObfuscator {
 
     private Obfuscator obfuscator;
 
-    public void obfuscate(){
+    public void obfuscate() {
         try {
             for (String filePath : classList) {
                 File file = new File(filePath);
                 CompilationUnit cu = JavaParser.parse(file);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(file.getName())).orElse(null);
-                if(clas == null)
+                if (clas == null)
                     clas = cu.getInterfaceByName(getClassNameFromFilePath(file.getName())).orElse(null);
 
                 obfuscator = new Obfuscator();
@@ -121,6 +120,7 @@ public class MethodObfuscator {
             VariableDeclarationExpr vdexp = exp.asVariableDeclarationExpr();
             List<VariableDeclarator> variables = vdexp.getVariables();
             handleVariables(variables, parentScope);
+
         } else if (exp.isMethodCallExpr()) {
             MethodCallExpr methodCall = exp.asMethodCallExpr();
             String mname = methodCall.getName().getIdentifier();
@@ -130,26 +130,20 @@ public class MethodObfuscator {
             int mend_col_num = methodCall.getName().getRange().get().end.column;
 
             Expression obj_name_exp = methodCall.getScope().orElse(null);
-            if (obj_name_exp != null && obj_name_exp.isNameExpr()) {
-                String obj_name = obj_name_exp.asNameExpr().getName().getIdentifier();
-                String obj_type = parentScope.findDataTypeOfIdentifier(obj_name);
-                if (obj_type != null) {
-                    int x;
-                    for (x = 0; x < classList.size(); x++) {
-                        if (getClassNameFromFilePath(classList.get(x)).equals(obj_type)) {
-                            ReplacementDataNode rnode = new ReplacementDataNode();
-                            rnode.setLineNo(mstart_line_num);
-                            rnode.setStartColNo(mstart_col_num);
-                            rnode.setEndColNo(mend_col_num);
-                            rnode.setReplacementString(getHexValue(mname));
-                            obfuscator.setArrayList(rnode);
-                            break;
-                        }
+            if (obj_name_exp != null) {
+                if (obj_name_exp.isNameExpr()) {
+                    String obj_name = obj_name_exp.asNameExpr().getName().getIdentifier();
+                    String obj_type = parentScope.findDataTypeOfIdentifier(obj_name);
+                    if ((obj_type != null && compare(obj_type)) || (toBeReplaced(mname) && compare(obj_name))) {
+                        ReplacementDataNode rnode = new ReplacementDataNode();
+                        rnode.setLineNo(mstart_line_num);
+                        rnode.setStartColNo(mstart_col_num);
+                        rnode.setEndColNo(mend_col_num);
+                        rnode.setReplacementString(getHexValue(mname));
+                        obfuscator.setArrayList(rnode);
                     }
                 }
-            } else {
-                //might be class methods
-                if (toBeReplaced(mname)) {
+                else if (obj_name_exp.isSuperExpr() && toBeReplaced(mname)){
                     ReplacementDataNode rnode = new ReplacementDataNode();
                     rnode.setLineNo(mstart_line_num);
                     rnode.setStartColNo(mstart_col_num);
@@ -192,7 +186,7 @@ public class MethodObfuscator {
         }
     }
 
-    public void handleVariables(List<VariableDeclarator> variables, Scope parentScope){
+    public void handleVariables(List<VariableDeclarator> variables, Scope parentScope) {
         if (!variables.isEmpty()) {
             for (VariableDeclarator variable : variables) {
                 String vname = variable.getName().getIdentifier();

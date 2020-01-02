@@ -16,8 +16,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static utils.CommonUtils.getClassName;
-import static utils.CommonUtils.getHexValue;
+import static utils.CommonUtils.*;
 import static utils.Constants.classList;
 import static utils.FileOperation.getClassNameFromFilePath;
 import static utils.FileOperation.renameFile;
@@ -169,9 +168,7 @@ public class ClassObfuscator {
             exp = exp.asThisExpr().getClassExpr().orElse(null);
             handleExpression(exp);
 
-        }
-
-        else if(exp.isFieldAccessExpr()){
+        } else if(exp.isFieldAccessExpr()){
             SimpleName sname = exp.asFieldAccessExpr().getName();
             String name = sname.getIdentifier();
             int vstart_line_num = sname.getRange().get().begin.line;
@@ -321,13 +318,5 @@ public class ClassObfuscator {
             }
 
         }
-    }
-
-    public Boolean compare(String ObjType) {
-        for (int x = 0; x < classList.size(); x++) {
-            if (getClassNameFromFilePath(classList.get(x)).equals(ObjType))
-                return true;
-        }
-        return false;
     }
 }

@@ -194,6 +194,14 @@ public class CommonUtils {
         return classNameList;
     }
 
+    public static Boolean compare(String ObjType) {
+        for (int x = 0; x < classList.size(); x++) {
+            if (getClassNameFromFilePath(classList.get(x)).equals(ObjType))
+                return true;
+        }
+        return false;
+    }
+
     /****************************************************************************/
 
     public static String getPackageNameFromPath(String path) {
