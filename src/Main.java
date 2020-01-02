@@ -32,9 +32,9 @@ public class Main {
         analyseProjectStructure();
         getDependencyData();
 
-        CommentObfuscation();
+        //CommentObfuscation();
         //MethodObfuscation();
-        //ClassObfuscation();
+        ClassObfuscation();
         //PackageObfuscation();
     }
 

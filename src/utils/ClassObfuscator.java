@@ -164,11 +164,15 @@ public class ClassObfuscator {
             exp = methodCall.getScope().orElse(null);
             handleExpression(exp);
 
+        } else if (exp.isBinaryExpr()) {
+            BinaryExpr expr = exp.asBinaryExpr();
+            handleExpression(expr.getLeft());
+            handleExpression(expr.getRight());
         } else if (exp.isThisExpr()) {
             exp = exp.asThisExpr().getClassExpr().orElse(null);
             handleExpression(exp);
 
-        } else if(exp.isFieldAccessExpr()){
+        } else if (exp.isFieldAccessExpr()) {
             SimpleName sname = exp.asFieldAccessExpr().getName();
             String name = sname.getIdentifier();
             int vstart_line_num = sname.getRange().get().begin.line;
@@ -183,6 +187,9 @@ public class ClassObfuscator {
                 rnode.setEndColNo(vend_col_num);
                 rnode.setReplacementString(getHexValue(name));
                 obfuscator.setArrayList(rnode);
+            } else {
+                //eg: m.behaviour(Mammal.count);
+                handleExpression(exp.asFieldAccessExpr().getScope());
             }
         } else if (exp.isNameExpr()) {
             String name = exp.asNameExpr().getName().getIdentifier();
@@ -222,6 +229,10 @@ public class ClassObfuscator {
                 for (Expression e : expList)
                     handleExpression(e);
             }
+        } else if (exp.isAssignExpr()) {
+            AssignExpr expr = exp.asAssignExpr();
+            if (expr.getTarget().isFieldAccessExpr())
+                handleExpression(expr.getTarget().asFieldAccessExpr().getScope());
         }
     }
 
