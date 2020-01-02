@@ -1,23 +1,27 @@
 import com.github.javaparser.JavaParser;
-import com.github.javaparser.Position;
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import model.FileSystem;
+import model.Obfuscator;
+import model.ReplacementDataNode;
+import utils.ClassObfuscator;
+import utils.MethodObfuscator;
+import utils.PackageObfuscator;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import model.*;
-import utils.*;
 import static utils.CommonUtils.*;
 import static utils.Constants.*;
-import static utils.FileOperation.*;
+import static utils.FileOperation.copyFolder;
 
 public class Main {
 
@@ -28,7 +32,7 @@ public class Main {
         analyseProjectStructure();
         getDependencyData();
 
-        //removeComments();
+        CommentObfuscation();
         //MethodObfuscation();
         //ClassObfuscation();
         //PackageObfuscation();
@@ -106,49 +110,44 @@ public class Main {
         mo.obfuscate();
     }
 
-    public static void removeComments(){
-
-        for(String s:classList){
-
-            try{
-                File f=new File(s);
-                Obfuscator obfuscator=new Obfuscator();
+    public static void CommentObfuscation() {
+        for (String s : classList) {
+            try {
+                File f = new File(s);
+                Obfuscator obfuscator = new Obfuscator();
                 obfuscator.setCurrentFile(f);
 
-                CompilationUnit cu=JavaParser.parse(f);
-                cu.getComments();
-                List<Comment> l=cu.getComments();
+                CompilationUnit cu = JavaParser.parse(f);
+                List<Comment> l = cu.getComments();
 
-                for(Comment comment:l){
-
-                    if(comment.isLineComment()){
-                        ReplacementDataNode r=new ReplacementDataNode();
-                        Position begin=comment.getRange().orElse(null).begin;
-                        Position end=comment.getRange().orElse(null).end;
-                        r.setLineNo(begin.line);
-                        r.setStartColNo(begin.column);
-                        r.setEndColNo(end.column);
-                        r.setReplacementString("");
-                        obfuscator.setArrayList(r);
-                    }
-                    else if(comment.isBlockComment()){
-                        ReplacementDataNode r=new ReplacementDataNode();
-                        Position begin=comment.getRange().orElse(null).begin;
-                        Position end=comment.getRange().orElse(null).end;
-                        r.setLineNo(begin.line);
-                        r.setStartColNo(begin.column);
-                        r.setEndLineNo(end.line);
-                        r.setEndColNo(end.column);
-                        obfuscator.setArrayList(r);
+                for (Comment comment : l) {
+                    if (comment.isLineComment()) {
+                        ReplacementDataNode rnode = new ReplacementDataNode();
+                        Range range = comment.getRange().orElse(null);
+                        if (range != null) {
+                            rnode.setLineNo(range.begin.line);
+                            rnode.setStartColNo(range.begin.column);
+                            rnode.setEndColNo(range.end.column);
+                            rnode.setReplacementString("");
+                            obfuscator.setArrayList(rnode);
+                        }
+                    } else if (comment.isBlockComment()) {
+                        ReplacementDataNode rnode = new ReplacementDataNode();
+                        Range range = comment.getRange().orElse(null);
+                        if (range != null) {
+                            rnode.setLineNo(range.begin.line);
+                            rnode.setStartColNo(range.begin.column);
+                            rnode.setEndLineNo(range.end.line);
+                            rnode.setEndColNo(range.end.column);
+                            rnode.setReplacementString("");
+                            obfuscator.setArrayList(rnode);
+                        }
                     }
                 }
-
                 obfuscator.replaceComments();
-
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
     }
 
