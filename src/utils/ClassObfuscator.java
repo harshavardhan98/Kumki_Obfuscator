@@ -157,6 +157,10 @@ public class ClassObfuscator {
                 for (Expression i : argList)
                     handleExpression(i);
             }
+
+            //Static method calls
+            exp = methodCall.getScope().orElse(null);
+            handleExpression(exp);
         } else if (exp.isThisExpr()) {
             exp = exp.asThisExpr().getClassExpr().orElse(null);
             handleExpression(exp);
