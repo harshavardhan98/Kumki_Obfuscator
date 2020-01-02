@@ -48,4 +48,33 @@ public class Obfuscator {
             System.out.println(e.getMessage());
         }
     }
+
+    public void replaceComments(){
+        try{
+            List<String> fileContent = new ArrayList<>(Files.readAllLines(currentFile.toPath()));
+            for(ReplacementDataNode r:arrayList){
+                if(r.getEndLineNo()==-1){
+                    String temp = fileContent.get(r.getLineNo() - 1);
+                    temp = temp.substring(0, r.getStartColNo() - 1);
+                    fileContent.set(r.getLineNo() - 1, temp);
+                }
+                else{
+                    String temp = fileContent.get(r.getLineNo() - 1);
+                    temp = temp.substring(0,r.getStartColNo()-1);
+                    fileContent.set(r.getLineNo() - 1, temp);
+
+                    for(int i=r.getLineNo();i<r.getEndLineNo()-1;i++){
+                        fileContent.set(i,"");
+                    }
+
+                    temp = fileContent.get(r.getEndLineNo() - 1).substring(r.getEndColNo());
+                    fileContent.set(r.getEndLineNo()-1,temp);
+                }
+            }
+
+            Files.write(currentFile.toPath(), fileContent);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 }

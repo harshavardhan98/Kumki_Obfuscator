@@ -9,8 +9,13 @@ public class ReplacementDataNode {
 
     private int LineNo;
     private int startColNo;
+    private int endLineNo;
     private int endColNo;
     private String replacementString;
+
+    public ReplacementDataNode() {
+        endLineNo=-1;
+    }
 
     public int getLineNo() {
         return LineNo;
@@ -42,6 +47,13 @@ public class ReplacementDataNode {
 
     public void setReplacementString(String replacementString) {
         this.replacementString = replacementString;
+    }
+
+    public void setEndLineNo(int endLineNo){
+        this.endLineNo=endLineNo;
+    }
+    public int getEndLineNo(){
+        return this.endLineNo;
     }
 };
 
