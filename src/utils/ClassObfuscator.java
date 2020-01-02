@@ -43,12 +43,12 @@ public class ClassObfuscator {
                 obfuscator.setCurrentFile(file);
                 handleClass(clas);
                 handleImport(cu, classes);
-                obfuscator.replaceInFiles();
+                ///obfuscator.replaceInFiles();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
+            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
 
@@ -117,6 +117,7 @@ public class ClassObfuscator {
                 }
             }
 
+            //Method Definition
             List<MethodDeclaration> methods = clas.getMethods();
             if (!methods.isEmpty()) {
                 for (MethodDeclaration method : methods) {
@@ -135,6 +136,7 @@ public class ClassObfuscator {
                         }
                     }
 
+                    //Method Arguments
                     List<Parameter> parameterList = method.getParameters();
                     handleParameter(parameterList);
                 }
@@ -150,6 +152,7 @@ public class ClassObfuscator {
             VariableDeclarationExpr vdexp = exp.asVariableDeclarationExpr();
             List<VariableDeclarator> variables = vdexp.getVariables();
             handleVariables(variables);
+
         } else if (exp.isMethodCallExpr()) {
             MethodCallExpr methodCall = exp.asMethodCallExpr();
             List<Expression> argList = methodCall.getArguments();
@@ -161,9 +164,29 @@ public class ClassObfuscator {
             //Static method calls
             exp = methodCall.getScope().orElse(null);
             handleExpression(exp);
+
         } else if (exp.isThisExpr()) {
             exp = exp.asThisExpr().getClassExpr().orElse(null);
             handleExpression(exp);
+
+        }
+
+        else if(exp.isFieldAccessExpr()){
+            SimpleName sname = exp.asFieldAccessExpr().getName();
+            String name = sname.getIdentifier();
+            int vstart_line_num = sname.getRange().get().begin.line;
+            int vstart_col_num = sname.getRange().get().begin.column;
+            int vend_col_num = sname.getRange().get().end.column;
+
+            Boolean flag = compare(name);
+            if (flag) {
+                ReplacementDataNode rnode = new ReplacementDataNode();
+                rnode.setLineNo(vstart_line_num);
+                rnode.setStartColNo(vstart_col_num);
+                rnode.setEndColNo(vend_col_num);
+                rnode.setReplacementString(getHexValue(name));
+                obfuscator.setArrayList(rnode);
+            }
         } else if (exp.isNameExpr()) {
             String name = exp.asNameExpr().getName().getIdentifier();
             int vstart_line_num = exp.getRange().get().begin.line;
@@ -179,6 +202,7 @@ public class ClassObfuscator {
                 rnode.setReplacementString(getHexValue(name));
                 obfuscator.setArrayList(rnode);
             }
+
         } else if (exp.isObjectCreationExpr()) {
             ObjectCreationExpr expr = exp.asObjectCreationExpr();
             String type = expr.getType().getName().getIdentifier();
