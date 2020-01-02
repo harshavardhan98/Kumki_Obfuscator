@@ -1,6 +1,7 @@
 package utils;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.Position;
 import com.github.javaparser.Range;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
@@ -22,21 +23,43 @@ public class PackageObfuscator {
 
         ArrayList<String> renameData=getPackageNameToRename();
 
+//        for(String s:classList){
+//            try{
+//                File f=new File(s);
+//                CompilationUnit cu = JavaParser.parse(f);
+//                obfuscator = new Obfuscator();
+//                obfuscator.setCurrentFile(f);
+//                handleImport(cu,renameData);
+//                obfuscator.replaceInFiles();
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+//        }
+
+        ArrayList<String> classPattern=new ArrayList<>();
+        classPattern.add("ViewPager");
+        classPattern.add("viewPageAdapter");
+
         for(String s:classList){
-
             try{
-
                 File f=new File(s);
-                CompilationUnit cu = JavaParser.parse(f);
-                obfuscator = new Obfuscator();
+                CompilationUnit cu=JavaParser.parse(f);
+                obfuscator=new Obfuscator();
                 obfuscator.setCurrentFile(f);
-                handleImport(cu,renameData);
-                obfuscator.replaceInFiles();
-
+                handleImportClasses(cu,classPattern);
             }catch (Exception e){
                 e.printStackTrace();
             }
         }
+
+
+
+//
+//        for(String s:folderList){
+//            File f=new File(s);
+//            String className=getFileNameFromFilePath(f.getAbsolutePath());
+//            renameDirectory(f.getAbsolutePath(),f.getParent()+File.separator+getHexValue(className));
+//        }
 
     }
 
@@ -76,6 +99,36 @@ public class PackageObfuscator {
         }
     }
 
+    public void handleImportClasses(CompilationUnit cu,ArrayList<String> replacementPattern){
+        //com.example.dsc_onboarding.Adapter.viewPageAdapter -> com.example.dsc_onboarding.Adapter
+
+        for(int i=0;i<cu.getImports().size();i++){
+            Name nm = cu.getImports().get(i).getName().getQualifier().orElse(null);
+            boolean isAsterisk = cu.getImports().get(i).isAsterisk();
+
+            //cu.getImports().get(i).getTokenRange().orElse(null).getEnd().getRange().orElse(null).begin;
+
+            if(!isAsterisk) {
+                try{
+                    String identifier = cu.getImports().get(i).getName().getIdentifier();
+                    String qualifier  = cu.getImports().get(i).getName().getQualifier().orElse(null).asString();
+                    String pattern = qualifier+"."+identifier;
+
+                    for(String str:replacementPattern){
+                        if(str.equals(identifier)){
+                            TokenRange tokenRange=cu.getImports().get(i).getName().getTokenRange().orElse(null);
+                            handleRange(tokenRange,identifier);
+                        }
+                    }
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
     public void handleRange(TokenRange tokenRange, String identifier) {
         if (tokenRange != null) {
             Range range = tokenRange.getEnd().getRange().orElse(null);
@@ -108,7 +161,7 @@ public class PackageObfuscator {
     public String getPackageNameFromPath(String path){
 
 
-        String arr[]=path.split("/",100);
+        String arr[]=path.split(File.separator,100);
 
         boolean javaFound=false;
         String packageName="";
@@ -129,5 +182,20 @@ public class PackageObfuscator {
         return packageName;
 
     }
+
+
+    public static void renameDirectory(String src, String dst) {
+        File sourceFolder = new File(src);
+        File destinationFolder = new File(dst);
+        sourceFolder.renameTo(destinationFolder);
+    }
+
+
+    public static String getFileNameFromFilePath(String filePath) {
+        //  usr/Desktop/file1.java -> file1.java
+        String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+        return fileName;
+    }
+
 
 }
