@@ -13,7 +13,9 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import model.Obfuscator;
 import model.ReplacementDataNode;
+import model.Scope;
 
+import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +54,8 @@ public class ClassObfuscator {
             //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
+
+    /*********************************************/
 
     public void handleClass(ClassOrInterfaceDeclaration clas) {
         if (clas != null) {
@@ -152,31 +156,74 @@ public class ClassObfuscator {
         }
     }
 
-    public void handleBlockStmt(BlockStmt block) {
-        if (block == null)
+    public void handleBlockStmt(BlockStmt block){
+        if(block == null)
             return;
 
         List<Statement> stList = block.getStatements();
         if (!stList.isEmpty()) {
             for (int i = 0; i < stList.size(); i++) {
                 Statement st = stList.get(i);
-                if (st != null) {
-                    if (st.isExpressionStmt()) {
-                        Expression exp = st.asExpressionStmt().getExpression();
-                        handleExpression(exp);
-
-                    } else if (st.isExplicitConstructorInvocationStmt()) {
-                        ExplicitConstructorInvocationStmt ecst = st.asExplicitConstructorInvocationStmt();
-                        List<Expression> exp = ecst.getArguments();
-                        if (exp != null) {
-                            for (Expression e : exp)
-                                handleExpression(e);
-                        }
-                    }
-                }
+                handleStatement(st);
             }
         }
     }
+
+    public void handleStatement(Statement statement) {
+        if (statement == null || statement.isEmptyStmt())
+            return;
+
+        handleExpressionStatement(statement);
+        handleExplicitConstructorInvocationStmt(statement);
+        handleIfStatement(statement);
+        handleBlockStatement(statement);
+    }
+
+    /*********************************************/
+
+    public void handleIfStatement(Statement st) {
+        if (st == null || !st.isIfStmt())
+            return;
+
+        Statement thenStmt = st.asIfStmt().getThenStmt();
+        handleStatement(thenStmt);
+
+        Statement elseStmt = st.asIfStmt().getElseStmt().orElse(null);
+        handleStatement(elseStmt);
+    }
+
+    public void handleBlockStatement(Statement statement) {
+        if (statement == null || !statement.isBlockStmt())
+            return;
+
+        List<Statement> stmtBlock = statement.asBlockStmt().getStatements();
+        if (!stmtBlock.isEmpty()) {
+            for (Statement stmt : stmtBlock)
+                handleStatement(stmt);
+        }
+    }
+
+    public void handleExpressionStatement(Statement st){
+        if (st == null || !st.isExpressionStmt())
+            return;
+
+        Expression exp = st.asExpressionStmt().getExpression();
+        handleExpression(exp);
+    }
+
+    public void handleExplicitConstructorInvocationStmt(Statement st){
+        if (st == null || !st.isExplicitConstructorInvocationStmt())
+            return;
+
+        ExplicitConstructorInvocationStmt ecst = st.asExplicitConstructorInvocationStmt();
+        List<Expression> exp = ecst.getArguments();
+        if (exp != null) {
+            for (Expression e : exp)
+                handleExpression(e);
+        }
+    }
+
+    /*********************************************/
 
     public void handleExpression(Expression exp) {
         if (exp == null)
@@ -186,6 +233,11 @@ public class ClassObfuscator {
             VariableDeclarationExpr vdexp = exp.asVariableDeclarationExpr();
             List<VariableDeclarator> variables = vdexp.getVariables();
             handleVariables(variables);
+
+        } else if (exp.isClassExpr()) {
+            ClassExpr expr = exp.asClassExpr();
+            if(expr.getType().isClassOrInterfaceType())
+                handleClassInterfaceType(expr.getType().asClassOrInterfaceType());
 
         } else if (exp.isMethodCallExpr()) {
             MethodCallExpr methodCall = exp.asMethodCallExpr();
@@ -276,6 +328,8 @@ public class ClassObfuscator {
         }
     }
 
+    /*********************************************/
+
     public void handleVariables(List<VariableDeclarator> variables) {
         if (!variables.isEmpty()) {
             for (VariableDeclarator variable : variables) {
@@ -329,6 +383,8 @@ public class ClassObfuscator {
             obfuscator.setArrayList(rnode);
         }
     }
+
+    /*********************************************/
 
     public void handleImport(CompilationUnit cu, ArrayList<String> replacementPattern) {
         //com.example.dsc_onboarding.Adapter.viewPageAdapter -> com.example.dsc_onboarding.Adapter.xxx
