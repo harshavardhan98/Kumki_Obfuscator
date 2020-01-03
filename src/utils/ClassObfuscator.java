@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExplicitConstructorInvocationStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import model.Obfuscator;
@@ -47,7 +48,7 @@ public class ClassObfuscator {
                 e.printStackTrace();
             }
 
-            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
+            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
 
@@ -113,6 +114,9 @@ public class ClassObfuscator {
 
                     List<Parameter> parameterList = constructor.getParameters();
                     handleParameter(parameterList);
+
+                    BlockStmt block = constructor.getBody();
+                    handleBlockStmt(block);
                 }
             }
 
@@ -121,23 +125,37 @@ public class ClassObfuscator {
             if (!methods.isEmpty()) {
                 for (MethodDeclaration method : methods) {
                     BlockStmt block = method.getBody().orElse(null);
-
-                    if (block != null) {
-                        List<Statement> stList = block.getStatements();
-                        if (!stList.isEmpty()) {
-                            for (int i = 0; i < stList.size(); i++) {
-                                Statement st = stList.get(i);
-                                if (st != null && st.isExpressionStmt()) {
-                                    Expression exp = st.asExpressionStmt().getExpression();
-                                    handleExpression(exp);
-                                }
-                            }
-                        }
-                    }
+                    handleBlockStmt(block);
 
                     //Method Arguments
                     List<Parameter> parameterList = method.getParameters();
                     handleParameter(parameterList);
+                }
+            }
+        }
+    }
+
+    public void handleBlockStmt(BlockStmt block) {
+        if (block == null)
+            return;
+
+        List<Statement> stList = block.getStatements();
+        if (!stList.isEmpty()) {
+            for (int i = 0; i < stList.size(); i++) {
+                Statement st = stList.get(i);
+                if (st != null) {
+                    if (st.isExpressionStmt()) {
+                        Expression exp = st.asExpressionStmt().getExpression();
+                        handleExpression(exp);
+
+                    } else if (st.isExplicitConstructorInvocationStmt()) {
+                        ExplicitConstructorInvocationStmt ecst = st.asExplicitConstructorInvocationStmt();
+                        List<Expression> exp = ecst.getArguments();
+                        if (exp != null) {
+                            for (Expression e : exp)
+                                handleExpression(e);
+                        }
+                    }
                 }
             }
         }
@@ -168,6 +186,7 @@ public class ClassObfuscator {
             BinaryExpr expr = exp.asBinaryExpr();
             handleExpression(expr.getLeft());
             handleExpression(expr.getRight());
+
         } else if (exp.isThisExpr()) {
             exp = exp.asThisExpr().getClassExpr().orElse(null);
             handleExpression(exp);
@@ -229,10 +248,12 @@ public class ClassObfuscator {
                 for (Expression e : expList)
                     handleExpression(e);
             }
+
         } else if (exp.isAssignExpr()) {
             AssignExpr expr = exp.asAssignExpr();
             if (expr.getTarget().isFieldAccessExpr())
                 handleExpression(expr.getTarget().asFieldAccessExpr().getScope());
+
         }
     }
 
