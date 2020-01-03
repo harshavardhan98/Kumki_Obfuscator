@@ -126,37 +126,39 @@ public class ClassObfuscator {
             //Method Definition
             List<MethodDeclaration> methods = clas.getMethods();
             if (!methods.isEmpty()) {
-                for (MethodDeclaration method : methods) {
-
-                    if (method.getType().isClassOrInterfaceType()) {
-                        ClassOrInterfaceType cit = method.getType().asClassOrInterfaceType();
-                        handleClassInterfaceType(cit);
-                    }
-
-                    if (compare(method.getType().asString())) {
-                        ReplacementDataNode r = new ReplacementDataNode();
-                        Range range = method.getType().getRange().orElse(null);
-
-                        if (range != null) {
-                            Position begin = range.begin;
-                            Position end = range.end;
-                            r.setLineNo(begin.line);
-                            r.setStartColNo(begin.column);
-                            r.setEndColNo(end.column);
-                            r.setReplacementString(getHexValue(method.getType().asString()));
-                            obfuscator.setArrayList(r);
-                        }
-                    }
-
-                    BlockStmt block = method.getBody().orElse(null);
-                    handleBlockStmt(block);
-
-                    //Method Arguments
-                    List<Parameter> parameterList = method.getParameters();
-                    handleParameter(parameterList);
-                }
+                for (MethodDeclaration method : methods)
+                    handleMethodDeclaration(method);
             }
         }
+    }
+
+    public void handleMethodDeclaration(MethodDeclaration method) {
+        if (method.getType().isClassOrInterfaceType()) {
+            ClassOrInterfaceType cit = method.getType().asClassOrInterfaceType();
+            handleClassInterfaceType(cit);
+        }
+
+        if (compare(method.getType().asString())) {
+            ReplacementDataNode r = new ReplacementDataNode();
+            Range range = method.getType().getRange().orElse(null);
+
+            if (range != null) {
+                Position begin = range.begin;
+                Position end = range.end;
+                r.setLineNo(begin.line);
+                r.setStartColNo(begin.column);
+                r.setEndColNo(end.column);
+                r.setReplacementString(getHexValue(method.getType().asString()));
+                obfuscator.setArrayList(r);
+            }
+        }
+
+        BlockStmt block = method.getBody().orElse(null);
+        handleBlockStmt(block);
+
+        //Method Arguments
+        List<Parameter> parameterList = method.getParameters();
+        handleParameter(parameterList);
     }
 
     public void handleBlockStmt(BlockStmt block) {
@@ -350,6 +352,13 @@ public class ClassObfuscator {
             if (expList != null) {
                 for (Expression e : expList)
                     handleExpression(e);
+            }
+
+            List<BodyDeclaration<?>> bodyList = expr.getAnonymousClassBody().orElse(null);
+            if (bodyList != null) {
+                for (BodyDeclaration<?> e : bodyList)
+                    if (e.isMethodDeclaration())
+                        handleMethodDeclaration(e.asMethodDeclaration());
             }
 
         } else if (exp.isAssignExpr()) {
