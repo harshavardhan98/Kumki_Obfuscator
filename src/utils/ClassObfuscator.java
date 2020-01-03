@@ -331,6 +331,13 @@ public class ClassObfuscator {
             List<VariableDeclarator> variables = vdexp.getVariables();
             handleVariables(variables);
 
+        } else if (exp.isCastExpr()) {
+            CastExpr expr = exp.asCastExpr();
+            if(expr.getType().isClassOrInterfaceType())
+                handleClassInterfaceType(expr.getType().asClassOrInterfaceType());
+
+            handleExpression(expr.getExpression());
+
         } else if (exp.isClassExpr()) {
             ClassExpr expr = exp.asClassExpr();
             if (expr.getType().isClassOrInterfaceType())
