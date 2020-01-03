@@ -139,7 +139,6 @@ public class ClassObfuscator {
                             r.setReplacementString(getHexValue(method.getType().asString()));
                             obfuscator.setArrayList(r);
                         }
-
                     }
 
                     BlockStmt block = method.getBody().orElse(null);
@@ -272,6 +271,8 @@ public class ClassObfuscator {
             if (expr.getTarget().isFieldAccessExpr())
                 handleExpression(expr.getTarget().asFieldAccessExpr().getScope());
 
+            //eg: darkMode = MainActivity.getHelloMain("dark_mode");
+            handleExpression(expr.getValue());
         }
     }
 
