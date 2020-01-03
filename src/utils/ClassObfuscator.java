@@ -63,7 +63,7 @@ public class ClassObfuscator {
             int start_col_num = clas.getName().getRange().get().begin.column;
             int end_col_num = clas.getName().getRange().get().end.column;
 
-            Boolean flag = compare(name);
+            boolean flag = compare(name);
             if (flag) {
                 ReplacementDataNode rnode = new ReplacementDataNode();
                 rnode.setLineNo(start_line_num);
@@ -126,11 +126,18 @@ public class ClassObfuscator {
                 }
             }
 
-            //Method Definition
-            List<MethodDeclaration> methods = clas.getMethods();
-            if (!methods.isEmpty()) {
-                for (MethodDeclaration method : methods)
-                    handleMethodDeclaration(method);
+            //Class Members
+            List<BodyDeclaration<?>> members = clas.getMembers();
+            if (!members.isEmpty()) {
+                for (BodyDeclaration<?> bd : members){
+                    //Methods
+                    if (bd.isMethodDeclaration())
+                        handleMethodDeclaration(bd.asMethodDeclaration());
+
+                    //Inner Class
+                    else if(bd.isClassOrInterfaceDeclaration())
+                        handleClass(bd.asClassOrInterfaceDeclaration());
+                }
             }
         }
     }
@@ -247,8 +254,6 @@ public class ClassObfuscator {
         Statement forEach = st.asForeachStmt().getBody();
         handleStatement(forEach);
     }
-
-
 
     public void handleIfStatement(Statement st) {
         if (st == null || !st.isIfStmt())
