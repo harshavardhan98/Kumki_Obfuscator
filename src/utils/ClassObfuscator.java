@@ -36,9 +36,6 @@ public class ClassObfuscator {
 
         for (String s : classList) {
 
-            if(!s.contains("Main"))
-                continue;
-
             File file = new File(s);
             String className = getClassNameFromFilePath(file.getName());
 
@@ -57,7 +54,7 @@ public class ClassObfuscator {
                 e.printStackTrace();
             }
 
-            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
+            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
 
