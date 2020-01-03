@@ -129,13 +129,13 @@ public class ClassObfuscator {
             //Class Members
             List<BodyDeclaration<?>> members = clas.getMembers();
             if (!members.isEmpty()) {
-                for (BodyDeclaration<?> bd : members){
+                for (BodyDeclaration<?> bd : members) {
                     //Methods
                     if (bd.isMethodDeclaration())
                         handleMethodDeclaration(bd.asMethodDeclaration());
 
-                    //Inner Class
-                    else if(bd.isClassOrInterfaceDeclaration())
+                        //Inner Class
+                    else if (bd.isClassOrInterfaceDeclaration())
                         handleClass(bd.asClassOrInterfaceDeclaration());
                 }
             }
@@ -333,7 +333,7 @@ public class ClassObfuscator {
 
         } else if (exp.isCastExpr()) {
             CastExpr expr = exp.asCastExpr();
-            if(expr.getType().isClassOrInterfaceType())
+            if (expr.getType().isClassOrInterfaceType())
                 handleClassInterfaceType(expr.getType().asClassOrInterfaceType());
 
             handleExpression(expr.getExpression());
@@ -489,6 +489,9 @@ public class ClassObfuscator {
     }
 
     public void handleClassInterfaceType(ClassOrInterfaceType cit) {
+        if(cit == null)
+            return;
+
         String name = cit.getName().getIdentifier();
         int start_line_num = cit.getName().getRange().get().begin.line;
         int start_col_num = cit.getName().getRange().get().begin.column;
@@ -512,6 +515,8 @@ public class ClassObfuscator {
             }
         }
 
+        ClassOrInterfaceType scope = cit.getScope().orElse(null);
+        handleClassInterfaceType(scope);
     }
 
     /*********************************************/
