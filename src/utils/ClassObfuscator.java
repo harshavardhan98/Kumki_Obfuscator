@@ -5,12 +5,14 @@ import com.github.javaparser.Position;
 import com.github.javaparser.Range;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExplicitConstructorInvocationStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import model.Obfuscator;
 import model.ReplacementDataNode;
 import model.Scope;
@@ -33,6 +35,10 @@ public class ClassObfuscator {
         ArrayList<String> classes = getClassName();
 
         for (String s : classList) {
+
+            if(!s.contains("Main"))
+                continue;
+
             File file = new File(s);
             String className = getClassNameFromFilePath(file.getName());
 
@@ -129,6 +135,11 @@ public class ClassObfuscator {
             List<MethodDeclaration> methods = clas.getMethods();
             if (!methods.isEmpty()) {
                 for (MethodDeclaration method : methods) {
+
+                    if(method.getType().isClassOrInterfaceType()){
+                        ClassOrInterfaceType cit=method.getType().asClassOrInterfaceType();
+                        handleClassInterfaceType(cit);
+                    }
 
                     if (compare(method.getType().asString())) {
                         ReplacementDataNode r = new ReplacementDataNode();
@@ -312,6 +323,9 @@ public class ClassObfuscator {
                 obfuscator.setArrayList(rnode);
             }
 
+            if(expr.getType().isClassOrInterfaceType())
+                handleClassInterfaceType(expr.getType().asClassOrInterfaceType());
+
             List<Expression> expList = expr.getArguments();
             if (expList != null) {
                 for (Expression e : expList)
@@ -322,7 +336,6 @@ public class ClassObfuscator {
             AssignExpr expr = exp.asAssignExpr();
             if (expr.getTarget().isFieldAccessExpr())
                 handleExpression(expr.getTarget().asFieldAccessExpr().getScope());
-
             //eg: darkMode = MainActivity.getHelloMain("dark_mode");
             handleExpression(expr.getValue());
         }
@@ -333,6 +346,10 @@ public class ClassObfuscator {
     public void handleVariables(List<VariableDeclarator> variables) {
         if (!variables.isEmpty()) {
             for (VariableDeclarator variable : variables) {
+
+                if(variable.getType().isClassOrInterfaceType())
+                    handleClassInterfaceType(variable.getType().asClassOrInterfaceType());
+
                 String vtype = variable.getType().asString();
 
                 int vstart_line_num = variable.getType().getRange().get().begin.line;
@@ -382,6 +399,15 @@ public class ClassObfuscator {
             rnode.setReplacementString(getHexValue(name));
             obfuscator.setArrayList(rnode);
         }
+
+        NodeList<Type> args = cit.getTypeArguments().orElse(null);
+        if(args!=null){
+            for(Type t:args){
+                if(t.isClassOrInterfaceType())
+                    handleClassInterfaceType(t.asClassOrInterfaceType());
+            }
+        }
+
     }
 
     /*********************************************/
