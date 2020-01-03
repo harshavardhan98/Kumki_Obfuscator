@@ -57,7 +57,7 @@ public class ClassObfuscator {
                 e.printStackTrace();
             }
 
-            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
+            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
 
@@ -338,6 +338,10 @@ public class ClassObfuscator {
             VariableDeclarationExpr vdexp = exp.asVariableDeclarationExpr();
             List<VariableDeclarator> variables = vdexp.getVariables();
             handleVariables(variables);
+
+        } else if (exp.isEnclosedExpr()) {
+            EnclosedExpr expr = exp.asEnclosedExpr();
+            handleExpression(expr.getInner());
 
         } else if (exp.isCastExpr()) {
             CastExpr expr = exp.asCastExpr();
