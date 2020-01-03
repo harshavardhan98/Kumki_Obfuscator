@@ -8,16 +8,12 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExplicitConstructorInvocationStmt;
-import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import model.Obfuscator;
 import model.ReplacementDataNode;
-import model.Scope;
 
-import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +21,6 @@ import java.util.List;
 import static utils.CommonUtils.*;
 import static utils.Constants.classList;
 import static utils.FileOperation.getClassNameFromFilePath;
-import static utils.FileOperation.renameFile;
 
 public class ClassObfuscator {
 
@@ -54,7 +49,7 @@ public class ClassObfuscator {
                 e.printStackTrace();
             }
 
-            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
+            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
 
@@ -133,8 +128,8 @@ public class ClassObfuscator {
             if (!methods.isEmpty()) {
                 for (MethodDeclaration method : methods) {
 
-                    if(method.getType().isClassOrInterfaceType()){
-                        ClassOrInterfaceType cit=method.getType().asClassOrInterfaceType();
+                    if (method.getType().isClassOrInterfaceType()) {
+                        ClassOrInterfaceType cit = method.getType().asClassOrInterfaceType();
                         handleClassInterfaceType(cit);
                     }
 
@@ -164,8 +159,8 @@ public class ClassObfuscator {
         }
     }
 
-    public void handleBlockStmt(BlockStmt block){
-        if(block == null)
+    public void handleBlockStmt(BlockStmt block) {
+        if (block == null)
             return;
 
         List<Statement> stList = block.getStatements();
@@ -184,6 +179,7 @@ public class ClassObfuscator {
         handleExpressionStatement(statement);
         handleExplicitConstructorInvocationStmt(statement);
         handleIfStatement(statement);
+        handleSwitchStatement(statement);
         handleBlockStatement(statement);
     }
 
@@ -193,11 +189,34 @@ public class ClassObfuscator {
         if (st == null || !st.isIfStmt())
             return;
 
+        Expression condition = st.asIfStmt().getCondition();
+        handleExpression(condition);
+
         Statement thenStmt = st.asIfStmt().getThenStmt();
         handleStatement(thenStmt);
 
         Statement elseStmt = st.asIfStmt().getElseStmt().orElse(null);
         handleStatement(elseStmt);
+    }
+
+    public void handleSwitchStatement(Statement st) {
+        if (st == null || !st.isSwitchStmt())
+            return;
+
+        SwitchStmt switchStmt = st.asSwitchStmt();
+        handleExpression(switchStmt.getSelector());
+
+        List<SwitchEntryStmt> stList = switchStmt.getEntries();
+        if (stList != null) {
+            for (SwitchEntryStmt set : stList) {
+                handleExpression(set.getLabel().orElse(null));
+                List<Statement> expst = set.getStatements();
+                if (!expst.isEmpty()) {
+                    for (Statement est : expst)
+                        handleStatement(est);
+                }
+            }
+        }
     }
 
     public void handleBlockStatement(Statement statement) {
@@ -211,7 +230,7 @@ public class ClassObfuscator {
         }
     }
 
-    public void handleExpressionStatement(Statement st){
+    public void handleExpressionStatement(Statement st) {
         if (st == null || !st.isExpressionStmt())
             return;
 
@@ -219,7 +238,7 @@ public class ClassObfuscator {
         handleExpression(exp);
     }
 
-    public void handleExplicitConstructorInvocationStmt(Statement st){
+    public void handleExplicitConstructorInvocationStmt(Statement st) {
         if (st == null || !st.isExplicitConstructorInvocationStmt())
             return;
 
@@ -244,7 +263,7 @@ public class ClassObfuscator {
 
         } else if (exp.isClassExpr()) {
             ClassExpr expr = exp.asClassExpr();
-            if(expr.getType().isClassOrInterfaceType())
+            if (expr.getType().isClassOrInterfaceType())
                 handleClassInterfaceType(expr.getType().asClassOrInterfaceType());
 
         } else if (exp.isMethodCallExpr()) {
@@ -258,6 +277,10 @@ public class ClassObfuscator {
             //Static method calls
             exp = methodCall.getScope().orElse(null);
             handleExpression(exp);
+
+        } else if (exp.isUnaryExpr()) {
+            UnaryExpr expr = exp.asUnaryExpr();
+            handleExpression(expr.getExpression());
 
         } else if (exp.isBinaryExpr()) {
             BinaryExpr expr = exp.asBinaryExpr();
@@ -320,7 +343,7 @@ public class ClassObfuscator {
                 obfuscator.setArrayList(rnode);
             }
 
-            if(expr.getType().isClassOrInterfaceType())
+            if (expr.getType().isClassOrInterfaceType())
                 handleClassInterfaceType(expr.getType().asClassOrInterfaceType());
 
             List<Expression> expList = expr.getArguments();
@@ -344,7 +367,7 @@ public class ClassObfuscator {
         if (!variables.isEmpty()) {
             for (VariableDeclarator variable : variables) {
 
-                if(variable.getType().isClassOrInterfaceType())
+                if (variable.getType().isClassOrInterfaceType())
                     handleClassInterfaceType(variable.getType().asClassOrInterfaceType());
 
                 String vtype = variable.getType().asString();
@@ -398,9 +421,9 @@ public class ClassObfuscator {
         }
 
         NodeList<Type> args = cit.getTypeArguments().orElse(null);
-        if(args!=null){
-            for(Type t:args){
-                if(t.isClassOrInterfaceType())
+        if (args != null) {
+            for (Type t : args) {
+                if (t.isClassOrInterfaceType())
                     handleClassInterfaceType(t.asClassOrInterfaceType());
             }
         }
