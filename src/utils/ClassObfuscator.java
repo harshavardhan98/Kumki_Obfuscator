@@ -21,6 +21,7 @@ import java.util.List;
 import static utils.CommonUtils.*;
 import static utils.Constants.classList;
 import static utils.FileOperation.getClassNameFromFilePath;
+import static utils.FileOperation.renameFile;
 
 public class ClassObfuscator {
 
@@ -42,14 +43,21 @@ public class ClassObfuscator {
 
                 obfuscator = new Obfuscator();
                 obfuscator.setCurrentFile(file);
+
+                // handling import statements
+                for (int i = 0; i < cu.getImports().size(); i++) {
+                    String imports = cu.getImports().get(i).getName().toString();
+                    if(imports.startsWith(getBasePackage()))
+                        handleImport(cu.getImports().get(i).getName(), classes);
+                }
+
                 handleClass(clas);
-                handleImport(cu, classes);
                 obfuscator.replaceInFiles();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
+            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
 
@@ -489,7 +497,7 @@ public class ClassObfuscator {
     }
 
     public void handleClassInterfaceType(ClassOrInterfaceType cit) {
-        if(cit == null)
+        if (cit == null)
             return;
 
         String name = cit.getName().getIdentifier();
@@ -521,44 +529,33 @@ public class ClassObfuscator {
 
     /*********************************************/
 
-    public void handleImport(CompilationUnit cu, ArrayList<String> replacementPattern) {
-        //com.example.dsc_onboarding.Adapter.viewPageAdapter -> com.example.dsc_onboarding.Adapter.xxx
 
-        for (int i = 0; i < cu.getImports().size(); i++) {
-            Name nm = cu.getImports().get(i).getName().getQualifier().orElse(null);
-            boolean isAsterisk = cu.getImports().get(i).isAsterisk();
+    public void handleImport(Name name, ArrayList<String> replacementPattern) {
 
+        if (name == null)
+            return;
 
-            if (!isAsterisk) {
-                try {
-                    String identifier = cu.getImports().get(i).getName().getIdentifier();
+        for (String str : replacementPattern) {
+            if (str.equals(name.getIdentifier())) {
+                TokenRange tokenRange = name.getTokenRange().orElse(null);
+                if (tokenRange != null) {
+                    Range range = tokenRange.getEnd().getRange().orElse(null);
+                    if (range != null) {
+                        int start_line_no = range.begin.line;
+                        int start_col_no = range.begin.column;
+                        int end_col_no = range.end.column;
 
-                    for (String str : replacementPattern) {
-                        if (str.equals(identifier)) {
-                            TokenRange tokenRange = cu.getImports().get(i).getName().getTokenRange().orElse(null);
-                            if (tokenRange != null) {
-                                Range range = tokenRange.getEnd().getRange().orElse(null);
-                                if (range != null) {
-                                    int start_line_no = range.begin.line;
-                                    int start_col_no = range.begin.column;
-                                    int end_col_no = range.end.column;
-
-                                    ReplacementDataNode rnode = new ReplacementDataNode();
-                                    rnode.setLineNo(start_line_no);
-                                    rnode.setStartColNo(start_col_no);
-                                    rnode.setEndColNo(end_col_no);
-                                    rnode.setReplacementString(getHexValue(identifier));
-                                    obfuscator.setArrayList(rnode);
-                                }
-                            }
-                        }
+                        ReplacementDataNode rnode = new ReplacementDataNode();
+                        rnode.setLineNo(start_line_no);
+                        rnode.setStartColNo(start_col_no);
+                        rnode.setEndColNo(end_col_no);
+                        rnode.setReplacementString(getHexValue(name.getIdentifier()));
+                        obfuscator.setArrayList(rnode);
                     }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
-
         }
+
+        handleImport(name.getQualifier().orElse(null), replacementPattern);
     }
 }
