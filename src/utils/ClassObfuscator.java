@@ -437,10 +437,10 @@ public class ClassObfuscator {
                 rnode.setEndColNo(vend_col_num);
                 rnode.setReplacementString(getHexValue(name));
                 obfuscator.setArrayList(rnode);
-            } else {
-                //eg: m.behaviour(Mammal.count);
-                handleExpression(exp.asFieldAccessExpr().getScope());
             }
+            //eg: m.behaviour(Mammal.count);
+            handleExpression(exp.asFieldAccessExpr().getScope());
+
         } else if (exp.isNameExpr()) {
             String name = exp.asNameExpr().getName().getIdentifier();
             int vstart_line_num = exp.getRange().get().begin.line;
@@ -506,6 +506,16 @@ public class ClassObfuscator {
             if (!acl.isEmpty()) {
                 for (ArrayCreationLevel ac : acl)
                     handleExpression(ac.getDimension().orElse(null));
+            }
+
+            handleExpression(expr.getInitializer().orElse(null));
+
+        } else if (exp.isArrayInitializerExpr()) {
+            ArrayInitializerExpr expr = exp.asArrayInitializerExpr();
+            List<Expression> exList = expr.getValues();
+            if(!exList.isEmpty()){
+                for(Expression e:exList)
+                    handleExpression(e);
             }
         }
     }
