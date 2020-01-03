@@ -1,6 +1,7 @@
 package utils;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.Position;
 import com.github.javaparser.Range;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
@@ -124,6 +125,23 @@ public class ClassObfuscator {
             List<MethodDeclaration> methods = clas.getMethods();
             if (!methods.isEmpty()) {
                 for (MethodDeclaration method : methods) {
+
+                    if (compare(method.getType().asString())) {
+                        ReplacementDataNode r = new ReplacementDataNode();
+                        Range range = method.getType().getRange().orElse(null);
+
+                        if (range != null) {
+                            Position begin = range.begin;
+                            Position end = range.end;
+                            r.setLineNo(begin.line);
+                            r.setStartColNo(begin.column);
+                            r.setEndColNo(end.column);
+                            r.setReplacementString(getHexValue(method.getType().asString()));
+                            obfuscator.setArrayList(r);
+                        }
+
+                    }
+
                     BlockStmt block = method.getBody().orElse(null);
                     handleBlockStmt(block);
 
