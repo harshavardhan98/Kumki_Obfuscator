@@ -23,6 +23,7 @@ import java.util.List;
 import static utils.CommonUtils.*;
 import static utils.Constants.classList;
 import static utils.FileOperation.getClassNameFromFilePath;
+import static utils.FileOperation.renameFile;
 
 public class ClassObfuscator {
 
@@ -58,7 +59,7 @@ public class ClassObfuscator {
                 e.printStackTrace();
             }
 
-            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
+            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
 
@@ -223,15 +224,26 @@ public class ClassObfuscator {
         handleTryCatchStatement(statement);
         handleForStatement(statement);
         handleForEachStatement(statement);
+        handleDoWhileStatement(statement);
         handleReturnStatement(statement);
         handleSynchronisedStatement(statement);
     }
 
     /*********************************************/
 
-    public void handleSynchronisedStatement(Statement st){
+    private void handleDoWhileStatement(Statement st){
+        if(st==null || !st.isDoStmt())
+            return;
+
+        handleStatement(st.asDoStmt().getBody());
+        handleExpression(st.asDoStmt().getCondition());
+    }
+
+    private void handleSynchronisedStatement(Statement st){
         if(st==null || !st.isSynchronizedStmt())
             return;
+
+        handleExpression(st.asSynchronizedStmt().getExpression());
         handleStatement(st.asSynchronizedStmt().getBody());
     }
 
