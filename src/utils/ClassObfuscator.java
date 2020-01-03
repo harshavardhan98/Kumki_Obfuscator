@@ -116,7 +116,10 @@ public class ClassObfuscator {
                     }
 
                     List<Parameter> parameterList = constructor.getParameters();
-                    handleParameter(parameterList);
+                    if (!parameterList.isEmpty()) {
+                        for (Parameter p : parameterList)
+                            handleParameter(p);
+                    }
 
                     BlockStmt block = constructor.getBody();
                     handleBlockStmt(block);
@@ -158,7 +161,12 @@ public class ClassObfuscator {
 
         //Method Arguments
         List<Parameter> parameterList = method.getParameters();
-        handleParameter(parameterList);
+
+        if (!parameterList.isEmpty()) {
+            for (Parameter p : parameterList)
+                handleParameter(p);
+        }
+
     }
 
     public void handleBlockStmt(BlockStmt block) {
@@ -183,9 +191,64 @@ public class ClassObfuscator {
         handleIfStatement(statement);
         handleSwitchStatement(statement);
         handleBlockStatement(statement);
+        handleTryCatchStatement(statement);
+        handleForStatement(statement);
+        handleForEachStatement(statement);
     }
 
     /*********************************************/
+
+    private void handleTryCatchStatement(Statement st) {
+
+        if (st == null || !st.isTryStmt())
+            return;
+
+        handleStatement(st.asTryStmt().getTryBlock());
+
+        List<CatchClause> l = st.asTryStmt().getCatchClauses();
+        if (!l.isEmpty()) {
+            for (CatchClause i : l) {
+                handleStatement(i.getBody());
+                handleParameter(i.getParameter());
+            }
+        }
+    }
+
+    private void handleForStatement(Statement st) {
+
+        if (st == null || !st.isForStmt())
+            return;
+
+        NodeList<Expression> n1 = st.asForStmt().getInitialization();
+        if (n1.isNonEmpty()) {
+            for (Expression e : n1)
+                handleExpression(e);
+        }
+
+        handleExpression(st.asForStmt().getCompare().orElse(null));
+
+        NodeList<Expression> n2 = st.asForStmt().getUpdate();
+        if (n2.isNonEmpty()) {
+            for (Expression e : n2)
+                handleExpression(e);
+        }
+
+        Statement forStmt = st.asForStmt().getBody();
+        handleStatement(forStmt);
+    }
+
+    private void handleForEachStatement(Statement st) {
+        if (st == null || !st.isForeachStmt())
+            return;
+
+        NodeList<VariableDeclarator> variableDeclarators = st.asForeachStmt().getVariable().getVariables();
+        handleVariables(variableDeclarators);
+        handleExpression(st.asForeachStmt().getIterable());
+        Statement forEach = st.asForeachStmt().getBody();
+        handleStatement(forEach);
+    }
+
+
 
     public void handleIfStatement(Statement st) {
         if (st == null || !st.isIfStmt())
@@ -402,15 +465,15 @@ public class ClassObfuscator {
         }
     }
 
-    public void handleParameter(List<Parameter> parameterList) {
-        if (parameterList != null) {
-            for (Parameter p : parameterList) {
-                if (p.getType().isClassOrInterfaceType()) {
-                    ClassOrInterfaceType type = p.getType().asClassOrInterfaceType();
-                    handleClassInterfaceType(type);
-                }
-            }
+    public void handleParameter(Parameter p) {
+
+        if (p == null)
+            return;
+        if (p.getType().isClassOrInterfaceType()) {
+            ClassOrInterfaceType type = p.getType().asClassOrInterfaceType();
+            handleClassInterfaceType(type);
         }
+
     }
 
     public void handleClassInterfaceType(ClassOrInterfaceType cit) {
