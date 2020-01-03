@@ -57,7 +57,7 @@ public class ClassObfuscator {
                 e.printStackTrace();
             }
 
-            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
+            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
 
@@ -209,9 +209,19 @@ public class ClassObfuscator {
         handleTryCatchStatement(statement);
         handleForStatement(statement);
         handleForEachStatement(statement);
+        handleReturnStatement(statement);
     }
 
     /*********************************************/
+
+
+    private void handleReturnStatement(Statement st){
+
+        if(st==null || !st.isReturnStmt())
+            return;
+
+        handleExpression(st.asReturnStmt().getExpression().orElse(null));
+    }
 
     private void handleTryCatchStatement(Statement st) {
 
