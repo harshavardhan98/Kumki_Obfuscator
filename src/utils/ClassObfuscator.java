@@ -4,11 +4,13 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.Position;
 import com.github.javaparser.Range;
 import com.github.javaparser.TokenRange;
+import com.github.javaparser.ast.ArrayCreationLevel;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
+import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import model.Obfuscator;
@@ -21,7 +23,6 @@ import java.util.List;
 import static utils.CommonUtils.*;
 import static utils.Constants.classList;
 import static utils.FileOperation.getClassNameFromFilePath;
-import static utils.FileOperation.renameFile;
 
 public class ClassObfuscator {
 
@@ -47,7 +48,7 @@ public class ClassObfuscator {
                 // handling import statements
                 for (int i = 0; i < cu.getImports().size(); i++) {
                     String imports = cu.getImports().get(i).getName().toString();
-                    if(imports.startsWith(getBasePackage()))
+                    if (imports.startsWith(getBasePackage()))
                         handleImport(cu.getImports().get(i).getName(), classes);
                 }
 
@@ -57,7 +58,7 @@ public class ClassObfuscator {
                 e.printStackTrace();
             }
 
-            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
+            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
         }
     }
 
@@ -156,6 +157,11 @@ public class ClassObfuscator {
             handleClassInterfaceType(cit);
         }
 
+        if (method.getType().isArrayType()) {
+            ArrayType cit = method.getType().asArrayType();
+            handleArrayType(cit);
+        }
+
         if (compare(method.getType().asString())) {
             ReplacementDataNode r = new ReplacementDataNode();
             Range range = method.getType().getRange().orElse(null);
@@ -184,6 +190,14 @@ public class ClassObfuscator {
 
     }
 
+    public void handleArrayType(ArrayType cit) {
+        if (cit == null)
+            return;
+
+        if (cit.getComponentType().isClassOrInterfaceType())
+            handleClassInterfaceType(cit.getComponentType().asClassOrInterfaceType());
+    }
+
     public void handleBlockStmt(BlockStmt block) {
         if (block == null)
             return;
@@ -210,14 +224,20 @@ public class ClassObfuscator {
         handleForStatement(statement);
         handleForEachStatement(statement);
         handleReturnStatement(statement);
+        handleSynchronisedStatement(statement);
     }
 
     /*********************************************/
 
+    public void handleSynchronisedStatement(Statement st){
+        if(st==null || !st.isSynchronizedStmt())
+            return;
+        handleStatement(st.asSynchronizedStmt().getBody());
+    }
 
-    private void handleReturnStatement(Statement st){
+    private void handleReturnStatement(Statement st) {
 
-        if(st==null || !st.isReturnStmt())
+        if (st == null || !st.isReturnStmt())
             return;
 
         handleExpression(st.asReturnStmt().getExpression().orElse(null));
@@ -464,6 +484,17 @@ public class ClassObfuscator {
                 handleExpression(expr.getTarget().asFieldAccessExpr().getScope());
             //eg: darkMode = MainActivity.getHelloMain("dark_mode");
             handleExpression(expr.getValue());
+
+        } else if (exp.isArrayCreationExpr()) {
+            ArrayCreationExpr expr = exp.asArrayCreationExpr();
+            if (expr.getElementType().isClassOrInterfaceType())
+                handleClassInterfaceType(expr.getElementType().asClassOrInterfaceType());
+
+            List<ArrayCreationLevel> acl = expr.getLevels();
+            if (!acl.isEmpty()) {
+                for (ArrayCreationLevel ac : acl)
+                    handleExpression(ac.getDimension().orElse(null));
+            }
         }
     }
 
