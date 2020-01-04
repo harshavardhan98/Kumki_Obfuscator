@@ -225,7 +225,7 @@ public class CommonUtils {
                 myNameChars[i] = '.';
         }
 
-        packageName = String.valueOf(myNameChars);
+        String packageName = String.valueOf(myNameChars);
         return packageName;
     }
 

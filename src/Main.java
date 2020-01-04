@@ -34,8 +34,9 @@ public class Main {
 
         //CommentObfuscation();
         //MethodObfuscation();
+        PackageObfuscation();
         ClassObfuscation();
-        //PackageObfuscation();
+
     }
 
     /***********************************************************/
@@ -76,6 +77,8 @@ public class Main {
         ArrayList<String> predefinedClassList = loadPredefinedClassList();
 
         ArrayList<FileSystem> fsTemp = parseFileStructureJson(projectDirectory + (jsonFileNameCount - 1) + fileStructureJsonPath);
+        folderList=new ArrayList<>();
+        classList=new ArrayList<>();
         getFilesList(fsTemp);
 
         for (int i = 0; i < classList.size(); i++) {
@@ -87,6 +90,7 @@ public class Main {
             if (Collections.binarySearch(predefinedClassList, folderList.get(i)) >= 0)
                 folderList.remove(i--);
         }
+        System.out.print("");
     }
 
     /***********************************************************/
