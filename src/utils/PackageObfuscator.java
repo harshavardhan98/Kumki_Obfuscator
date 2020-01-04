@@ -11,6 +11,7 @@ import model.ReplacementDataNode;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static utils.CommonUtils.getHexValue;
 import static utils.CommonUtils.getPackageName;
@@ -25,13 +26,26 @@ public class PackageObfuscator {
     public void obfuscate() {
 
         ArrayList<String> renameData = getPackageName();
+        ArrayList<String> replacementPattern=new ArrayList<>();
+
+        for(String i:renameData){
+            String arr[]=i.split("\\.");
+            replacementPattern.add(arr[arr.length-1]);
+        }
+
+        Collections.sort(replacementPattern);
 
         for (String s : classList) {
             try {
+
                 File f = new File(s);
                 CompilationUnit cu = JavaParser.parse(f);
                 obfuscator = new Obfuscator();
                 obfuscator.setCurrentFile(f);
+
+                if(cu.getPackageDeclaration().orElse(null)!=null) {
+                    handlePackageDeclaration(cu.getPackageDeclaration().orElse(null).getName(), replacementPattern);
+                }
                 handleImport(cu, renameData);
                 obfuscator.replaceInFiles();
             } catch (Exception e) {
@@ -60,7 +74,7 @@ public class PackageObfuscator {
                     temp += "." + identifier;
 
                 for (String str : packageToRename) {
-                    if (str.compareTo(temp) == 0) {
+                    if (str.trim().compareTo(temp) == 0) {
                         try {
                             if (isAsterisk) {
                                 TokenRange tokenRange = cu.getImports().get(i).getName().getTokenRange().orElse(null);
@@ -80,7 +94,7 @@ public class PackageObfuscator {
         }
     }
 
-    public void handleRange(TokenRange tokenRange, String identifier) {
+    private void handleRange(TokenRange tokenRange, String identifier) {
         if (tokenRange != null) {
             Range range = tokenRange.getEnd().getRange().orElse(null);
             if (range != null) {
@@ -96,5 +110,30 @@ public class PackageObfuscator {
                 obfuscator.setArrayList(rnode);
             }
         }
+    }
+
+    private void handlePackageDeclaration(Name name,ArrayList<String> replacementPattern){
+
+        if(name!=null){
+            if(name.getIdentifier()!=null && Collections.binarySearch(replacementPattern,name.getIdentifier())>=0){
+                TokenRange tokenRange=name.getTokenRange().orElse(null);
+                if(tokenRange!=null){
+                    Range range=tokenRange.getEnd().getRange().orElse(null);
+
+                    if(range!=null)
+                    {
+                        ReplacementDataNode r=new ReplacementDataNode();
+                        r.setLineNo(range.begin.line);
+                        r.setStartColNo(range.begin.column);
+                        r.setEndColNo(range.end.column);
+                        r.setReplacementString(getHexValue(name.getIdentifier()));
+                        obfuscator.setArrayList(r);
+                    }
+                }
+            }
+
+            handlePackageDeclaration(name.getQualifier().orElse(null),replacementPattern);
+        }
+
     }
 }
