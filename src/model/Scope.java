@@ -66,4 +66,14 @@ public class Scope {
         else
             return null;
     }
+
+    public boolean checkIfGivenVariableExistsInScope(String identifierName){
+        if(data.containsKey(identifierName))
+            return true;
+
+        if(parentScope!=null)
+            return parentScope.checkIfGivenVariableExistsInScope(identifierName);
+        else
+            return false;
+    }
 };
