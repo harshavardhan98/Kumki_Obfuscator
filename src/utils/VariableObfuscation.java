@@ -25,9 +25,10 @@ import static utils.FileOperation.getClassNameFromFilePath;
 /*
     getViewById(R.id.name) -> R.id.btn_testing must never be changed
     Camel.b -> then b must be static and need to add b to the global scope
-    inner classes
+    Student arr[]; -> java parser library error
+    constant obfuscation using unicode character
+    need to implement array access expression in class obfuscator
  */
-
 
 public class VariableObfuscation {
 
@@ -50,7 +51,7 @@ public class VariableObfuscation {
                 obfuscator.setCurrentFile(f);
                 handleClass(clas);
                 System.out.print("");
-                obfuscator.replaceInFiles();
+               obfuscator.replaceInFiles();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -80,10 +81,8 @@ public class VariableObfuscation {
                         handleMethodDeclaration(method,global_scope);
                     }
                     else if(bd.isClassOrInterfaceDeclaration()){
-
+                        handleClass(bd.asClassOrInterfaceDeclaration());
                     }
-
-
                 }
             }
         }
@@ -169,7 +168,10 @@ public class VariableObfuscation {
 
         }else if(exp.isFieldAccessExpr()){
 
-            SimpleName sname = exp.asFieldAccessExpr().getName();
+            FieldAccessExpr fieldAccessExpr=exp.asFieldAccessExpr();
+            handleExpression(fieldAccessExpr.getScope(),parentScope);
+
+            SimpleName sname = fieldAccessExpr.getName();
             String name = sname.getIdentifier();
             int vstart_line_num = sname.getRange().get().begin.line;
             int vstart_col_num = sname.getRange().get().begin.column;
@@ -220,6 +222,35 @@ public class VariableObfuscation {
                     if (e.isMethodDeclaration())
                         handleMethodDeclaration(e.asMethodDeclaration(),parentScope);
             }
+        }else if (exp.isClassExpr()) {
+            ClassExpr expr = exp.asClassExpr();
+            if (expr.getType().isClassOrInterfaceType())
+                handleClassInterfaceType(expr.getType().asClassOrInterfaceType());
+        }else if (exp.isEnclosedExpr()) {
+            EnclosedExpr expr = exp.asEnclosedExpr();
+            handleExpression(expr.getInner(),parentScope);
+        }else if(exp.isArrayAccessExpr()){
+            ArrayAccessExpr arrayAccessExpr=exp.asArrayAccessExpr();
+            handleExpression(arrayAccessExpr.getName(),parentScope);
+        }else if (exp.isArrayInitializerExpr()) {
+            ArrayInitializerExpr expr = exp.asArrayInitializerExpr();
+            List<Expression> exList = expr.getValues();
+            if(!exList.isEmpty()){
+                for(Expression e:exList)
+                    handleExpression(e,parentScope);
+            }
+        }else if (exp.isArrayCreationExpr()) {
+            ArrayCreationExpr expr = exp.asArrayCreationExpr();
+            if (expr.getElementType().isClassOrInterfaceType())
+                handleClassInterfaceType(expr.getElementType().asClassOrInterfaceType());
+
+            List<ArrayCreationLevel> acl = expr.getLevels();
+            if (!acl.isEmpty()) {
+                for (ArrayCreationLevel ac : acl)
+                    handleExpression(ac.getDimension().orElse(null),parentScope);
+            }
+
+            handleExpression(expr.getInitializer().orElse(null),parentScope);
         }
     }
 
