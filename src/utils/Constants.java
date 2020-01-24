@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Constants {
-    //public static String projectDirectory = "/Users/harshavardhanp/final_year_project/fyp/kumkiTest/";
     //public static String projectDirectory = "C:\\Users\\Logesh Dinakaran\\OneDrive\\Desktop\\kumkiTest\\";
+    //public static String projectDirectory = "/Users/harshavardhanp/final_year_project/fyp/kumkiTest/";
     //public static String packageName = "com" + File.separator + "example" + File.separator + "dsc_onboarding" + File.separator;
     public static String projectDirectory = "/Users/harshavardhanp/final_year_project/fyp/ssn-app/";
     public static String packageName = "in" + File.separator + "edu" + File.separator + "ssn" + File.separator+"ssnapp" + File.separator;
@@ -29,6 +29,7 @@ public class Constants {
     public static ArrayList<String> classList = new ArrayList<>();
     public static ArrayList<String> folderList = new ArrayList<>();
     public static Map<String, ArrayList<String>> methodMap = new HashMap<String, ArrayList<String>>();
+    public static dictionary globalDictionary=new dictionary();
 
     /**************************************************************************/
 }

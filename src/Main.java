@@ -12,6 +12,7 @@ import model.ReplacementDataNode;
 import utils.ClassObfuscator;
 import utils.MethodObfuscator;
 import utils.PackageObfuscator;
+import utils.VariableObfuscation;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -33,9 +34,11 @@ public class Main {
         getDependencyData();
 
         //CommentObfuscation();
+        VariableObfuscation();
+
         //MethodObfuscation();
-        PackageObfuscation();
-        ClassObfuscation();
+        //PackageObfuscation();
+        //ClassObfuscation();
 
     }
 
@@ -153,6 +156,11 @@ public class Main {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void VariableObfuscation(){
+        VariableObfuscation vo=new VariableObfuscation();
+        vo.obfuscate();
     }
 
     /***********************************************************/

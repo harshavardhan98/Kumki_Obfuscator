@@ -31,6 +31,9 @@ import static utils.FileOperation.getClassNameFromFilePath;
 
 public class VariableObfuscation {
 
+    enum Mode{
+      INTEGER,STRING,DOUBLE,CHAR;
+    };
     private Obfuscator obfuscator;
     ArrayList<String> predefinedClassList;
 
@@ -39,8 +42,8 @@ public class VariableObfuscation {
         for (String s : classList) {
             try {
                 File f = new File(s);
-                if(!f.getName().contains("Main"))
-                    continue;
+//                if(!f.getName().contains("Main"))
+//                    continue;
                 CompilationUnit cu = JavaParser.parse(f);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
                 if (clas == null)
@@ -275,28 +278,73 @@ public class VariableObfuscation {
 
             handleExpression(expr.getInitializer().orElse(null),parentScope);
         }
+//        else if(exp.isStringLiteralExpr()){
+//
+//            StringLiteralExpr sExpr=exp.asStringLiteralExpr();
+//            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
+//            replacementDataNode.setReplacementString(getUnicodeExpression(sExpr.getValue(),Mode.STRING));
+//            replacementDataNode.setLineNo(sExpr.getRange().get().begin.line);
+//            replacementDataNode.setStartColNo(sExpr.getRange().get().begin.column);
+//            replacementDataNode.setEndColNo(sExpr.getRange().get().end.column);
+//            obfuscator.setArrayList(replacementDataNode);
+//
+//        }else if(exp.isIntegerLiteralExpr()){
+//
+//            IntegerLiteralExpr iExpr=exp.asIntegerLiteralExpr();
+//            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
+//            replacementDataNode.setReplacementString(getUnicodeExpression(iExpr.getValue(),Mode.INTEGER));
+//            replacementDataNode.setLineNo(iExpr.getRange().get().begin.line);
+//            replacementDataNode.setStartColNo(iExpr.getRange().get().begin.column);
+//            replacementDataNode.setEndColNo(iExpr.getRange().get().end.column);
+//            obfuscator.setArrayList(replacementDataNode);
+//
+//        }else if(exp.isDoubleLiteralExpr()){
+//
+//            DoubleLiteralExpr dExpr=exp.asDoubleLiteralExpr();
+//            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
+//            replacementDataNode.setReplacementString(getUnicodeExpression(dExpr.getValue(),Mode.DOUBLE));
+//            replacementDataNode.setLineNo(dExpr.getRange().get().begin.line);
+//            replacementDataNode.setStartColNo(dExpr.getRange().get().begin.column);
+//            replacementDataNode.setEndColNo(dExpr.getRange().get().end.column);
+//            obfuscator.setArrayList(replacementDataNode);
+//
+//        }else if(exp.isCharLiteralExpr()){
+//            CharLiteralExpr cExpr=exp.asCharLiteralExpr();
+//            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
+//            replacementDataNode.setReplacementString(getUnicodeExpression(cExpr.getValue(),Mode.INTEGER));
+//            replacementDataNode.setLineNo(cExpr.getRange().get().begin.line);
+//            replacementDataNode.setStartColNo(cExpr.getRange().get().begin.column);
+//            replacementDataNode.setEndColNo(cExpr.getRange().get().end.column);
+//            obfuscator.setArrayList(replacementDataNode);
+//        }
     }
 
     public void handleMethodDeclaration(MethodDeclaration method,Scope parentScope) {
 
         BlockStmt block = method.getBody().orElse(null);
-        List<Statement> stList = block.getStatements();
 
-        Scope methodScope = new Scope();
-        methodScope.setScope(parentScope);
+        if(block!=null && block.getStatements().size()>0){
 
-        List<Parameter> parametersList=method.getParameters();
-        if(!parametersList.isEmpty()){
-            for(Parameter p:parametersList)
-                handleParameter(p,methodScope);
-        }
+            List<Statement> stList = block.getStatements();
 
-        if (!stList.isEmpty()) {
-            for (int i = 0; i < stList.size(); i++) {
-                Statement st = stList.get(i);
-                handleStatement(st, methodScope);
+            Scope methodScope = new Scope();
+            methodScope.setScope(parentScope);
+
+            List<Parameter> parametersList=method.getParameters();
+            if(!parametersList.isEmpty()){
+                for(Parameter p:parametersList)
+                    handleParameter(p,methodScope);
             }
+
+            if (!stList.isEmpty()) {
+                for (int i = 0; i < stList.size(); i++) {
+                    Statement st = stList.get(i);
+                    handleStatement(st, methodScope);
+                }
+            }
+
         }
+
     }
 
     private void handleReturnStatement(Statement st,Scope parentScope) {
@@ -519,6 +567,31 @@ public class VariableObfuscation {
 
     /*********************************************/
 
+    public String getUnicodeExpression(String val,Mode m){
+
+        String str="";
+
+        if(m==Mode.INTEGER||m==Mode.DOUBLE) {
+            return toUnicode(val);
+        }
+        else if(m==Mode.STRING){
+            val="\""+val+"\"";
+            return toUnicode(val);
+        }
+
+        return str;
+    }
+    public String toUnicode(String uString) {
+        String unicode = "";
+        for (char c: uString.toCharArray()) {
+            unicode += toUnicode(c);
+        }
+        return unicode;
+    }
+
+    public String toUnicode(Character uChar) {
+        return "\\u" + Integer.toHexString(uChar | 0x10000).substring(1);
+    }
 
 
 }

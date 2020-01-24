@@ -26,6 +26,19 @@ public class CommonUtils {
     /****************************************************************************/
     //Vignere Cipher
     public static String getHexValue(String value) {
+
+//        String temp=globalDictionary.getIdentifier(value);
+//        System.out.println(temp+" "+temp.length());
+//
+//        for(int i=0;i<temp.length();i++)
+//            if(!Character.isJavaIdentifierPart(temp.charAt(i))){
+//                System.out.println(value);
+//                System.out.println(globalDictionary.lastString);
+//            }
+//
+//        return temp;
+
+
         value = value.toLowerCase();
         String keyValue = Constants.keyValue;
         String tempKey = keyValue;
@@ -48,6 +61,7 @@ public class CommonUtils {
         }
 
         return text;
+
     }
 
     /****************************************************************************/
@@ -138,8 +152,7 @@ public class CommonUtils {
                     File file = new File(f.getPath() + File.separator + f.getName());
                     CompilationUnit cu = JavaParser.parse(file);
                     cu.accept(new MethodVisitor(), file.getAbsolutePath());
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (Exception e) {e.printStackTrace();
                 }
             } else if (f.getType().equals("directory")) {
                 String path = f.getPath() + File.separator + f.getName();
