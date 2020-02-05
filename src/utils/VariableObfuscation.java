@@ -23,7 +23,11 @@ import static utils.FileOperation.getClassNameFromFilePath;
 
 /*
     getViewById(R.id.name) -> R.id.btn_testing must never be changed
-    Camel.b -> then b must be static and need to add b to the global scope
+    Camel.b
+    -> if Camel is a class then b must be static and need to add b to the global scope
+    -> if Camel is a member of a class then b must be a public data member, need to change the b also
+
+
     Student arr[]; -> java parser library error
     constant obfuscation using unicode character
     need to implement array access expression in class obfuscator
@@ -42,8 +46,9 @@ public class VariableObfuscation {
         for (String s : classList) {
             try {
                 File f = new File(s);
-//                if(!f.getName().contains("Main"))
-//                    continue;
+                if(!f.getName().contains("BusRoutes"))
+                    continue;
+
                 CompilationUnit cu = JavaParser.parse(f);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
                 if (clas == null)
@@ -51,20 +56,33 @@ public class VariableObfuscation {
 
                 obfuscator = new Obfuscator();
                 obfuscator.setCurrentFile(f);
-                handleClass(clas);
+
+                Scope global_scope = new Scope();
+                global_scope.setScope(null);
+                handleClass(clas,global_scope);
                 System.out.print("");
-               obfuscator.replaceInFiles();
+
+                obfuscator.replaceInFiles();
+               System.out.println("last file replaced in variable obfuscation is "+f.getName());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void handleClass(ClassOrInterfaceDeclaration clas) {
+    public void handleClass(ClassOrInterfaceDeclaration clas,Scope global_scope) {
 
         if (clas != null) {
-            Scope global_scope = new Scope();
-            global_scope.setScope(null);
+//            Scope global_scope = new Scope();
+//            global_scope.setScope(null);
+
+            List<FieldDeclaration> global_fields = clas.getFields();
+            if (!global_fields.isEmpty()) {
+                for (FieldDeclaration field : global_fields) {
+                    List<VariableDeclarator> global_variables = field.getVariables();
+                    handleVariables(global_variables, global_scope);
+                }
+            }
 
             //Constructors
             List<ConstructorDeclaration> constructors = clas.getConstructors();
@@ -82,13 +100,6 @@ public class VariableObfuscation {
                 }
             }
 
-            List<FieldDeclaration> global_fields = clas.getFields();
-            if (!global_fields.isEmpty()) {
-                for (FieldDeclaration field : global_fields) {
-                    List<VariableDeclarator> global_variables = field.getVariables();
-                    handleVariables(global_variables, global_scope);
-                }
-            }
 
             List<BodyDeclaration<?>> members = clas.getMembers();
             if (!members.isEmpty()) {
@@ -99,7 +110,7 @@ public class VariableObfuscation {
                         handleMethodDeclaration(method,global_scope);
                     }
                     else if(bd.isClassOrInterfaceDeclaration()){
-                        handleClass(bd.asClassOrInterfaceDeclaration());
+                        handleClass(bd.asClassOrInterfaceDeclaration(),global_scope);
                     }
                 }
             }
@@ -115,11 +126,12 @@ public class VariableObfuscation {
         handleBlockStatement(statement, parentScope);
         handleForStatement(statement,parentScope);
         handleForEachStatement(statement,parentScope);
+        handleWhileStatement(statement,parentScope);
+        handleDoWhileStatement(statement,parentScope);
         handleIfStatement(statement,parentScope);
         handleReturnStatement(statement,parentScope);
         handleSwitchStatement(statement,parentScope);
         handleTryCatchStatement(statement,parentScope);
-        handleDoWhileStatement(statement,parentScope);
         handleSynchronisedStatement(statement,parentScope);
         handleExplicitConstructorInvocationStmt(statement,parentScope);
     }
@@ -194,7 +206,20 @@ public class VariableObfuscation {
 
         }else if(exp.isFieldAccessExpr()){
 
+            //((NameExpr) ((FieldAccessExpr) fieldAccessExpr.getScope()).getScope()).getNameAsString()
             FieldAccessExpr fieldAccessExpr=exp.asFieldAccessExpr();
+
+
+            //R.layout.row -> row must not be renamed during variable obfuscation
+            if(fieldAccessExpr.getScope().isFieldAccessExpr()){
+                if(fieldAccessExpr.getScope().asFieldAccessExpr().getScope().isNameExpr()){
+                    String name=fieldAccessExpr.getScope().asFieldAccessExpr().getScope().asNameExpr().getNameAsString();
+                    if(name.equals("R"))
+                        return;
+                }
+            }
+
+
             handleExpression(fieldAccessExpr.getScope(),parentScope);
 
             SimpleName sname = fieldAccessExpr.getName();
@@ -278,6 +303,14 @@ public class VariableObfuscation {
 
             handleExpression(expr.getInitializer().orElse(null),parentScope);
         }
+        else if(exp.isConditionalExpr()){
+            ConditionalExpr conditionalExpr=exp.asConditionalExpr();
+            handleExpression(conditionalExpr.getCondition(),parentScope);
+            handleExpression(conditionalExpr.getThenExpr(),parentScope);
+            handleExpression(conditionalExpr.getElseExpr(),parentScope);
+        }
+
+
 //        else if(exp.isStringLiteralExpr()){
 //
 //            StringLiteralExpr sExpr=exp.asStringLiteralExpr();
@@ -478,6 +511,17 @@ public class VariableObfuscation {
             for (Expression e : exp)
                 handleExpression(e,parentScope);
         }
+    }
+
+    public void handleWhileStatement(Statement statement,Scope parentScope){
+
+        if(statement==null||!statement.isWhileStmt())
+            return;
+
+        WhileStmt whileStmt=statement.asWhileStmt();
+        handleExpression(whileStmt.getCondition(),parentScope);
+        handleBlockStatement(whileStmt.getBody(),parentScope);
+
     }
 
 
