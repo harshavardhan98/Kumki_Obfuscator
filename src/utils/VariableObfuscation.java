@@ -3,6 +3,7 @@ package utils;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.ArrayCreationLevel;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.*;
@@ -14,8 +15,7 @@ import model.ReplacementDataNode;
 import model.Scope;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static utils.CommonUtils.*;
 import static utils.Constants.classList;
@@ -27,6 +27,7 @@ import static utils.FileOperation.getClassNameFromFilePath;
     -> if Camel is a class then b must be static and need to add b to the global scope
     -> if Camel is a member of a class then b must be a public data member, need to change the b also
 
+    while loop without a body
 
     Student arr[]; -> java parser library error
     constant obfuscation using unicode character
@@ -42,12 +43,17 @@ public class VariableObfuscation {
     ArrayList<String> predefinedClassList;
 
     public void obfuscate(){
+
         predefinedClassList= loadPredefinedClassList();
+        Scope global_scope = new Scope();
+        global_scope.setScope(null);
+        buildGlobalSymbolTable(global_scope);
+
         for (String s : classList) {
             try {
                 File f = new File(s);
-                if(!f.getName().contains("BusRoutes"))
-                    continue;
+//                if(!f.getName().contains("GPACalculator"))
+//                    continue;
 
                 CompilationUnit cu = JavaParser.parse(f);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
@@ -56,18 +62,110 @@ public class VariableObfuscation {
 
                 obfuscator = new Obfuscator();
                 obfuscator.setCurrentFile(f);
-
-                Scope global_scope = new Scope();
-                global_scope.setScope(null);
-                handleClass(clas,global_scope);
+                Scope classScope=new Scope();
+                classScope.setScope(global_scope);
+                if(clas.getExtendedTypes().size()>0)
+                    handleExtendingClass(classScope,clas.getExtendedTypes().get(0).getName().toString());
+                handleClass(clas,classScope);
                 System.out.print("");
-
                 obfuscator.replaceInFiles();
                System.out.println("last file replaced in variable obfuscation is "+f.getName());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    void handleExtendingClass(Scope scope,String extendingClassName){
+        // check if the class being extended is a user defined class
+        // if user defined add the public data members to the
+
+        for(String s:classList){
+            File f=new File(s);
+            if(f.getName().equals(extendingClassName+".java")) {
+
+                try{
+                    CompilationUnit cu = JavaParser.parse(f);
+                    ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
+                    if (clas == null)
+                        clas = cu.getInterfaceByName(getClassNameFromFilePath(f.getName())).orElse(null);
+
+                    List<FieldDeclaration> memberField = clas.getFields();
+                    if (!memberField.isEmpty()) {
+                        for (FieldDeclaration field : memberField) {
+                            List<VariableDeclarator> memberVariables = field.getVariables();
+                            EnumSet<Modifier> modifiers=field.getModifiers();
+                            Boolean isPublic=false,isStatic=false;
+
+                            for(Modifier m:modifiers){
+                                if(m.toString().equals("PUBLIC"))
+                                    isPublic=true;
+                                if(m.toString().equals("STATIC"))
+                                    isStatic=true;
+                            }
+
+                            if(isPublic && !isStatic)
+                                handlePublicStaticVariables(memberVariables,scope);
+                        }
+                    }
+
+
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+                break;
+            }
+        }
+
+
+
+
+
+
+    }
+
+    void buildGlobalSymbolTable(Scope globalScope){
+
+        // what if 2 static members have same identifier name but different datatype
+
+        for(String s:classList){
+
+            try{
+                File f = new File(s);
+
+                CompilationUnit cu = JavaParser.parse(f);
+                ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
+                if (clas == null)
+                    clas = cu.getInterfaceByName(getClassNameFromFilePath(f.getName())).orElse(null);
+
+                    List<FieldDeclaration> global_fields = clas.getFields();
+                    if (!global_fields.isEmpty()) {
+                        for (FieldDeclaration field : global_fields) {
+                            List<VariableDeclarator> global_variables = field.getVariables();
+                            EnumSet<Modifier> modifiers=field.getModifiers();
+                            Boolean isPublic=false,isStatic=false;
+
+                            for(Modifier m:modifiers){
+                                if(m.toString().equals("PUBLIC"))
+                                    isPublic=true;
+                                if(m.toString().equals("STATIC"))
+                                    isStatic=true;
+                            }
+
+                            if(isPublic&&isStatic)
+                                handlePublicStaticVariables(global_variables,globalScope);
+                        }
+                    }
+
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+
     }
 
     public void handleClass(ClassOrInterfaceDeclaration clas,Scope global_scope) {
@@ -319,7 +417,7 @@ public class VariableObfuscation {
 //            replacementDataNode.setLineNo(sExpr.getRange().get().begin.line);
 //            replacementDataNode.setStartColNo(sExpr.getRange().get().begin.column);
 //            replacementDataNode.setEndColNo(sExpr.getRange().get().end.column);
-//            obfuscator.setArrayList(replacementDataNode);
+//            obfuscator.(replacementDataNode);
 //
 //        }else if(exp.isIntegerLiteralExpr()){
 //
@@ -533,7 +631,7 @@ public class VariableObfuscation {
         if (!variables.isEmpty()) {
             for (VariableDeclarator variable : variables) {
 
-                String vtype = variable.getName().asString();
+                String vtype = variable.getType().asString();
                 String vname = variable.getName().getIdentifier();
                 parentScope.setData(vname, vtype);
 
@@ -546,7 +644,7 @@ public class VariableObfuscation {
                 rnode.setLineNo(vstart_line_num);
                 rnode.setStartColNo(vstart_col_num);
                 rnode.setEndColNo(vend_col_num);
-                rnode.setReplacementString(getHexValue(vtype));
+                rnode.setReplacementString(getHexValue(vname));
                 obfuscator.setArrayList(rnode);
 
                 Expression expression = variable.getInitializer().orElse(null);
@@ -554,6 +652,18 @@ public class VariableObfuscation {
             }
         }
     }
+
+    public void handlePublicStaticVariables(List<VariableDeclarator> variables,Scope parentScope) {
+        if (!variables.isEmpty()) {
+            for (VariableDeclarator variable : variables) {
+                String vtype = variable.getType().asString();
+                String vname = variable.getName().getIdentifier();
+                parentScope.setData(vname, vtype);
+            }
+        }
+    }
+
+
 
     public void handleParameter(Parameter p,Scope parentScope) {
 
