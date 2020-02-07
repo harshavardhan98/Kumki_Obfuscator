@@ -19,6 +19,7 @@ import java.util.*;
 
 import static utils.CommonUtils.*;
 import static utils.Constants.classList;
+import static utils.Constants.packageName;
 import static utils.FileOperation.getClassNameFromFilePath;
 
 /*
@@ -46,11 +47,12 @@ public class VariableObfuscation {
 
     private Obfuscator obfuscator;
     ArrayList<String> predefinedClassList;
-    HashMap<String,HashMap<String,String>> dataMembers;
+    HashMap<String,HashMap<String,String>> dataMembers=new HashMap<>();
 
     public void obfuscate(){
 
         predefinedClassList= loadPredefinedClassList();
+        collectPublicDataMembersOfClass();
         Scope global_scope = new Scope();
         global_scope.setScope(null);
         buildGlobalSymbolTable(global_scope);
@@ -84,54 +86,77 @@ public class VariableObfuscation {
 
 
 
+    void collectPublicDataMembersOfClass(){
+
+        for(String s:classList){
+
+            try{
+                File f=new File(s);
+                CompilationUnit cu = JavaParser.parse(f);
+                ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
+                if (clas == null)
+                    clas = cu.getInterfaceByName(getClassNameFromFilePath(f.getName())).orElse(null);
+
+                List<FieldDeclaration> memberField = clas.getFields();
+                if (!memberField.isEmpty()) {
+                    for (FieldDeclaration field : memberField) {
+                        List<VariableDeclarator> memberVariables = field.getVariables();
+                        EnumSet<Modifier> modifiers=field.getModifiers();
+                        Boolean isPublic=false,isStatic=false;
+
+                        for(Modifier m:modifiers){
+                            if(m.toString().equals("PUBLIC"))
+                                isPublic=true;
+                            if(m.toString().equals("STATIC"))
+                                isStatic=true;
+                        }
+
+                        if(isPublic && !isStatic){
+
+                            HashMap<String,String> variables=new HashMap<>();
+
+                            if (!memberVariables.isEmpty()) {
+                                for (VariableDeclarator variable : memberVariables) {
+                                    String vtype = variable.getType().asString();
+                                    String vname = variable.getName().getIdentifier();
+                                    //parentScope.setData(vname, vtype);
+                                    variables.put(vname,vtype);
+                                }
+                            }
+
+                            dataMembers.put(s,variables);
+                        }
+
+                    }
+                }
+
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+
     void handleExtendingClass(Scope scope,String extendingClassName){
         // check if the class being extended is a user defined class
         // if user defined add the public data members to the
 
         for(String s:classList){
+
             File f=new File(s);
             if(f.getName().equals(extendingClassName+".java")) {
 
-                try{
-                    CompilationUnit cu = JavaParser.parse(f);
-                    ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
-                    if (clas == null)
-                        clas = cu.getInterfaceByName(getClassNameFromFilePath(f.getName())).orElse(null);
+                HashMap<String,String> temp=dataMembers.get(s);
 
-                    List<FieldDeclaration> memberField = clas.getFields();
-                    if (!memberField.isEmpty()) {
-                        for (FieldDeclaration field : memberField) {
-                            List<VariableDeclarator> memberVariables = field.getVariables();
-                            EnumSet<Modifier> modifiers=field.getModifiers();
-                            Boolean isPublic=false,isStatic=false;
-
-                            for(Modifier m:modifiers){
-                                if(m.toString().equals("PUBLIC"))
-                                    isPublic=true;
-                                if(m.toString().equals("STATIC"))
-                                    isStatic=true;
-                            }
-
-                            if(isPublic && !isStatic)
-                                addVariablesToScope(memberVariables,scope);
-                        }
-                    }
-
-
-
-                }catch (Exception e){
-                    e.printStackTrace();
+                for(String str:temp.keySet()){
+                    scope.setData(str,temp.get(str));
                 }
 
                 break;
             }
         }
-
-
-
-
-
-
     }
 
     void buildGlobalSymbolTable(Scope globalScope){
