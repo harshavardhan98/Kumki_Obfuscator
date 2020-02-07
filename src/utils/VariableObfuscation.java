@@ -29,14 +29,14 @@ import static utils.FileOperation.getClassNameFromFilePath;
     -> if Camel is a member of a class then b must be a public data member, need to change the b also
 
     while loop without a body
+    static inner class
+    assert statement
+    new Club[100] -> then Club must not be obfuscated
+    Configuration configuration.SSID
 
     Student arr[]; -> java parser library error
     constant obfuscation using unicode character
     need to implement array access expression in class obfuscator
-
-
-    Need to build a dependency graph. The parent class needs to be obfuscated at the end.
-
  */
 
 public class VariableObfuscation {

@@ -34,10 +34,10 @@ public class Main {
         getDependencyData();
 
         //CommentObfuscation();
-        //MethodObfuscation();
+        MethodObfuscation();
         //PackageObfuscation();
         //ClassObfuscation();
-        VariableObfuscation();
+        //VariableObfuscation();
 
     }
 
