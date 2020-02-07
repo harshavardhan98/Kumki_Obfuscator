@@ -1,7 +1,10 @@
 package model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static utils.Constants.classList;
 
 public class Scope {
     private HashMap<String, String> data;
@@ -73,6 +76,30 @@ public class Scope {
 
         if(parentScope!=null)
             return parentScope.checkIfGivenVariableExistsInScope(identifierName);
+        else
+            return false;
+    }
+
+    public boolean checkIfGivenVariableIsFromUserDefinedClass(String identifierName){
+
+        if(data.containsKey(identifierName)){
+
+            String dataType=data.get(identifierName);
+            // check if the variable belongs to user defined class
+
+            for(String s:classList){
+                File f=new File(s);
+                if(f.getName().equals(dataType+".java")){
+                    return true;
+                }
+            }
+
+            return  false;
+        }
+
+
+        if(parentScope!=null)
+            return parentScope.checkIfGivenVariableIsFromUserDefinedClass(identifierName);
         else
             return false;
     }

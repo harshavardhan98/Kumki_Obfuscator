@@ -36,17 +36,23 @@ public class Obfuscator {
     /*****************************************************************/
 
     public void replaceInFiles() {
+
+        String temp;
+        ReplacementDataNode r1=new ReplacementDataNode();
         try {
             List<String> fileContent = new ArrayList<>(Files.readAllLines(currentFile.toPath()));
             for (ReplacementDataNode r : arrayList) {
-                String temp = fileContent.get(r.getLineNo() - 1);
+                r1=r;
+                temp = fileContent.get(r.getLineNo() - 1);
                 temp = temp.substring(0, r.getStartColNo() - 1) + r.getReplacementString() + temp.substring(r.getEndColNo());
                 fileContent.set(r.getLineNo() - 1, temp);
             }
             Files.write(currentFile.toPath(), fileContent);
         } catch (Exception e) {
+            System.out.print(r1.getLineNo());
             System.out.println(e.getMessage());
         }
+
     }
 
     public void replaceComments() {

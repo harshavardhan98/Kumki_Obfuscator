@@ -48,6 +48,7 @@ public class PackageObfuscator {
                 }
                 handleImport(cu, renameData);
                 obfuscator.replaceInFiles();
+                System.out.println("last file replaced in package obfuscation is "+f.getName());
             } catch (Exception e) {
                 e.printStackTrace();
             }

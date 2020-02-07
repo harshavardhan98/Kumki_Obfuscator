@@ -55,6 +55,7 @@ public class ClassObfuscator {
 
                 handleClass(clas);
                 obfuscator.replaceInFiles();
+                System.out.println("last file replaced in class obfuscation is "+file.getName());
             } catch (Exception e) {
                 e.printStackTrace();
             }
