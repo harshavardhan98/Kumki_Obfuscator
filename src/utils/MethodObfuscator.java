@@ -37,8 +37,6 @@ public class MethodObfuscator {
                 try {
                 File file = new File(filePath);
 
-                if(!file.getName().contains("MainActivity"))
-                    continue;
 
                 CompilationUnit cu = JavaParser.parse(file);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(file.getName())).orElse(null);
@@ -317,6 +315,11 @@ public class MethodObfuscator {
         } else if (exp.isMethodCallExpr()) {
             MethodCallExpr methodCall = exp.asMethodCallExpr();
             String mname = methodCall.getName().getIdentifier();
+            List<Expression> argList = methodCall.getArguments();
+            if (argList != null) {
+                for (Expression i : argList)
+                    handleExpression(i,parentScope);
+            }
 
             int mstart_line_num = methodCall.getName().getRange().get().begin.line;
             int mstart_col_num = methodCall.getName().getRange().get().begin.column;
@@ -390,23 +393,24 @@ public class MethodObfuscator {
         }else if (exp.isThisExpr()) {
             exp = exp.asThisExpr().getClassExpr().orElse(null);
             handleExpression(exp,parentScope);
-        }else if(exp.isObjectCreationExpr()){
+        }else if(exp.isObjectCreationExpr()) {
 
-            ObjectCreationExpr expr=exp.asObjectCreationExpr();
+            ObjectCreationExpr expr = exp.asObjectCreationExpr();
 
             List<Expression> expList = expr.getArguments();
             if (expList != null) {
                 for (Expression e : expList)
-                    handleExpression(e,parentScope);
+                    handleExpression(e, parentScope);
             }
 
-//            List<BodyDeclaration<?>> bodyList = expr.getAnonymousClassBody().orElse(null);
-//            if (bodyList != null) {
-//                for (BodyDeclaration<?> e : bodyList)
-//                    if (e.isMethodDeclaration())
-//                        handleMethodDeclaration(e.asMethodDeclaration(),parentScope);
-//            }
-        }else if (exp.isEnclosedExpr()) {
+            List<BodyDeclaration<?>> bodyList = expr.getAnonymousClassBody().orElse(null);
+            if (bodyList != null) {
+                for (BodyDeclaration<?> e : bodyList)
+                    if(e.isMethodDeclaration())
+                        handleStatement(e.asMethodDeclaration().getBody().orElse(null),parentScope);
+            }
+        }
+        else if (exp.isEnclosedExpr()) {
             EnclosedExpr expr = exp.asEnclosedExpr();
             handleExpression(expr.getInner(),parentScope);
         }else if(exp.isArrayAccessExpr()){
@@ -455,6 +459,9 @@ public class MethodObfuscator {
             return;
 
         Scope ifScope;
+
+        Expression condition = st.asIfStmt().getCondition();
+        handleExpression(condition,parentScope);
 
         Statement thenStmt = st.asIfStmt().getThenStmt();
         ifScope = new Scope();

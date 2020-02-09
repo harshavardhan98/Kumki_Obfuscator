@@ -3,6 +3,8 @@ package model;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class Obfuscator {
@@ -41,6 +43,18 @@ public class Obfuscator {
         ReplacementDataNode r1=new ReplacementDataNode();
         try {
             List<String> fileContent = new ArrayList<>(Files.readAllLines(currentFile.toPath()));
+
+            Collections.sort(arrayList,new Comparator<ReplacementDataNode>() {
+                @Override
+                public int compare(ReplacementDataNode lhs, ReplacementDataNode rhs) {
+                    if(lhs.getLineNo()!=rhs.getLineNo())
+                        return (lhs.getLineNo() - rhs.getLineNo());
+                    else
+                        return rhs.getStartColNo()-lhs.getStartColNo();
+                }
+            });
+
+
             for (ReplacementDataNode r : arrayList) {
                 r1=r;
                 temp = fileContent.get(r.getLineNo() - 1);
