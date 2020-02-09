@@ -54,10 +54,25 @@ public class CommonUtils {
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
             char k = keyValue.charAt(i);
-            int cix = c - 97;
-            int key = k - 97;
-            cix = (cix + key) % 26 + 97;
-            text += (char) (cix);
+            if(Character.isAlphabetic(c)) {
+
+                if(Character.isUpperCase(c)){
+                    int cix = c - 65;
+                    int key = k - 65;
+                    cix = (cix + key) % 26 + 65;
+                    text += (char) (cix);
+
+                }else{
+                    int cix = c - 97;
+                    int key = k - 97;
+                    cix = (cix + key) % 26 + 97;
+                    text += (char) (cix);
+                }
+
+
+            }
+            else
+                text += c;
         }
 
         return text;

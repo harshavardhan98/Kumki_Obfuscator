@@ -18,8 +18,7 @@ import java.io.File;
 import java.util.*;
 
 import static utils.CommonUtils.*;
-import static utils.Constants.classList;
-import static utils.Constants.packageName;
+import static utils.Constants.*;
 import static utils.FileOperation.getClassNameFromFilePath;
 
 /*
@@ -46,12 +45,12 @@ public class VariableObfuscation {
     };
 
     private Obfuscator obfuscator;
-    ArrayList<String> predefinedClassList;
+
     HashMap<String,HashMap<String,String>> dataMembers=new HashMap<>();
 
     public void obfuscate(){
 
-        predefinedClassList= loadPredefinedClassList();
+
         collectPublicDataMembersOfClass();
         Scope global_scope = new Scope();
         global_scope.setScope(null);
@@ -60,8 +59,8 @@ public class VariableObfuscation {
         for (String s : classList) {
             try {
                 File f = new File(s);
-//                if(!f.getName().contains("CommonUtils"))
-//                    continue;
+                if(!f.getName().contains("DataBaseHelper"))
+                    continue;
 
                 CompilationUnit cu = JavaParser.parse(f);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
@@ -173,25 +172,35 @@ public class VariableObfuscation {
                 if (clas == null)
                     clas = cu.getInterfaceByName(getClassNameFromFilePath(f.getName())).orElse(null);
 
-                    List<FieldDeclaration> global_fields = clas.getFields();
-                    if (!global_fields.isEmpty()) {
-                        for (FieldDeclaration field : global_fields) {
-                            List<VariableDeclarator> global_variables = field.getVariables();
-                            EnumSet<Modifier> modifiers=field.getModifiers();
-                            Boolean isPublic=false,isStatic=false;
+                List<FieldDeclaration> global_fields = clas.getFields();
+                if (!global_fields.isEmpty()) {
+                    for (FieldDeclaration field : global_fields) {
+                        List<VariableDeclarator> global_variables = field.getVariables();
+                        EnumSet<Modifier> modifiers=field.getModifiers();
+                        Boolean isPublic=false,isStatic=false;
 
-                            for(Modifier m:modifiers){
-                                if(m.toString().equals("PUBLIC"))
-                                    isPublic=true;
-                                if(m.toString().equals("STATIC"))
-                                    isStatic=true;
-                            }
+                        for(Modifier m:modifiers){
+                            if(m.toString().equals("PUBLIC"))
+                                isPublic=true;
+                            if(m.toString().equals("STATIC"))
+                                isStatic=true;
+                        }
 
-                            if(isPublic&&isStatic)
-                                addVariablesToScope(global_variables,globalScope);
+                        if(isPublic&&isStatic)
+                            addVariablesToScope(global_variables,globalScope);
+                    }
+                }
+
+                List<BodyDeclaration<?>> members = clas.getMembers();
+                if (!members.isEmpty()) {
+                    for (BodyDeclaration<?> bd : members) {
+                        if(bd.isClassOrInterfaceDeclaration()){
+                            FileOperation.getClassNameFromFilePath(f.getAbsolutePath());
+                            innerClassList.add(FileOperation.getClassNameFromFilePath(f.getAbsolutePath())+"."+bd.asClassOrInterfaceDeclaration().getName());
+                            innerClassList.add(bd.asClassOrInterfaceDeclaration().getName().asString());
                         }
                     }
-
+                }
 
             }catch (Exception e){
                 e.printStackTrace();
@@ -317,16 +326,13 @@ public class VariableObfuscation {
             handleExpression(expr.getRight(),parentScope);
 
         }else if(exp.isNameExpr()){
-
             NameExpr nameExpr=exp.asNameExpr();
             String name = nameExpr.getName().getIdentifier();
-            int vstart_line_num = nameExpr.getRange().get().begin.line;
-            int vstart_col_num = nameExpr.getRange().get().begin.column;
-            int vend_col_num = nameExpr.getRange().get().end.column;
-            // Collections-> Collections.binarySearch(predefinedClassList,name)<0
-            boolean found=parentScope.checkIfGivenVariableExistsInScope(name);
+            if (parentScope.checkIfGivenVariableExistsInScope(name)) {
+                int vstart_line_num = nameExpr.getRange().get().begin.line;
+                int vstart_col_num = nameExpr.getRange().get().begin.column;
+                int vend_col_num = nameExpr.getRange().get().end.column;
 
-            if(found){
                 ReplacementDataNode rnode = new ReplacementDataNode();
                 rnode.setLineNo(vstart_line_num);
                 rnode.setStartColNo(vstart_col_num);
@@ -334,93 +340,85 @@ public class VariableObfuscation {
                 rnode.setReplacementString(getHexValue(name));
                 obfuscator.setArrayList(rnode);
             }
-
         }else if(exp.isFieldAccessExpr()){
 
+            FieldAccessExpr fieldAccessExpr = exp.asFieldAccessExpr();
+            System.out.print("");
 
-            FieldAccessExpr fieldAccessExpr=exp.asFieldAccessExpr();
+            if(fieldAccessExpr.getScope().isThisExpr()){
+                String name = fieldAccessExpr.getName().getIdentifier();
+                int vstart_line_num = fieldAccessExpr.getName().getRange().get().begin.line;
+                int vstart_col_num = fieldAccessExpr.getName().getRange().get().begin.column;
+                int vend_col_num = fieldAccessExpr.getName().getRange().get().end.column;
 
-            //R.layout.row -> row must not be renamed during variable obfuscation
-            if(fieldAccessExpr.getScope().isFieldAccessExpr()){
-                if(fieldAccessExpr.getScope().asFieldAccessExpr().getScope().isNameExpr()){
-                    String name=fieldAccessExpr.getScope().asFieldAccessExpr().getScope().asNameExpr().getNameAsString();
-                    if(name.equals("R"))
-                        return;
-                }
-            }
-
-            FieldAccessExpr temp=fieldAccessExpr;
-            while(temp.getScope().isFieldAccessExpr()){
-                temp=temp.getScope().asFieldAccessExpr();
-            }
-            if(temp.getScope().isNameExpr()){
-                String identifierName=temp.getScope().asNameExpr().getName().getIdentifier();
-
-                Boolean userDefinedClassVariable=parentScope.checkIfGivenVariableExistsInScope(identifierName);
-
-//                if(!userDefinedClassVariable){
-//                    NameExpr nameExpr=temp.getScope().asNameExpr();
-//                    ReplacementDataNode rnode=new ReplacementDataNode();
-//                    rnode.setLineNo(nameExpr.getRange().get().begin.line);
-//                    rnode.setStartColNo(nameExpr.getRange().get().begin.column);
-//                    rnode.setEndColNo(nameExpr.getRange().get().end.column);
-//                    rnode.setReplacementString(getHexValue(nameExpr.getNameAsString()));
-//                    obfuscator.setArrayList(rnode);
-//                }
-
-                if(userDefinedClassVariable || checkForStaticVariableAccess(identifierName)){
-                    while(fieldAccessExpr.getScope().isFieldAccessExpr()){
-                        SimpleName sname = fieldAccessExpr.getName();
-                        ReplacementDataNode rnode = new ReplacementDataNode();
-                        rnode.setLineNo(sname.getRange().get().begin.line);
-                        rnode.setStartColNo(sname.getRange().get().begin.column);
-                        rnode.setEndColNo(sname.getRange().get().end.column);
-                        rnode.setReplacementString(getHexValue(sname.getIdentifier()));
-                        obfuscator.setArrayList(rnode);
-
-                        if(fieldAccessExpr.getScope().isFieldAccessExpr())
-                            fieldAccessExpr=fieldAccessExpr.getScope().asFieldAccessExpr();
-                        else
-                            break;
-                    }
-
-                    SimpleName sname = fieldAccessExpr.getName();
-                    ReplacementDataNode rnode = new ReplacementDataNode();
-                    rnode.setLineNo(sname.getRange().get().begin.line);
-                    rnode.setStartColNo(sname.getRange().get().begin.column);
-                    rnode.setEndColNo(sname.getRange().get().end.column);
-                    rnode.setReplacementString(getHexValue(sname.getIdentifier()));
-                    obfuscator.setArrayList(rnode);
-
-                    if(fieldAccessExpr.getScope().isNameExpr()){
-
-                        if(checkForStaticVariableAccess(fieldAccessExpr.getScope().asNameExpr().getNameAsString())){
-                            // Animal.class
-                            return;
-                        }
-                        NameExpr nameExpr=fieldAccessExpr.getScope().asNameExpr();
-                        rnode=new ReplacementDataNode();
-                        rnode.setLineNo(nameExpr.getRange().get().begin.line);
-                        rnode.setStartColNo(nameExpr.getRange().get().begin.column);
-                        rnode.setEndColNo(nameExpr.getRange().get().end.column);
-                        rnode.setReplacementString(getHexValue(nameExpr.getNameAsString()));
-                        obfuscator.setArrayList(rnode);
-                    }
-                }
-
-            }
-            else{
-                System.out.print("testing the code");
-                handleExpression(fieldAccessExpr.getScope(),parentScope);
-                SimpleName sname = fieldAccessExpr.getName();
                 ReplacementDataNode rnode = new ReplacementDataNode();
-                rnode.setLineNo(sname.getRange().get().begin.line);
-                rnode.setStartColNo(sname.getRange().get().begin.column);
-                rnode.setEndColNo(sname.getRange().get().end.column);
-                rnode.setReplacementString(getHexValue(sname.getIdentifier()));
+                rnode.setLineNo(vstart_line_num);
+                rnode.setStartColNo(vstart_col_num);
+                rnode.setEndColNo(vend_col_num);
+                rnode.setReplacementString(getHexValue(name));
                 obfuscator.setArrayList(rnode);
+            }
+            else if(fieldAccessExpr.getScope().isFieldAccessExpr()){
+                String identifier = fieldAccessExpr.getScope().asFieldAccessExpr().getName().getIdentifier();
+                if(parentScope.checkIfGivenVariableIsFromUserDefinedClass(identifier)){
+                    String name = fieldAccessExpr.getName().getIdentifier();
+                    int vstart_line_num = fieldAccessExpr.getName().getRange().get().begin.line;
+                    int vstart_col_num = fieldAccessExpr.getName().getRange().get().begin.column;
+                    int vend_col_num = fieldAccessExpr.getName().getRange().get().end.column;
+
+                    ReplacementDataNode rnode = new ReplacementDataNode();
+                    rnode.setLineNo(vstart_line_num);
+                    rnode.setStartColNo(vstart_col_num);
+                    rnode.setEndColNo(vend_col_num);
+                    rnode.setReplacementString(getHexValue(name));
+                    obfuscator.setArrayList(rnode);
+                }
+                else if(fieldAccessExpr.isNameExpr())
+                    handleExpression(fieldAccessExpr.asNameExpr(), parentScope);
+                else if(fieldAccessExpr.getScope().isFieldAccessExpr())
+                    handleExpression(fieldAccessExpr.getScope().asFieldAccessExpr(), parentScope);
+            }
+            else if(fieldAccessExpr.getScope().isNameExpr()) {
+                String identifier = fieldAccessExpr.getScope().asNameExpr().getName().getIdentifier();
+                if (checkForStaticVariableAccess(identifier)) {
+                    //Constants.BUS_ALERTS
+
+                    String name = fieldAccessExpr.getName().getIdentifier();
+                    int vstart_line_num = fieldAccessExpr.getName().getRange().get().begin.line;
+                    int vstart_col_num = fieldAccessExpr.getName().getRange().get().begin.column;
+                    int vend_col_num = fieldAccessExpr.getName().getRange().get().end.column;
+
+                    ReplacementDataNode rnode = new ReplacementDataNode();
+                    rnode.setLineNo(vstart_line_num);
+                    rnode.setStartColNo(vstart_col_num);
+                    rnode.setEndColNo(vend_col_num);
+                    rnode.setReplacementString(getHexValue(name));
+                    obfuscator.setArrayList(rnode);
+                }
+                else {
+                    if (parentScope.checkIfGivenVariableIsFromUserDefinedClass(identifier)) {
+                        String name = fieldAccessExpr.getName().getIdentifier();
+                        int vstart_line_num = fieldAccessExpr.getName().getRange().get().begin.line;
+                        int vstart_col_num = fieldAccessExpr.getName().getRange().get().begin.column;
+                        int vend_col_num = fieldAccessExpr.getName().getRange().get().end.column;
+
+                        ReplacementDataNode rnode = new ReplacementDataNode();
+                        rnode.setLineNo(vstart_line_num);
+                        rnode.setStartColNo(vstart_col_num);
+                        rnode.setEndColNo(vend_col_num);
+                        rnode.setReplacementString(getHexValue(name));
+                        obfuscator.setArrayList(rnode);
+                    }
+                    handleExpression(fieldAccessExpr.getScope().asNameExpr(), parentScope);
+                }
+            }else{
+
+                System.out.print("");
+                System.out.print("");
+
 
             }
+
 
 
         }else if(exp.isCastExpr()){
@@ -840,6 +838,10 @@ public class VariableObfuscation {
         for(String s:classList){
             File f=new File(s);
             if(f.getName().equals(name+".java"))
+                return true;
+        }
+        for(String s:innerClassList){
+            if(name.equals(s))
                 return true;
         }
 

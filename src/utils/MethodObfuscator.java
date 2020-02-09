@@ -6,9 +6,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.stmt.*;
 import model.Obfuscator;
 import model.ReplacementDataNode;
 import model.Scope;
@@ -35,8 +33,8 @@ public class MethodObfuscator {
             for (String filePath : classList) {
                 File file = new File(filePath);
 
-                if(!file.getName().contains("BusRoutesActivity"))
-                    continue;
+//                if(!file.getName().contains("BusRoutesActivity"))
+//                    continue;
 
                 CompilationUnit cu = JavaParser.parse(file);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(file.getName())).orElse(null);
@@ -114,17 +112,116 @@ public class MethodObfuscator {
         handleIfStatement(statement, parentScope);
         handleBlockStatement(statement, parentScope);
         handleForStatement(statement,parentScope);
-//        handleForEachStatement(statement,parentScope);
-//        handleWhileStatement(statement,parentScope);
-//        handleDoWhileStatement(statement,parentScope);
-//        handleReturnStatement(statement,parentScope);
-//        handleSwitchStatement(statement,parentScope);
-//        handleTryCatchStatement(statement,parentScope);
-//        handleSynchronisedStatement(statement,parentScope);
-//        handleExplicitConstructorInvocationStmt(statement,parentScope);
+        handleForEachStatement(statement,parentScope);
+        handleWhileStatement(statement,parentScope);
+        handleDoWhileStatement(statement,parentScope);
+        handleReturnStatement(statement,parentScope);
+        handleSwitchStatement(statement,parentScope);
+        handleTryCatchStatement(statement,parentScope);
+        handleSynchronisedStatement(statement,parentScope);
+        handleExplicitConstructorInvocationStmt(statement,parentScope);
+    }
+
+    public void handleExplicitConstructorInvocationStmt(Statement st,Scope parentScope) {
+        if (st == null || !st.isExplicitConstructorInvocationStmt())
+            return;
+
+        ExplicitConstructorInvocationStmt ecst = st.asExplicitConstructorInvocationStmt();
+        List<Expression> exp = ecst.getArguments();
+        if (exp != null) {
+            for (Expression e : exp)
+                handleExpression(e,parentScope);
+        }
     }
 
 
+    private void handleSynchronisedStatement(Statement st,Scope parentScope){
+
+        if(st==null || !st.isSynchronizedStmt())
+            return;
+
+        handleExpression(st.asSynchronizedStmt().getExpression(),parentScope);
+        handleStatement(st.asSynchronizedStmt().getBody(),parentScope);
+    }
+
+    private void handleTryCatchStatement(Statement st,Scope parentScope) {
+
+        if (st == null || !st.isTryStmt())
+            return;
+
+        handleStatement(st.asTryStmt().getTryBlock(),parentScope);
+
+        List<CatchClause> l = st.asTryStmt().getCatchClauses();
+        if (!l.isEmpty()) {
+            for (CatchClause i : l) {
+                handleParameter(i.getParameter(),parentScope);
+                handleStatement(i.getBody(),parentScope);
+            }
+        }
+    }
+
+
+    public void handleSwitchStatement(Statement st,Scope parentScope) {
+        if (st == null || !st.isSwitchStmt())
+            return;
+
+        SwitchStmt switchStmt = st.asSwitchStmt();
+        handleExpression(switchStmt.getSelector(),parentScope);
+
+        List<SwitchEntryStmt> stList = switchStmt.getEntries();
+        if (stList != null) {
+            for (SwitchEntryStmt set : stList) {
+                handleExpression(set.getLabel().orElse(null),parentScope);
+                List<Statement> expst = set.getStatements();
+                if (!expst.isEmpty()) {
+                    for (Statement est : expst)
+                        handleStatement(est,parentScope);
+                }
+            }
+        }
+    }
+
+
+    private void handleReturnStatement(Statement st,Scope parentScope) {
+        if (st == null || !st.isReturnStmt())
+            return;
+
+        handleExpression(st.asReturnStmt().getExpression().orElse(null),parentScope);
+    }
+
+    private void handleDoWhileStatement(Statement st,Scope parentScope){
+
+        if(st==null || !st.isDoStmt())
+            return;
+
+        handleStatement(st.asDoStmt().getBody(),parentScope);
+        handleExpression(st.asDoStmt().getCondition(),parentScope);
+    }
+
+    public void handleWhileStatement(Statement statement,Scope parentScope){
+
+        if(statement==null||!statement.isWhileStmt())
+            return;
+
+        WhileStmt whileStmt=statement.asWhileStmt();
+        handleExpression(whileStmt.getCondition(),parentScope);
+        handleBlockStatement(whileStmt.getBody(),parentScope);
+
+    }
+
+    private void handleForEachStatement(Statement st,Scope parentScope) {
+        if (st == null || !st.isForeachStmt())
+            return;
+
+        Scope forEachScope=new Scope();
+        forEachScope.setScope(parentScope);
+
+        NodeList<VariableDeclarator> variableDeclarators = st.asForeachStmt().getVariable().getVariables();
+        handleVariables(variableDeclarators,forEachScope);
+        handleExpression(st.asForeachStmt().getIterable(),forEachScope);
+        Statement forEach = st.asForeachStmt().getBody();
+        handleStatement(forEach,forEachScope);
+    }
 
     private void handleForStatement(Statement st,Scope parentScope) {
 
@@ -356,5 +453,17 @@ public class MethodObfuscator {
             }
         }
         return flag;
+    }
+
+    public void handleParameter(Parameter p,Scope parentScope) {
+
+        if (p == null)
+            return;
+        if (p.getName()!=null) {
+            String pname=p.getNameAsString();
+            String ptype=p.getType().asString();
+            parentScope.setData(pname,ptype);
+        }
+
     }
 }
