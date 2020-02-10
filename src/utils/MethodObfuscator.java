@@ -22,20 +22,26 @@ public class MethodObfuscator {
 
     private Obfuscator obfuscator;
     HashMap<String,HashMap<String,String>> dataMembers=new HashMap<>();
+    public ArrayList<String> staticMethods=new ArrayList<>();
+    public String extendingClassPath="null";
+    public ArrayList<String> keepMethods=new ArrayList<String>();
 
     public void obfuscate() {
 
+            updateKeepMethods();
             collectPublicDataMembersOfClass();
             Scope global_scope = new Scope();
             global_scope.setScope(null);
             buildGlobalSymbolTable(global_scope);
 
+
+
             for (String filePath : classList) {
                 try {
                 File file = new File(filePath);
 
-                //if(!file.getName().contains("Comments"))
-                    //continue;
+//                if(!file.getName().contains("LoginActivity"))
+//                    continue;
 
                 CompilationUnit cu = JavaParser.parse(file);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(file.getName())).orElse(null);
@@ -122,7 +128,23 @@ public class MethodObfuscator {
                     int start_col_num = method.getName().getRange().get().begin.column;
                     int end_col_num = method.getName().getRange().get().end.column;
 
-                    if (!MethodVisitor.isOverride(method) || toBeReplaced(name)) {
+                    Boolean isKeepClass=false,isKeepMethod=false;
+                    for(String s:keepClass)
+                        if(obfuscator.getCurrentFile().getName().equals(s+".java"))
+                            isKeepClass=true;
+
+                    if(isKeepClass)
+                        continue;
+
+                    for(String s:keepMethods)
+                        if(s.equals(name)){
+                            isKeepMethod=true;
+                        }
+
+                    if(isKeepMethod)
+                        continue;
+
+                    if (!MethodVisitor.isOverride(method) || toBeReplaced1(name,null)) {
                         ReplacementDataNode rnode = new ReplacementDataNode();
                         rnode.setLineNo(start_line_num);
                         rnode.setStartColNo(start_col_num);
@@ -154,8 +176,9 @@ public class MethodObfuscator {
             File f=new File(s);
             if(f.getName().equals(extendingClassName+".java")) {
 
-                HashMap<String,String> temp=dataMembers.get(s);
+                extendingClassPath=f.getAbsolutePath();
 
+                HashMap<String,String> temp=dataMembers.get(s);
                 for(String str:temp.keySet()){
                     scope.setData(str,temp.get(str));
                 }
@@ -347,11 +370,11 @@ public class MethodObfuscator {
                     rnode.setEndColNo(mend_col_num);
                     rnode.setReplacementString(getHexValue(mname));
 
-                    if (obj_type != null && compare(obj_type)&&toBeReplaced(mname)) {
+                    if (obj_type != null && compare(obj_type)&&toBeReplaced1(mname,obj_type)) {
                         obfuscator.setArrayList(rnode);
                     }
 
-                    else if(checkForStaticVariableAccess(obj_name)&&toBeReplaced(mname)){
+                    else if(checkForStaticVariableAccess(obj_name)&&toBeReplaced1(mname,obj_type)){
                         obfuscator.setArrayList(rnode);
                     }else{
                         System.out.print("");
@@ -365,16 +388,34 @@ public class MethodObfuscator {
                     rnode.setReplacementString(getHexValue(mname));
                     obfuscator.setArrayList(rnode);
                 }
-                else if(obj_name_exp.isMethodCallExpr() && toBeReplaced(mname)){
+                else if(obj_name_exp.isMethodCallExpr()){
+                    handleExpression(obj_name_exp.asMethodCallExpr(),parentScope);
+                }
+                else if(obj_name_exp.isThisExpr() && toBeReplaced1(mname,null)){
                     ReplacementDataNode rnode = new ReplacementDataNode();
                     rnode.setLineNo(mstart_line_num);
                     rnode.setStartColNo(mstart_col_num);
                     rnode.setEndColNo(mend_col_num);
                     rnode.setReplacementString(getHexValue(mname));
                     obfuscator.setArrayList(rnode);
+                }else if(obj_name_exp.isEnclosedExpr()){
+
+                    EnclosedExpr enclosedExpr=obj_name_exp.asEnclosedExpr();
+                    if(enclosedExpr.getInner().isCastExpr()){
+                        String obj_type=enclosedExpr.getInner().asCastExpr().getType().asString();
+                        if(toBeReplaced1(mname,obj_type)){
+                            ReplacementDataNode rnode = new ReplacementDataNode();
+                            rnode.setLineNo(mstart_line_num);
+                            rnode.setStartColNo(mstart_col_num);
+                            rnode.setEndColNo(mend_col_num);
+                            rnode.setReplacementString(getHexValue(mname));
+                            obfuscator.setArrayList(rnode);
+                        }
+
+                    }
                 }
             }
-            else if(toBeReplaced(mname)){
+            else if(toBeReplaced1(mname,null)){
                 ReplacementDataNode rnode = new ReplacementDataNode();
                 rnode.setLineNo(mstart_line_num);
                 rnode.setStartColNo(mstart_col_num);
@@ -523,17 +564,79 @@ public class MethodObfuscator {
 
         for (Map.Entry<String, ArrayList<String>> entry : methodMap.entrySet()) {
             ArrayList<String>  temp = entry.getValue();
-            int i;
-            for (i = 0; i < temp.size(); i++) {
+            for (int i = 0; i < temp.size(); i++) {
                 if (temp.get(i).equals(name)) {
                     return true;
                 }
             }
-            if (i != temp.size())
-                break;
         }
         return false;
     }
+
+    public Boolean toBeReplaced1(String name,String objType){
+
+        File f=obfuscator.getCurrentFile();
+
+        // check in keep classes
+        for(String s:keepClass)
+            if(f.getName().equals(s+".java"))
+                return false;
+
+        // check in keep methods
+        for(String s:keepMethods)
+            if(name.equals(s))
+                return false;
+
+
+        if(objType==null){
+
+            // it must be a static method
+            for(String s:staticMethods)
+                if(s.equals(name))
+                    return true;
+
+             // the function must defined in the class itself
+            ArrayList<String> temp=methodMap.get(f.getAbsolutePath());
+            if(temp!=null){
+                for (int i = 0; i < temp.size(); i++) {
+                    if (temp.get(i).equals(name)) {
+                        return true;
+                    }
+                }
+            }
+
+            // the function can be from the extending class
+            temp=methodMap.get(extendingClassPath);
+            if(temp!=null){
+                for (int i = 0; i < temp.size(); i++) {
+                    if (temp.get(i).equals(name)) {
+                        return true;
+                    }
+                }
+            }
+
+        }
+        else{
+
+            for (String fileName: methodMap.keySet()) {
+
+                f=new File(fileName);
+                if(f.getName().equals(objType+".java")){
+
+                    ArrayList<String> temp=methodMap.get(f.getAbsolutePath());
+                    for (int i = 0; i < temp.size(); i++) {
+                        if (temp.get(i).equals(name)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        return false;
+    }
+
 
     public void handleParameter(Parameter p,Scope parentScope) {
 
@@ -652,6 +755,21 @@ public class MethodObfuscator {
                             innerClassList.add(FileOperation.getClassNameFromFilePath(f.getAbsolutePath())+"."+bd.asClassOrInterfaceDeclaration().getName());
                             innerClassList.add(bd.asClassOrInterfaceDeclaration().getName().asString());
                         }
+                        else if(bd.isMethodDeclaration()){
+                            EnumSet<Modifier> modifiers=bd.asMethodDeclaration().getModifiers();
+                            Boolean isPublic=false,isStatic=false;
+
+                            for(Modifier m:modifiers){
+                                if(m.toString().equals("PUBLIC"))
+                                    isPublic=true;
+                                if(m.toString().equals("STATIC"))
+                                    isStatic=true;
+                            }
+
+                            if(isPublic&&isStatic){
+                                staticMethods.add(bd.asMethodDeclaration().getNameAsString());
+                            }
+                        }
                     }
                 }
 
@@ -672,6 +790,10 @@ public class MethodObfuscator {
         }
     }
 
+    void updateKeepMethods(){
+        keepMethods.add("getString");
+        keepMethods.add("compare");
+    }
 
 
 }
