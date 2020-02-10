@@ -59,8 +59,8 @@ public class VariableObfuscation {
         for (String s : classList) {
             try {
                 File f = new File(s);
-                if(!f.getName().contains("DataBaseHelper"))
-                    continue;
+//                if(!f.getName().contains("MainActivity"))
+//                    continue;
 
                 CompilationUnit cu = JavaParser.parse(f);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
@@ -359,6 +359,8 @@ public class VariableObfuscation {
                 obfuscator.setArrayList(rnode);
             }
             else if(fieldAccessExpr.getScope().isFieldAccessExpr()){
+
+
                 String identifier = fieldAccessExpr.getScope().asFieldAccessExpr().getName().getIdentifier();
                 if(parentScope.checkIfGivenVariableIsFromUserDefinedClass(identifier)){
                     String name = fieldAccessExpr.getName().getIdentifier();
@@ -503,7 +505,7 @@ public class VariableObfuscation {
 //            replacementDataNode.setLineNo(sExpr.getRange().get().begin.line);
 //            replacementDataNode.setStartColNo(sExpr.getRange().get().begin.column);
 //            replacementDataNode.setEndColNo(sExpr.getRange().get().end.column);
-//            obfuscator.(replacementDataNode);
+//            obfuscator.setArrayList(replacementDataNode);
 //
 //        }else if(exp.isIntegerLiteralExpr()){
 //
@@ -812,7 +814,7 @@ public class VariableObfuscation {
         String str="";
 
         if(m==Mode.INTEGER||m==Mode.DOUBLE) {
-            return toUnicode(val);
+            return toUnicode (val);
         }
         else if(m==Mode.STRING){
             val="\""+val+"\"";

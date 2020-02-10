@@ -166,7 +166,9 @@ public class CommonUtils {
                 try {
                     File file = new File(f.getPath() + File.separator + f.getName());
                     CompilationUnit cu = JavaParser.parse(file);
-                    cu.accept(new MethodVisitor(), file.getAbsolutePath());
+
+                    if(!keepClass.contains(getClassNameFromFilePath(file.getAbsolutePath())))
+                        cu.accept(new MethodVisitor(), file.getAbsolutePath());
                 } catch (Exception e) {e.printStackTrace();
                 }
             } else if (f.getType().equals("directory")) {

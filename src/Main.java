@@ -9,10 +9,7 @@ import com.google.gson.JsonObject;
 import model.FileSystem;
 import model.Obfuscator;
 import model.ReplacementDataNode;
-import utils.ClassObfuscator;
-import utils.MethodObfuscator;
-import utils.PackageObfuscator;
-import utils.VariableObfuscation;
+import utils.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -34,16 +31,20 @@ public class Main {
         getDependencyData();
 
         //CommentObfuscation();
-        //MethodObfuscation();
-        //PackageObfuscation();
-        //ClassObfuscation();
         VariableObfuscation();
+        MethodObfuscation();
+        PackageObfuscation();
+        ClassObfuscation();
 
     }
 
     /***********************************************************/
 
     public static void analyseProjectStructure() {
+        keepClass.add("NewMessageEvent");
+        keepClass.add("Comments");
+        keepClass.add("ClubPost");
+
         File f = new File(projectRootDirectory + packageName);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonObject rootJO = new JsonObject();
@@ -86,13 +87,18 @@ public class Main {
         for (int i = 0; i < classList.size(); i++) {
             if (Collections.binarySearch(predefinedClassList, classList.get(i)) >= 0)
                 classList.remove(i--);
+
+            if (Collections.binarySearch(keepClass, classList.get(i)) >= 0)
+                classList.remove(i--);
         }
 
         for (int i = 0; i < folderList.size(); i++) {
             if (Collections.binarySearch(predefinedClassList, folderList.get(i)) >= 0)
                 folderList.remove(i--);
+
+            if (Collections.binarySearch(keepClass, classList.get(i)) >= 0)
+                classList.remove(i--);
         }
-        System.out.print("");
     }
 
     /***********************************************************/

@@ -30,7 +30,9 @@ public class Constants {
     public static ArrayList<String> innerClassList = new ArrayList<>();
     public static ArrayList<String> folderList = new ArrayList<>();
     public static Map<String, ArrayList<String>> methodMap = new HashMap<String, ArrayList<String>>();
+
     public static dictionary globalDictionary=new dictionary();
+    public static ArrayList<String> keepClass=new ArrayList<>();
 
     /**************************************************************************/
 }

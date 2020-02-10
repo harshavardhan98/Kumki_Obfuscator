@@ -1,10 +1,7 @@
 package utils;
 
 import com.github.javaparser.JavaParser;
-import com.github.javaparser.ast.ArrayCreationLevel;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.*;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
@@ -37,6 +34,8 @@ public class MethodObfuscator {
                 try {
                 File file = new File(filePath);
 
+                //if(!file.getName().contains("Comments"))
+                    //continue;
 
                 CompilationUnit cu = JavaParser.parse(file);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(file.getName())).orElse(null);
@@ -92,12 +91,22 @@ public class MethodObfuscator {
             List<MethodDeclaration> methods = clas.getMethods();
             if (!methods.isEmpty()) {
                 for (MethodDeclaration method : methods) {
+
+
+                    Scope methodScope = new Scope();
+                    methodScope.setScope(global_scope);
+
+                    List<Parameter> parametersList=method.getParameters();
+                    if(!parametersList.isEmpty()){
+                        for(Parameter p:parametersList)
+                            handleParameter(p,methodScope);
+                    }
+
                     BlockStmt block = method.getBody().orElse(null);
 
                     if (block != null) {
+
                         List<Statement> stList = block.getStatements();
-                        Scope methodScope = new Scope();
-                        methodScope.setScope(global_scope);
 
                         if (!stList.isEmpty()) {
                             for (int i = 0; i < stList.size(); i++) {
@@ -326,6 +335,7 @@ public class MethodObfuscator {
             int mend_col_num = methodCall.getName().getRange().get().end.column;
 
             Expression obj_name_exp = methodCall.getScope().orElse(null);
+            handleExpression(obj_name_exp, parentScope);
             if (obj_name_exp != null) {
                 if (obj_name_exp.isNameExpr()) {
                     String obj_name = obj_name_exp.asNameExpr().getName().getIdentifier();
@@ -355,8 +365,13 @@ public class MethodObfuscator {
                     rnode.setReplacementString(getHexValue(mname));
                     obfuscator.setArrayList(rnode);
                 }
-                else{
-                    System.out.print("");
+                else if(obj_name_exp.isMethodCallExpr() && toBeReplaced(mname)){
+                    ReplacementDataNode rnode = new ReplacementDataNode();
+                    rnode.setLineNo(mstart_line_num);
+                    rnode.setStartColNo(mstart_col_num);
+                    rnode.setEndColNo(mend_col_num);
+                    rnode.setReplacementString(getHexValue(mname));
+                    obfuscator.setArrayList(rnode);
                 }
             }
             else if(toBeReplaced(mname)){
@@ -366,10 +381,7 @@ public class MethodObfuscator {
                 rnode.setEndColNo(mend_col_num);
                 rnode.setReplacementString(getHexValue(mname));
                 obfuscator.setArrayList(rnode);
-            }else{
-                System.out.print("");
             }
-
         }
         else if(exp.isAssignExpr()){
             AssignExpr expr = exp.asAssignExpr();
@@ -406,8 +418,14 @@ public class MethodObfuscator {
             List<BodyDeclaration<?>> bodyList = expr.getAnonymousClassBody().orElse(null);
             if (bodyList != null) {
                 for (BodyDeclaration<?> e : bodyList)
-                    if(e.isMethodDeclaration())
+                    if(e.isMethodDeclaration()){
+                        NodeList<Parameter> parameters=e.asMethodDeclaration().getParameters();
+
+                        for(Parameter p:parameters)
+                            handleParameter(p,parentScope);
+
                         handleStatement(e.asMethodDeclaration().getBody().orElse(null),parentScope);
+                    }
             }
         }
         else if (exp.isEnclosedExpr()) {
@@ -502,30 +520,19 @@ public class MethodObfuscator {
     }
 
     public Boolean toBeReplaced(String name) {
-        //1. Check if method present in current file.
-        //2. Check if method present in other files.
 
-        Boolean flag = false;
-        ArrayList<String> temp = methodMap.get(obfuscator.getCurrentFile().getAbsolutePath());
-        if (temp != null) {
-            if (Collections.binarySearch(temp, name) >= 0)
-                flag = true;
-            else {
-                for (Map.Entry<String, ArrayList<String>> entry : methodMap.entrySet()) {
-                    temp = entry.getValue();
-                    int i;
-                    for (i = 0; i < temp.size(); i++) {
-                        if (temp.get(i).equals(name)) {
-                            flag = true;
-                            break;
-                        }
-                    }
-                    if (i != temp.size())
-                        break;
+        for (Map.Entry<String, ArrayList<String>> entry : methodMap.entrySet()) {
+            ArrayList<String>  temp = entry.getValue();
+            int i;
+            for (i = 0; i < temp.size(); i++) {
+                if (temp.get(i).equals(name)) {
+                    return true;
                 }
             }
+            if (i != temp.size())
+                break;
         }
-        return flag;
+        return false;
     }
 
     public void handleParameter(Parameter p,Scope parentScope) {
