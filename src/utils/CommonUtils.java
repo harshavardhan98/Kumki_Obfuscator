@@ -39,7 +39,6 @@ public class CommonUtils {
 //        return temp;
 
 
-        value = value.toLowerCase();
         String keyValue = Constants.keyValue;
         String tempKey = keyValue;
 
@@ -68,8 +67,6 @@ public class CommonUtils {
                     cix = (cix + key) % 26 + 97;
                     text += (char) (cix);
                 }
-
-
             }
             else
                 text += c;

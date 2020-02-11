@@ -59,8 +59,11 @@ public class VariableObfuscation {
         for (String s : classList) {
             try {
                 File f = new File(s);
-//                if(!f.getName().contains("MainActivity"))
+//                if(!f.getName().contains("FontChanger"))
 //                    continue;
+
+                if(keepClass.contains(getClassNameFromFilePath(f.getAbsolutePath())))
+                    continue;
 
                 CompilationUnit cu = JavaParser.parse(f);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
@@ -74,9 +77,7 @@ public class VariableObfuscation {
                 if(clas.getExtendedTypes().size()>0)
                     handleExtendingClass(classScope,clas.getExtendedTypes().get(0).getName().toString());
                 handleClass(clas,classScope);
-                System.out.print("");
                 obfuscator.replaceInFiles();
-               System.out.println("last file replaced in variable obfuscation is "+f.getName());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -274,6 +275,7 @@ public class VariableObfuscation {
         handleTryCatchStatement(statement,parentScope);
         handleSynchronisedStatement(statement,parentScope);
         handleExplicitConstructorInvocationStmt(statement,parentScope);
+        handleAssertStmt(statement,parentScope);
     }
 
     public void handleExpressionStatement(Statement st,Scope parentScope) {
@@ -358,11 +360,17 @@ public class VariableObfuscation {
                 rnode.setReplacementString(getHexValue(name));
                 obfuscator.setArrayList(rnode);
             }
-            else if(fieldAccessExpr.getScope().isFieldAccessExpr()){
 
+            if(fieldAccessExpr.getScope().isFieldAccessExpr())
+                handleExpression(fieldAccessExpr.getScope().asFieldAccessExpr(), parentScope);
 
+            if(fieldAccessExpr.getScope().isMethodCallExpr())
+                handleExpression(fieldAccessExpr.getScope().asMethodCallExpr(), parentScope);
+
+            if(fieldAccessExpr.getScope().isFieldAccessExpr()){
                 String identifier = fieldAccessExpr.getScope().asFieldAccessExpr().getName().getIdentifier();
-                if(parentScope.checkIfGivenVariableIsFromUserDefinedClass(identifier)){
+                //if(parentScope.checkIfGivenVariableExistsInScope(identifier)){
+                if(checkForStaticVariableAccess(identifier)) {
                     String name = fieldAccessExpr.getName().getIdentifier();
                     int vstart_line_num = fieldAccessExpr.getName().getRange().get().begin.line;
                     int vstart_col_num = fieldAccessExpr.getName().getRange().get().begin.column;
@@ -375,17 +383,14 @@ public class VariableObfuscation {
                     rnode.setReplacementString(getHexValue(name));
                     obfuscator.setArrayList(rnode);
                 }
-                else if(fieldAccessExpr.isNameExpr())
-                    handleExpression(fieldAccessExpr.asNameExpr(), parentScope);
-                else if(fieldAccessExpr.getScope().isFieldAccessExpr())
-                    handleExpression(fieldAccessExpr.getScope().asFieldAccessExpr(), parentScope);
             }
+
             else if(fieldAccessExpr.getScope().isNameExpr()) {
                 String identifier = fieldAccessExpr.getScope().asNameExpr().getName().getIdentifier();
-                if (checkForStaticVariableAccess(identifier)) {
+                String name = fieldAccessExpr.getName().getIdentifier();
+                if (checkForStaticVariableAccess(identifier) && !isKeepClass(identifier) && !checkForStaticVariableAccess(name)) {
                     //Constants.BUS_ALERTS
 
-                    String name = fieldAccessExpr.getName().getIdentifier();
                     int vstart_line_num = fieldAccessExpr.getName().getRange().get().begin.line;
                     int vstart_col_num = fieldAccessExpr.getName().getRange().get().begin.column;
                     int vend_col_num = fieldAccessExpr.getName().getRange().get().end.column;
@@ -399,7 +404,7 @@ public class VariableObfuscation {
                 }
                 else {
                     if (parentScope.checkIfGivenVariableIsFromUserDefinedClass(identifier)) {
-                        String name = fieldAccessExpr.getName().getIdentifier();
+                        name = fieldAccessExpr.getName().getIdentifier();
                         int vstart_line_num = fieldAccessExpr.getName().getRange().get().begin.line;
                         int vstart_col_num = fieldAccessExpr.getName().getRange().get().begin.column;
                         int vend_col_num = fieldAccessExpr.getName().getRange().get().end.column;
@@ -413,16 +418,10 @@ public class VariableObfuscation {
                     }
                     handleExpression(fieldAccessExpr.getScope().asNameExpr(), parentScope);
                 }
-            }else{
-
-                System.out.print("");
-                System.out.print("");
-
-
             }
 
-
-
+            if(fieldAccessExpr.isNameExpr())
+                handleExpression(fieldAccessExpr.asNameExpr(), parentScope);
         }else if(exp.isCastExpr()){
             CastExpr castExpr=exp.asCastExpr();
             handleExpression(castExpr.getExpression(),parentScope);
@@ -478,8 +477,8 @@ public class VariableObfuscation {
             }
         }else if (exp.isArrayCreationExpr()) {
             ArrayCreationExpr expr = exp.asArrayCreationExpr();
-            if (expr.getElementType().isClassOrInterfaceType())
-                handleClassInterfaceType(expr.getElementType().asClassOrInterfaceType());
+            //if (expr.getElementType().isClassOrInterfaceType())
+                //handleClassInterfaceType(expr.getElementType().asClassOrInterfaceType());
 
             List<ArrayCreationLevel> acl = expr.getLevels();
             if (!acl.isEmpty()) {
@@ -494,48 +493,51 @@ public class VariableObfuscation {
             handleExpression(conditionalExpr.getCondition(),parentScope);
             handleExpression(conditionalExpr.getThenExpr(),parentScope);
             handleExpression(conditionalExpr.getElseExpr(),parentScope);
+        }else if(exp.isInstanceOfExpr()){
+            InstanceOfExpr instanceOfExpr=exp.asInstanceOfExpr();
+            handleExpression(instanceOfExpr.getExpression(),parentScope);
         }
 
 
-//        else if(exp.isStringLiteralExpr()){
-//
-//            StringLiteralExpr sExpr=exp.asStringLiteralExpr();
-//            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
-//            replacementDataNode.setReplacementString(getUnicodeExpression(sExpr.getValue(),Mode.STRING));
-//            replacementDataNode.setLineNo(sExpr.getRange().get().begin.line);
-//            replacementDataNode.setStartColNo(sExpr.getRange().get().begin.column);
-//            replacementDataNode.setEndColNo(sExpr.getRange().get().end.column);
-//            obfuscator.setArrayList(replacementDataNode);
-//
-//        }else if(exp.isIntegerLiteralExpr()){
-//
-//            IntegerLiteralExpr iExpr=exp.asIntegerLiteralExpr();
-//            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
-//            replacementDataNode.setReplacementString(getUnicodeExpression(iExpr.getValue(),Mode.INTEGER));
-//            replacementDataNode.setLineNo(iExpr.getRange().get().begin.line);
-//            replacementDataNode.setStartColNo(iExpr.getRange().get().begin.column);
-//            replacementDataNode.setEndColNo(iExpr.getRange().get().end.column);
-//            obfuscator.setArrayList(replacementDataNode);
-//
-//        }else if(exp.isDoubleLiteralExpr()){
-//
-//            DoubleLiteralExpr dExpr=exp.asDoubleLiteralExpr();
-//            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
-//            replacementDataNode.setReplacementString(getUnicodeExpression(dExpr.getValue(),Mode.DOUBLE));
-//            replacementDataNode.setLineNo(dExpr.getRange().get().begin.line);
-//            replacementDataNode.setStartColNo(dExpr.getRange().get().begin.column);
-//            replacementDataNode.setEndColNo(dExpr.getRange().get().end.column);
-//            obfuscator.setArrayList(replacementDataNode);
-//
-//        }else if(exp.isCharLiteralExpr()){
-//            CharLiteralExpr cExpr=exp.asCharLiteralExpr();
-//            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
-//            replacementDataNode.setReplacementString(getUnicodeExpression(cExpr.getValue(),Mode.INTEGER));
-//            replacementDataNode.setLineNo(cExpr.getRange().get().begin.line);
-//            replacementDataNode.setStartColNo(cExpr.getRange().get().begin.column);
-//            replacementDataNode.setEndColNo(cExpr.getRange().get().end.column);
-//            obfuscator.setArrayList(replacementDataNode);
-//        }
+        else if(exp.isStringLiteralExpr()){
+
+            StringLiteralExpr sExpr=exp.asStringLiteralExpr();
+            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
+            replacementDataNode.setReplacementString(getUnicodeExpression(sExpr.getValue(),Mode.STRING));
+            replacementDataNode.setLineNo(sExpr.getRange().get().begin.line);
+            replacementDataNode.setStartColNo(sExpr.getRange().get().begin.column);
+            replacementDataNode.setEndColNo(sExpr.getRange().get().end.column);
+            obfuscator.setArrayList(replacementDataNode);
+
+        }else if(exp.isIntegerLiteralExpr()){
+
+            IntegerLiteralExpr iExpr=exp.asIntegerLiteralExpr();
+            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
+            replacementDataNode.setReplacementString(getUnicodeExpression(iExpr.getValue(),Mode.INTEGER));
+            replacementDataNode.setLineNo(iExpr.getRange().get().begin.line);
+            replacementDataNode.setStartColNo(iExpr.getRange().get().begin.column);
+            replacementDataNode.setEndColNo(iExpr.getRange().get().end.column);
+            obfuscator.setArrayList(replacementDataNode);
+
+        }else if(exp.isDoubleLiteralExpr()){
+
+            DoubleLiteralExpr dExpr=exp.asDoubleLiteralExpr();
+            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
+            replacementDataNode.setReplacementString(getUnicodeExpression(dExpr.getValue(),Mode.DOUBLE));
+            replacementDataNode.setLineNo(dExpr.getRange().get().begin.line);
+            replacementDataNode.setStartColNo(dExpr.getRange().get().begin.column);
+            replacementDataNode.setEndColNo(dExpr.getRange().get().end.column);
+            obfuscator.setArrayList(replacementDataNode);
+
+        }else if(exp.isCharLiteralExpr()){
+            CharLiteralExpr cExpr=exp.asCharLiteralExpr();
+            ReplacementDataNode replacementDataNode=new ReplacementDataNode();
+            replacementDataNode.setReplacementString(getUnicodeExpression(cExpr.getValue(),Mode.INTEGER));
+            replacementDataNode.setLineNo(cExpr.getRange().get().begin.line);
+            replacementDataNode.setStartColNo(cExpr.getRange().get().begin.column);
+            replacementDataNode.setEndColNo(cExpr.getRange().get().end.column);
+            obfuscator.setArrayList(replacementDataNode);
+        }
     }
 
     public void handleMethodDeclaration(MethodDeclaration method,Scope parentScope) {
@@ -710,6 +712,13 @@ public class VariableObfuscation {
 
     }
 
+    public void handleAssertStmt(Statement statement, Scope parentScope) {
+        if(statement==null||!statement.isAssertStmt())
+            return;
+
+        handleExpression(statement.asAssertStmt().getCheck(), parentScope);
+    }
+
 
 
 
@@ -725,8 +734,8 @@ public class VariableObfuscation {
 
                 int vstart_line_num = variable.getName().getRange().get().begin.line;
                 int vstart_col_num = variable.getName().getRange().get().begin.column;
-                int vend_col_num = variable.getName().getRange().get().end.column;
-
+                //int vend_col_num = variable.getName().getRange().get().end.column;
+                int vend_col_num=vstart_col_num+vname.length()-1;
 
                 ReplacementDataNode rnode = new ReplacementDataNode();
                 rnode.setLineNo(vstart_line_num);
@@ -843,6 +852,15 @@ public class VariableObfuscation {
                 return true;
         }
         for(String s:innerClassList){
+            if(name.equals(s))
+                return true;
+        }
+
+        return false;
+    }
+
+    public Boolean isKeepClass(String name){
+        for(String s:keepClass){
             if(name.equals(s))
                 return true;
         }

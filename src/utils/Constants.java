@@ -9,7 +9,7 @@ public class Constants {
     //public static String projectDirectory = "C:\\Users\\Logesh Dinakaran\\OneDrive\\Desktop\\kumkiTest\\";
     //public static String projectDirectory = "/Users/harshavardhanp/final_year_project/fyp/kumkiTest/";
     //public static String packageName = "com" + File.separator + "example" + File.separator + "dsc_onboarding" + File.separator;
-    public static String projectDirectory = "/Users/harshavardhanp/final_year_project/fyp/ssn-app/";
+    public static String projectDirectory = "/Users/harshavardhanp/final_year_project/bkp/ssn-app/";
     public static String packageName = "in" + File.separator + "edu" + File.separator + "ssn" + File.separator+"ssnapp" + File.separator;
 
     public static String backupProjectDirectory = "";

@@ -30,11 +30,12 @@ public class Main {
         analyseProjectStructure();
         getDependencyData();
 
-        //CommentObfuscation();
-        VariableObfuscation();
-        MethodObfuscation();
+
+        //VariableObfuscation();
+        //MethodObfuscation();
         PackageObfuscation();
         ClassObfuscation();
+        CommentObfuscation();
 
     }
 
@@ -88,16 +89,16 @@ public class Main {
             if (Collections.binarySearch(predefinedClassList, classList.get(i)) >= 0)
                 classList.remove(i--);
 
-            if (Collections.binarySearch(keepClass, classList.get(i)) >= 0)
-                classList.remove(i--);
+            //if (Collections.binarySearch(keepClass, classList.get(i)) >= 0)
+                //classList.remove(i--);
         }
 
         for (int i = 0; i < folderList.size(); i++) {
             if (Collections.binarySearch(predefinedClassList, folderList.get(i)) >= 0)
                 folderList.remove(i--);
 
-            if (Collections.binarySearch(keepClass, classList.get(i)) >= 0)
-                classList.remove(i--);
+            //if (Collections.binarySearch(keepClass, classList.get(i)) >= 0)
+                //classList.remove(i--);
         }
     }
 

@@ -40,7 +40,7 @@ public class MethodObfuscator {
                 try {
                 File file = new File(filePath);
 
-//                if(!file.getName().contains("LoginActivity"))
+//                if(!file.getName().contains("SavedPostAdapter"))
 //                    continue;
 
                 CompilationUnit cu = JavaParser.parse(file);
@@ -358,7 +358,7 @@ public class MethodObfuscator {
             int mend_col_num = methodCall.getName().getRange().get().end.column;
 
             Expression obj_name_exp = methodCall.getScope().orElse(null);
-            handleExpression(obj_name_exp, parentScope);
+
             if (obj_name_exp != null) {
                 if (obj_name_exp.isNameExpr()) {
                     String obj_name = obj_name_exp.asNameExpr().getName().getIdentifier();
