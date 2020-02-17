@@ -1,18 +1,8 @@
-package utils;
+package refactor.utils;
 
-import model.ReplacementDataNode;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static utils.Constants.*;
 
 public class FileOperation {
 

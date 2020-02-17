@@ -1,3 +1,5 @@
+package refactor;
+
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
@@ -7,9 +9,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import model.FileSystem;
-import model.Obfuscator;
+import obfuscator.Obfuscator;
 import model.ReplacementDataNode;
-import utils.*;
+import refactor.utils.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -17,89 +19,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static utils.CommonUtils.*;
-import static utils.Constants.*;
-import static utils.FileOperation.copyFolder;
+import static refactor.utils.CommonUtils.*;
+import static refactor.utils.Constants.*;
+import static refactor.utils.FileOperation.copyFolder;
 
 public class Main {
 
-    private static int jsonFileNameCount = 0;
-
     public static void main(String[] args) {
-        //backupProject();
-        analyseProjectStructure();
-        getDependencyData();
+        obfuscator.Obfuscator Obfuscator = new obfuscator.ClassObfuscator();
+        Obfuscator.performObfuscation(obfuscator.ClassObfuscator.class);
 
+        //backupProject();
+        //analyseProjectStructure();
+        //getDependencyData();
 
         //VariableObfuscation();
         //MethodObfuscation();
-        PackageObfuscation();
-        ClassObfuscation();
-        CommentObfuscation();
-
-    }
-
-    /***********************************************************/
-
-    public static void analyseProjectStructure() {
-        keepClass.add("NewMessageEvent");
-        keepClass.add("Comments");
-        keepClass.add("ClubPost");
-
-        File f = new File(projectRootDirectory + packageName);
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonObject rootJO = new JsonObject();
-        JsonArray pkgJA = new JsonArray();
-
-        buildJson(f.getAbsolutePath(), pkgJA, false, null);
-        rootJO.add("package", pkgJA);
-        String fileStructureJS = gson.toJson(rootJO);
-
-        File file = new File(projectDirectory + (jsonFileNameCount++) + fileStructureJsonPath);
-        try {
-            FileWriter fr = new FileWriter(file);
-            fr.write(fileStructureJS);
-            fr.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void backupProject() {
-        try {
-            File sourceFolder = new File(projectDirectory);
-            File destinationFolder = new File(sourceFolder.getAbsolutePath() + "1");
-
-            backupProjectDirectory = destinationFolder.getAbsolutePath() + File.separator;
-            copyFolder(sourceFolder, destinationFolder);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public static void getDependencyData() {
-        ArrayList<String> predefinedClassList = loadPredefinedClassList();
-
-        ArrayList<FileSystem> fsTemp = parseFileStructureJson(projectDirectory + (jsonFileNameCount - 1) + fileStructureJsonPath);
-        folderList=new ArrayList<>();
-        classList=new ArrayList<>();
-        getFilesList(fsTemp);
-
-        for (int i = 0; i < classList.size(); i++) {
-            if (Collections.binarySearch(predefinedClassList, classList.get(i)) >= 0)
-                classList.remove(i--);
-
-            //if (Collections.binarySearch(keepClass, classList.get(i)) >= 0)
-                //classList.remove(i--);
-        }
-
-        for (int i = 0; i < folderList.size(); i++) {
-            if (Collections.binarySearch(predefinedClassList, folderList.get(i)) >= 0)
-                folderList.remove(i--);
-
-            //if (Collections.binarySearch(keepClass, classList.get(i)) >= 0)
-                //classList.remove(i--);
-        }
+        //PackageObfuscation();
+        //ClassObfuscation();
+        //CommentObfuscation();
     }
 
     /***********************************************************/
@@ -164,9 +102,21 @@ public class Main {
         }
     }
 
-    public static void VariableObfuscation(){
-        VariableObfuscation vo=new VariableObfuscation();
+    public static void VariableObfuscation() {
+        VariableObfuscation vo = new VariableObfuscation();
         vo.obfuscate();
+    }
+
+    private static void backupProject() {
+        try {
+            File sourceFolder = new File(projectDirectory);
+            File destinationFolder = new File(sourceFolder.getAbsolutePath() + "1");
+
+            backupProjectDirectory = destinationFolder.getAbsolutePath() + File.separator;
+            copyFolder(sourceFolder, destinationFolder);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     /***********************************************************/

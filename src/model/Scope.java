@@ -1,16 +1,11 @@
 package model;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static utils.Constants.classList;
-import static utils.Constants.innerClassList;
-import static utils.FileOperation.getClassNameFromFilePath;
+import static refactor.utils.Constants.classList;
+import static refactor.utils.Constants.innerClassList;
 
 public class Scope {
     private HashMap<String, String> data;

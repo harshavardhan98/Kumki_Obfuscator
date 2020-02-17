@@ -1,4 +1,4 @@
-package utils;
+package refactor.utils;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.ArrayCreationLevel;
@@ -10,16 +10,16 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
-import model.Obfuscator;
+import obfuscator.Obfuscator;
 import model.ReplacementDataNode;
 import model.Scope;
 
 import java.io.File;
 import java.util.*;
 
-import static utils.CommonUtils.*;
-import static utils.Constants.*;
-import static utils.FileOperation.getClassNameFromFilePath;
+import static refactor.utils.CommonUtils.*;
+import static refactor.utils.Constants.*;
+import static refactor.utils.FileOperation.getClassNameFromFilePath;
 
 /*
     getViewById(R.id.name) -> R.id.btn_testing must never be changed

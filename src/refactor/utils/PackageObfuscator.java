@@ -1,23 +1,22 @@
-package utils;
+package refactor.utils;
 
 import com.github.javaparser.JavaParser;
-import com.github.javaparser.Position;
 import com.github.javaparser.Range;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.Name;
-import model.Obfuscator;
+import obfuscator.Obfuscator;
 import model.ReplacementDataNode;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static utils.CommonUtils.getHexValue;
-import static utils.CommonUtils.getPackageName;
-import static utils.Constants.*;
-import static utils.FileOperation.getFileNameFromFilePath;
-import static utils.FileOperation.renameFile;
+import static refactor.utils.CommonUtils.getHexValue;
+import static refactor.utils.CommonUtils.getPackageName;
+import static refactor.utils.Constants.*;
+import static refactor.utils.FileOperation.getFileNameFromFilePath;
+import static refactor.utils.FileOperation.renameFile;
 
 public class PackageObfuscator {
 

@@ -1,22 +1,19 @@
-package utils;
+package refactor.utils;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.*;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
-import model.Obfuscator;
+import obfuscator.Obfuscator;
 import model.ReplacementDataNode;
 import model.Scope;
 
-import javax.sound.midi.SysexMessage;
-import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.util.*;
 
-import static utils.CommonUtils.*;
-import static utils.Constants.*;
-import static utils.FileOperation.getClassNameFromFilePath;
+import static refactor.utils.CommonUtils.*;
+import static refactor.utils.FileOperation.getClassNameFromFilePath;
 
 public class MethodObfuscator {
 
@@ -188,152 +185,6 @@ public class MethodObfuscator {
         }
     }
 
-    public void handleStatement(Statement statement, Scope parentScope) {
-
-        if (statement == null || statement.isEmptyStmt())
-            return;
-
-        handleExpressionStatement(statement, parentScope);
-        handleIfStatement(statement, parentScope);
-        handleBlockStatement(statement, parentScope);
-        handleForStatement(statement,parentScope);
-        handleForEachStatement(statement,parentScope);
-        handleWhileStatement(statement,parentScope);
-        handleDoWhileStatement(statement,parentScope);
-        handleReturnStatement(statement,parentScope);
-        handleSwitchStatement(statement,parentScope);
-        handleTryCatchStatement(statement,parentScope);
-        handleSynchronisedStatement(statement,parentScope);
-        handleExplicitConstructorInvocationStmt(statement,parentScope);
-    }
-
-    public void handleExplicitConstructorInvocationStmt(Statement st,Scope parentScope) {
-        if (st == null || !st.isExplicitConstructorInvocationStmt())
-            return;
-
-        ExplicitConstructorInvocationStmt ecst = st.asExplicitConstructorInvocationStmt();
-        List<Expression> exp = ecst.getArguments();
-        if (exp != null) {
-            for (Expression e : exp)
-                handleExpression(e,parentScope);
-        }
-    }
-
-
-    private void handleSynchronisedStatement(Statement st,Scope parentScope){
-
-        if(st==null || !st.isSynchronizedStmt())
-            return;
-
-        handleExpression(st.asSynchronizedStmt().getExpression(),parentScope);
-        handleStatement(st.asSynchronizedStmt().getBody(),parentScope);
-    }
-
-    private void handleTryCatchStatement(Statement st,Scope parentScope) {
-
-        if (st == null || !st.isTryStmt())
-            return;
-
-        handleStatement(st.asTryStmt().getTryBlock(),parentScope);
-
-        List<CatchClause> l = st.asTryStmt().getCatchClauses();
-        if (!l.isEmpty()) {
-            for (CatchClause i : l) {
-                handleParameter(i.getParameter(),parentScope);
-                handleStatement(i.getBody(),parentScope);
-            }
-        }
-    }
-
-
-    public void handleSwitchStatement(Statement st,Scope parentScope) {
-        if (st == null || !st.isSwitchStmt())
-            return;
-
-        SwitchStmt switchStmt = st.asSwitchStmt();
-        handleExpression(switchStmt.getSelector(),parentScope);
-
-        List<SwitchEntryStmt> stList = switchStmt.getEntries();
-        if (stList != null) {
-            for (SwitchEntryStmt set : stList) {
-                handleExpression(set.getLabel().orElse(null),parentScope);
-                List<Statement> expst = set.getStatements();
-                if (!expst.isEmpty()) {
-                    for (Statement est : expst)
-                        handleStatement(est,parentScope);
-                }
-            }
-        }
-    }
-
-
-    private void handleReturnStatement(Statement st,Scope parentScope) {
-        if (st == null || !st.isReturnStmt())
-            return;
-
-        handleExpression(st.asReturnStmt().getExpression().orElse(null),parentScope);
-    }
-
-    private void handleDoWhileStatement(Statement st,Scope parentScope){
-
-        if(st==null || !st.isDoStmt())
-            return;
-
-        handleStatement(st.asDoStmt().getBody(),parentScope);
-        handleExpression(st.asDoStmt().getCondition(),parentScope);
-    }
-
-    public void handleWhileStatement(Statement statement,Scope parentScope){
-
-        if(statement==null||!statement.isWhileStmt())
-            return;
-
-        WhileStmt whileStmt=statement.asWhileStmt();
-        handleExpression(whileStmt.getCondition(),parentScope);
-        handleBlockStatement(whileStmt.getBody(),parentScope);
-
-    }
-
-    private void handleForEachStatement(Statement st,Scope parentScope) {
-        if (st == null || !st.isForeachStmt())
-            return;
-
-        Scope forEachScope=new Scope();
-        forEachScope.setScope(parentScope);
-
-        NodeList<VariableDeclarator> variableDeclarators = st.asForeachStmt().getVariable().getVariables();
-        handleVariables(variableDeclarators,forEachScope);
-        handleExpression(st.asForeachStmt().getIterable(),forEachScope);
-        Statement forEach = st.asForeachStmt().getBody();
-        handleStatement(forEach,forEachScope);
-    }
-
-    private void handleForStatement(Statement st,Scope parentScope) {
-
-        if (st == null || !st.isForStmt())
-            return;
-
-        Scope forLoopScope=new Scope();
-        forLoopScope.setScope(parentScope);
-
-        NodeList<Expression> n1 = st.asForStmt().getInitialization();
-        if (n1.isNonEmpty()) {
-            for (Expression e : n1)
-                handleExpression(e,forLoopScope);
-        }
-
-        handleExpression(st.asForStmt().getCompare().orElse(null),forLoopScope);
-
-        NodeList<Expression> n2 = st.asForStmt().getUpdate();
-        if (n2.isNonEmpty()) {
-            for (Expression e : n2)
-                handleExpression(e,forLoopScope);
-        }
-
-        Statement forStmt = st.asForStmt().getBody();
-        handleStatement(forStmt,forLoopScope);
-    }
-
     public void handleExpression(Expression exp,Scope parentScope) {
 
         if (exp == null)
@@ -344,7 +195,8 @@ public class MethodObfuscator {
             List<VariableDeclarator> variables = vdexp.getVariables();
             handleVariables(variables, parentScope);
 
-        } else if (exp.isMethodCallExpr()) {
+        }
+        else if (exp.isMethodCallExpr()) {
             MethodCallExpr methodCall = exp.asMethodCallExpr();
             String mname = methodCall.getName().getIdentifier();
             List<Expression> argList = methodCall.getArguments();
@@ -434,19 +286,23 @@ public class MethodObfuscator {
         else if (exp.isUnaryExpr()) {
             UnaryExpr expr = exp.asUnaryExpr();
             handleExpression(expr.getExpression(),parentScope);
-        } else if (exp.isBinaryExpr()) {
+        }
+        else if (exp.isBinaryExpr()) {
 
             BinaryExpr expr = exp.asBinaryExpr();
             handleExpression(expr.getLeft(),parentScope);
             handleExpression(expr.getRight(),parentScope);
 
-        }else if(exp.isCastExpr()){
+        }
+        else if(exp.isCastExpr()){
             CastExpr castExpr=exp.asCastExpr();
             handleExpression(castExpr.getExpression(),parentScope);
-        }else if (exp.isThisExpr()) {
+        }
+        else if (exp.isThisExpr()) {
             exp = exp.asThisExpr().getClassExpr().orElse(null);
             handleExpression(exp,parentScope);
-        }else if(exp.isObjectCreationExpr()) {
+        }
+        else if(exp.isObjectCreationExpr()) {
 
             ObjectCreationExpr expr = exp.asObjectCreationExpr();
 
@@ -472,17 +328,20 @@ public class MethodObfuscator {
         else if (exp.isEnclosedExpr()) {
             EnclosedExpr expr = exp.asEnclosedExpr();
             handleExpression(expr.getInner(),parentScope);
-        }else if(exp.isArrayAccessExpr()){
+        }
+        else if(exp.isArrayAccessExpr()){
             ArrayAccessExpr arrayAccessExpr=exp.asArrayAccessExpr();
             handleExpression(arrayAccessExpr.getName(),parentScope);
-        }else if (exp.isArrayInitializerExpr()) {
+        }
+        else if (exp.isArrayInitializerExpr()) {
             ArrayInitializerExpr expr = exp.asArrayInitializerExpr();
             List<Expression> exList = expr.getValues();
             if(!exList.isEmpty()){
                 for(Expression e:exList)
                     handleExpression(e,parentScope);
             }
-        }else if (exp.isArrayCreationExpr()) {
+        }
+        else if (exp.isArrayCreationExpr()) {
             ArrayCreationExpr expr = exp.asArrayCreationExpr();
 //            if (expr.getElementType().isClassOrInterfaceType())
 //                handleClassInterfaceType(expr.getElementType().asClassOrInterfaceType());
@@ -500,50 +359,6 @@ public class MethodObfuscator {
             handleExpression(conditionalExpr.getCondition(),parentScope);
             handleExpression(conditionalExpr.getThenExpr(),parentScope);
             handleExpression(conditionalExpr.getElseExpr(),parentScope);
-        }
-    }
-
-
-    public void handleExpressionStatement(Statement st, Scope parentScope) {
-        if (st == null || !st.isExpressionStmt())
-            return;
-
-        Expression exp = st.asExpressionStmt().getExpression();
-        handleExpression(exp,parentScope);
-
-    }
-
-    public void handleIfStatement(Statement st, Scope parentScope) {
-        if (st == null || !st.isIfStmt())
-            return;
-
-        Scope ifScope;
-
-        Expression condition = st.asIfStmt().getCondition();
-        handleExpression(condition,parentScope);
-
-        Statement thenStmt = st.asIfStmt().getThenStmt();
-        ifScope = new Scope();
-        ifScope.setScope(parentScope);
-        handleStatement(thenStmt, ifScope);
-
-        Statement elseStmt = st.asIfStmt().getElseStmt().orElse(null);
-        ifScope = new Scope();
-        ifScope.setScope(parentScope);
-        handleStatement(elseStmt, ifScope);
-    }
-
-    public void handleBlockStatement(Statement statement, Scope parentScope) {
-        if (statement == null || !statement.isBlockStmt())
-            return;
-
-        List<Statement> stmtBlock = statement.asBlockStmt().getStatements();
-        if (!stmtBlock.isEmpty()) {
-            Scope scope = new Scope();
-            scope.setScope(parentScope);
-
-            for (Statement stmt : stmtBlock)
-                handleStatement(stmt, scope);
         }
     }
 
@@ -636,7 +451,6 @@ public class MethodObfuscator {
 
         return false;
     }
-
 
     public void handleParameter(Parameter p,Scope parentScope) {
 

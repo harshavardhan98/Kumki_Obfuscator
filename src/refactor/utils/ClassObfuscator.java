@@ -1,4 +1,4 @@
-package utils;
+package refactor.utils;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.Position;
@@ -13,17 +13,17 @@ import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
-import model.Obfuscator;
+import obfuscator.Obfuscator;
 import model.ReplacementDataNode;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static utils.CommonUtils.*;
-import static utils.Constants.classList;
-import static utils.FileOperation.getClassNameFromFilePath;
-import static utils.FileOperation.renameFile;
+import static refactor.utils.CommonUtils.*;
+import static refactor.utils.Constants.classList;
+import static refactor.utils.FileOperation.getClassNameFromFilePath;
+import static refactor.utils.FileOperation.renameFile;
 
 public class ClassObfuscator {
 
