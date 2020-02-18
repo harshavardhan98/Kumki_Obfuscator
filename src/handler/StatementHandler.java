@@ -123,10 +123,9 @@ public class StatementHandler {
         forEachScope.setScope(parentScope);
 
         NodeList<VariableDeclarator> variableDeclarators = st.asForeachStmt().getVariable().getVariables();
-        //todo check
         if (expressionHandler instanceof ClassExpressionHandler)
             ClassObfuscator.handleVariables(variableDeclarators, forEachScope);
-        //else if (expressionHandler instanceof MethodExpressionHandler);
+        else if (expressionHandler instanceof MethodExpressionHandler);
 
         expressionHandler.handleExpression(st.asForeachStmt().getIterable(), forEachScope);
         Statement forEach = st.asForeachStmt().getBody();

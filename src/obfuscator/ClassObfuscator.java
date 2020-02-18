@@ -194,8 +194,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                     //Methods
                     if (bd.isMethodDeclaration())
                         handleMethodDeclaration(bd.asMethodDeclaration(), classScope);
-
-                        //Inner Class
+                    //Inner Class
                     else if (bd.isClassOrInterfaceDeclaration())
                         handleClass(bd.asClassOrInterfaceDeclaration());
                 }

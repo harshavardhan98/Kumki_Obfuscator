@@ -5,15 +5,10 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import model.ReplacementDataNode;
-import model.Scope;
-import obfuscator.ClassObfuscator;
-import obfuscator.Obfuscator;
-
+import model.*;
+import obfuscator.*;
 import java.util.List;
-
 import static obfuscator.ClassObfuscator.*;
-import static obfuscator.Obfuscator.*;
 import static utils.Encryption.*;
 
 public class ClassExpressionHandler extends ExpressionHandler {
@@ -52,7 +47,6 @@ public class ClassExpressionHandler extends ExpressionHandler {
         if (exp == null || !exp.isMethodCallExpr())
             return;
 
-        //TODO: CHECK
         MethodCallExpr methodCall = exp.asMethodCallExpr();
         List<Expression> argList = methodCall.getArguments();
         if (argList != null) {
@@ -115,7 +109,6 @@ public class ClassExpressionHandler extends ExpressionHandler {
         if (exp == null || !exp.isObjectCreationExpr())
             return;
 
-        //TODO: CHECK
         ObjectCreationExpr expr = exp.asObjectCreationExpr();
         String type = expr.getType().getName().getIdentifier();
         int vstart_line_num = expr.getType().getName().getRange().get().begin.line;
@@ -176,6 +169,5 @@ public class ClassExpressionHandler extends ExpressionHandler {
             ClassOrInterfaceType type = p.getType().asClassOrInterfaceType();
             handleClassInterfaceType(type);
         }
-
     }
 }

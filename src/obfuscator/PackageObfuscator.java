@@ -5,32 +5,23 @@ import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.Name;
-import model.ReplacementDataNode;
-import utils.CommonUtils;
-import utils.Constants;
-
+import model.*;
 import java.util.*;
-
-import static utils.Encryption.getHexValue;
+import static utils.Encryption.*;
 
 public class PackageObfuscator extends Obfuscator implements Obfuscate {
 
-
     @Override
     public void obfuscate(CompilationUnit cu) {
-
-        if (cu.getPackageDeclaration().orElse(null) != null) {
+        if (cu.getPackageDeclaration().orElse(null) != null)
             handlePackageDeclaration(cu.getPackageDeclaration().orElse(null).getName());
-        }
         handleImport(cu);
-
     }
 
     @Override
     public void handleClass(ClassOrInterfaceDeclaration clas) {
 
     }
-
 
     private void handleRange(TokenRange tokenRange, String identifier) {
         if (tokenRange != null) {
@@ -50,10 +41,7 @@ public class PackageObfuscator extends Obfuscator implements Obfuscate {
         }
     }
 
-
     public void handleImport(CompilationUnit cu) {
-
-
         for (int i = 0; i < cu.getImports().size(); i++) {
             Name nm = cu.getImports().get(i).getName().getQualifier().orElse(null);
             boolean isAsterisk = cu.getImports().get(i).isAsterisk();
@@ -86,7 +74,6 @@ public class PackageObfuscator extends Obfuscator implements Obfuscate {
         }
     }
 
-
     private void handlePackageDeclaration(Name name) {
 
         if (name != null) {
@@ -109,6 +96,4 @@ public class PackageObfuscator extends Obfuscator implements Obfuscate {
             handlePackageDeclaration(name.getQualifier().orElse(null));
         }
     }
-
-
 }
