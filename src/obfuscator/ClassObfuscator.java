@@ -20,6 +20,7 @@ import model.Scope;
 import java.util.ArrayList;
 import java.util.List;
 
+import static refactor.utils.CommonUtils.getHexValue;
 import static utils.CommonUtils.*;
 import static utils.Encryption.*;
 
@@ -29,54 +30,13 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
 
     public ClassObfuscator() {
         super();
-
         statementHandler = new StatementHandler(new ClassExpressionHandler());
-
     }
 
     /*********************************************/
 
-    public void handleMethodDeclaration(MethodDeclaration method) {
-        if (method.getType().isClassOrInterfaceType()) {
-            ClassOrInterfaceType cit = method.getType().asClassOrInterfaceType();
-            handleClassInterfaceType(cit);
-        }
 
-        if (method.getType().isArrayType()) {
-            ArrayType cit = method.getType().asArrayType();
-            handleArrayType(cit);
-        }
-
-        if (compare(method.getType().asString())) {
-            ReplacementDataNode r = new ReplacementDataNode();
-            Range range = method.getType().getRange().orElse(null);
-
-            if (range != null) {
-                Position begin = range.begin;
-                Position end = range.end;
-                r.setLineNo(begin.line);
-                r.setStartColNo(begin.column);
-                r.setEndColNo(end.column);
-                r.setReplacementString(getHexValue(method.getType().asString()));
-                obfuscatorConfig.setArrayList(r);
-            }
-        }
-
-        BlockStmt block = method.getBody().orElse(null);
-        handleBlockStmt(block);
-
-        //Method Arguments
-        List<Parameter> parameterList = method.getParameters();
-
-        // todo 3: check id handleParamter works properly
-        if (!parameterList.isEmpty()) {
-            for (Parameter p : parameterList)
-                statementHandler.handleParameter(p);
-        }
-
-    }
-
-    public void handleArrayType(ArrayType cit) {
+    public static void handleArrayType(ArrayType cit) {
         if (cit == null)
             return;
 
@@ -84,22 +44,10 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
             handleClassInterfaceType(cit.getComponentType().asClassOrInterfaceType());
     }
 
-    public void handleBlockStmt(BlockStmt block) {
-        if (block == null)
-            return;
-
-        List<Statement> stList = block.getStatements();
-        if (!stList.isEmpty()) {
-            for (int i = 0; i < stList.size(); i++) {
-                Statement st = stList.get(i);
-                statementHandler.handleStatement(st);
-            }
-        }
-    }
 
     /*********************************************/
 
-    public void handleVariables(List<VariableDeclarator> variables) {
+    public static void handleVariables(List<VariableDeclarator> variables,Scope parentScope) {
         if (!variables.isEmpty()) {
             for (VariableDeclarator variable : variables) {
 
@@ -112,19 +60,19 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                 int vstart_col_num = variable.getType().getRange().get().begin.column;
                 int vend_col_num = variable.getType().getRange().get().end.column;
 
-                Boolean flag = compare(vtype);
+                Boolean flag = verifyUserDefinedClass(vtype);
                 if (flag) {
                     ReplacementDataNode rnode = new ReplacementDataNode();
                     rnode.setLineNo(vstart_line_num);
                     rnode.setStartColNo(vstart_col_num);
                     rnode.setEndColNo(vend_col_num);
                     rnode.setReplacementString(getHexValue(vtype));
-                    //obfuscator.setArrayList(rnode);
+                    obfuscatorConfig.setArrayList(rnode);
                 }
 
                 //Object Initialisation
                 Expression expression = variable.getInitializer().orElse(null);
-                handleExpression(expression);
+                statementHandler.getExpressionHandler().handleExpression(expression,parentScope);
             }
         }
     }
@@ -134,6 +82,8 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
 
 
     /*********************************************/
+
+
 
 
     public void handleImport(Name name, ArrayList<String> replacementPattern) {
@@ -177,20 +127,24 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
     @Override
     public void handleClass(ClassOrInterfaceDeclaration clas) {
         if (clas != null) {
+
+            Scope classScope=new Scope();
+            classScope.setParentScope(null);
+
             //Class name
             String name = clas.getName().getIdentifier();
             int start_line_num = clas.getName().getRange().get().begin.line;
             int start_col_num = clas.getName().getRange().get().begin.column;
             int end_col_num = clas.getName().getRange().get().end.column;
 
-            boolean flag = compare(name);
+            boolean flag = verifyUserDefinedClass(name);
             if (flag) {
                 ReplacementDataNode rnode = new ReplacementDataNode();
                 rnode.setLineNo(start_line_num);
                 rnode.setStartColNo(start_col_num);
                 rnode.setEndColNo(end_col_num);
                 rnode.setReplacementString(getHexValue(name));
-                //obfuscator.setArrayList(rnode);
+                obfuscatorConfig.setArrayList(rnode);
             }
 
             //Extends class
@@ -212,7 +166,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
             if (!global_fields.isEmpty()) {
                 for (FieldDeclaration field : global_fields) {
                     List<VariableDeclarator> global_variables = field.getVariables();
-                    handleVariables(global_variables);
+                    handleVariables(global_variables,classScope);
                 }
             }
 
@@ -225,24 +179,25 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                     int cstart_col_num = constructor.getName().getRange().get().begin.column;
                     int cend_col_num = constructor.getName().getRange().get().end.column;
 
-                    flag = compare(cname);
+                    flag = verifyUserDefinedClass(cname);
                     if (flag) {
                         ReplacementDataNode rnode = new ReplacementDataNode();
                         rnode.setLineNo(cstart_line_num);
                         rnode.setStartColNo(cstart_col_num);
                         rnode.setEndColNo(cend_col_num);
                         rnode.setReplacementString(getHexValue(cname));
-                        //obfuscator.setArrayList(rnode);
+                        obfuscatorConfig.setArrayList(rnode);
                     }
 
                     List<Parameter> parameterList = constructor.getParameters();
                     if (!parameterList.isEmpty()) {
                         for (Parameter p : parameterList)
-                            statementHandler.handleParameter(p);
+                            statementHandler.handleParameter(p,classScope);
                     }
 
                     BlockStmt block = constructor.getBody();
-                    handleBlockStmt(block);
+
+                    statementHandler.handleStatement(block,classScope);
                 }
             }
 
@@ -252,7 +207,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                 for (BodyDeclaration<?> bd : members) {
                     //Methods
                     if (bd.isMethodDeclaration())
-                        handleMethodDeclaration(bd.asMethodDeclaration());
+                        handleMethodDeclaration(bd.asMethodDeclaration(),classScope);
 
                         //Inner Class
                     else if (bd.isClassOrInterfaceDeclaration())
@@ -260,5 +215,75 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                 }
             }
         }
+    }
+
+    public static void handleClassInterfaceType(ClassOrInterfaceType cit) {
+        if (cit == null)
+            return;
+
+        String name = cit.getName().getIdentifier();
+        int start_line_num = cit.getName().getRange().get().begin.line;
+        int start_col_num = cit.getName().getRange().get().begin.column;
+        int end_col_num = cit.getName().getRange().get().end.column;
+
+        Boolean flag = verifyUserDefinedClass(name);
+        if (flag) {
+            ReplacementDataNode rnode = new ReplacementDataNode();
+            rnode.setLineNo(start_line_num);
+            rnode.setStartColNo(start_col_num);
+            rnode.setEndColNo(end_col_num);
+            rnode.setReplacementString(getHexValue(name));
+            updateObfuscatorConfig(rnode);
+        }
+
+        NodeList<Type> args = cit.getTypeArguments().orElse(null);
+        if (args != null) {
+            for (Type t : args) {
+                if (t.isClassOrInterfaceType())
+                    handleClassInterfaceType(t.asClassOrInterfaceType());
+            }
+        }
+
+        ClassOrInterfaceType scope = cit.getScope().orElse(null);
+        handleClassInterfaceType(scope);
+    }
+
+    public static void handleMethodDeclaration(MethodDeclaration method,Scope parentScope) {
+        if (method.getType().isClassOrInterfaceType()) {
+            ClassOrInterfaceType cit = method.getType().asClassOrInterfaceType();
+            handleClassInterfaceType(cit);
+        }
+
+        if (method.getType().isArrayType()) {
+            ArrayType cit = method.getType().asArrayType();
+            handleArrayType(cit);
+        }
+
+        if (verifyUserDefinedClass(method.getType().asString())) {
+            ReplacementDataNode r = new ReplacementDataNode();
+            Range range = method.getType().getRange().orElse(null);
+
+            if (range != null) {
+                Position begin = range.begin;
+                Position end = range.end;
+                r.setLineNo(begin.line);
+                r.setStartColNo(begin.column);
+                r.setEndColNo(end.column);
+                r.setReplacementString(getHexValue(method.getType().asString()));
+                updateObfuscatorConfig(r);
+            }
+        }
+
+        BlockStmt block = method.getBody().orElse(null);
+        statementHandler.handleStatement(block,parentScope);
+
+        //Method Arguments
+        List<Parameter> parameterList = method.getParameters();
+
+        if (!parameterList.isEmpty()) {
+            for (Parameter p : parameterList)
+                statementHandler.handleParameter(p,parentScope);
+        }
+
     }
 }

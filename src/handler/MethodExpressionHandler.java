@@ -14,6 +14,9 @@ import static utils.Encryption.getHexValue;
 
 public class MethodExpressionHandler extends ExpressionHandler {
 
+    public MethodExpressionHandler(Object object) {
+        super(object);
+    }
 
     public void handleMethodCallExpr(Expression exp, Scope parentScope) {
         if (exp == null || !exp.isMethodCallExpr())

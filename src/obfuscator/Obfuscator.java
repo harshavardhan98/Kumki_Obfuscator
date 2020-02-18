@@ -10,6 +10,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import handler.StatementHandler;
 import model.FileSystem;
+import model.ReplacementDataNode;
 import refactor.utils.CommonUtils;
 import refactor.utils.FileOperation;
 import utils.visitor.MethodVisitor;
@@ -25,11 +26,10 @@ import static refactor.utils.FileOperation.*;
 
 public class Obfuscator {
 
-    ObfuscatorConfig obfuscatorConfig;
-    StatementHandler statementHandler;
+    public static ObfuscatorConfig obfuscatorConfig;
 
     public ArrayList<String> classList;
-    public ArrayList<String> classNameList;
+    public static ArrayList<String> classNameList;
     public ArrayList<String> folderList;
     public Map<String, ArrayList<String>> methodMap;
     public ArrayList<String> keepClass;
@@ -159,5 +159,18 @@ public class Obfuscator {
             if (f.getFiles() != null)
                 getFilesList(f.getFiles());
         }
+    }
+
+    public static void updateObfuscatorConfig(ReplacementDataNode r){
+        obfuscatorConfig.setArrayList(r);
+    }
+
+    public static Boolean verifyUserDefinedClass(String ObjType) {
+        // todo write as lambda
+        for (int x = 0; x < classNameList.size(); x++) {
+            if (classNameList.equals(ObjType))
+                return true;
+        }
+        return false;
     }
 }

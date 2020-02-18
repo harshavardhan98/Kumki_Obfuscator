@@ -11,9 +11,11 @@ import model.ReplacementDataNode;
 import model.Scope;
 import obfuscator.ClassObfuscator;
 import obfuscator.MethodObfuscator;
+import obfuscator.Obfuscator;
 
 import java.util.List;
 
+import static refactor.utils.CommonUtils.compare;
 import static utils.Encryption.getHexValue;
 
 public class StatementHandler{
@@ -22,11 +24,10 @@ public class StatementHandler{
 
 
     public StatementHandler(Object o) {
-
         if(o instanceof MethodExpressionHandler)
-            expressionHandler=new MethodExpressionHandler();
+            expressionHandler=new MethodExpressionHandler(o);
         else if(o instanceof ClassExpressionHandler)
-            expressionHandler=new ClassExpressionHandler();
+            expressionHandler=new ClassExpressionHandler(o);
     }
 
     public static void handleStatement(Statement statement, Scope parentScope) {
@@ -122,7 +123,10 @@ public class StatementHandler{
         forEachScope.setScope(parentScope);
 
         NodeList<VariableDeclarator> variableDeclarators = st.asForeachStmt().getVariable().getVariables();
-        handleVariables(variableDeclarators, forEachScope);
+        if(expressionHandler instanceof ClassExpressionHandler)
+            ClassObfuscator.handleVariables(variableDeclarators, forEachScope);
+        else if(expressionHandler instanceof MethodExpressionHandler)
+            ;
         expressionHandler.handleExpression(st.asForeachStmt().getIterable(), forEachScope);
         Statement forEach = st.asForeachStmt().getBody();
         handleStatement(forEach, forEachScope);
@@ -210,7 +214,7 @@ public class StatementHandler{
         }
     }
 
-    private static void handleParameter(Parameter p,Scope parentScope) {
+    public static void handleParameter(Parameter p,Scope parentScope) {
         if (p == null)
             return;
         expressionHandler.handleParameter(p,parentScope);
@@ -232,7 +236,7 @@ public class StatementHandler{
             rnode.setStartColNo(start_col_num);
             rnode.setEndColNo(end_col_num);
             rnode.setReplacementString(getHexValue(name));
-            //obfuscator.setArrayList(rnode);
+            Obfuscator.updateObfuscatorConfig(rnode);
         }
 
         NodeList<Type> args = cit.getTypeArguments().orElse(null);
@@ -245,5 +249,10 @@ public class StatementHandler{
 
         ClassOrInterfaceType scope = cit.getScope().orElse(null);
         handleClassInterfaceType(scope);
+    }
+
+
+    public ExpressionHandler getExpressionHandler(){
+        return expressionHandler;
     }
 }

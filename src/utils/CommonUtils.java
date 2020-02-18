@@ -2,6 +2,7 @@ package utils;
 
 import java.io.File;
 
+import static refactor.utils.FileOperation.getClassNameFromFilePath;
 import static utils.Constants.*;
 
 public class CommonUtils {
@@ -25,4 +26,5 @@ public class CommonUtils {
         //  usr/Desktop/file1.java -> file1.java
         return filePath.substring(filePath.lastIndexOf(File.separator) + 1);
     }
+
 }

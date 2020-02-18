@@ -4,13 +4,19 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import model.Scope;
+import obfuscator.ClassObfuscator;
+
 import java.util.List;
 
 public class ExpressionHandler{
 
 
+    Object object;
 
-    public ExpressionHandler() {
+    public ExpressionHandler(){}
+
+    public ExpressionHandler(Object object) {
+            this.object=object;
     }
 
     public void handleExpression(Expression exp, Scope parentScope) {
@@ -42,7 +48,11 @@ public class ExpressionHandler{
 
         VariableDeclarationExpr vdexp = exp.asVariableDeclarationExpr();
         List<VariableDeclarator> variables = vdexp.getVariables();
-        handleVariables(variables, parentScope);
+
+        if(object instanceof ClassExpressionHandler)
+            ClassObfuscator.handleVariables(variables, parentScope);
+        else if(object instanceof MethodExpressionHandler)
+            ;
     }
 
     public void handleAssignExpr(Expression exp, Scope parentScope) {

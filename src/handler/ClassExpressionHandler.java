@@ -7,12 +7,24 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import model.ReplacementDataNode;
 import model.Scope;
+import obfuscator.ClassObfuscator;
+import obfuscator.Obfuscator;
 
 import java.util.List;
 
+import static obfuscator.ClassObfuscator.handleClassInterfaceType;
+import static obfuscator.Obfuscator.verifyUserDefinedClass;
 import static utils.Encryption.*;
 
 public class ClassExpressionHandler extends ExpressionHandler {
+
+    public ClassExpressionHandler() {
+
+    }
+
+    public ClassExpressionHandler(Object p) {
+        super(p);
+    }
 
     @Override
     public void handleCastExpr(Expression exp, Scope parentScope) {
@@ -23,7 +35,7 @@ public class ClassExpressionHandler extends ExpressionHandler {
         if (expr.getType().isClassOrInterfaceType())
             handleClassInterfaceType(expr.getType().asClassOrInterfaceType());
 
-        handleExpression(expr.getExpression());
+        handleExpression(expr.getExpression(),parentScope);
     }
 
     @Override
@@ -46,12 +58,12 @@ public class ClassExpressionHandler extends ExpressionHandler {
         List<Expression> argList = methodCall.getArguments();
         if (argList != null) {
             for (Expression i : argList)
-                handleExpression(i);
+                handleExpression(i,parentScope);
         }
 
         //Static method calls
         exp = methodCall.getScope().orElse(null);
-        handleExpression(exp);
+        handleExpression(exp,parentScope);
     }
 
     @Override
@@ -65,17 +77,17 @@ public class ClassExpressionHandler extends ExpressionHandler {
         int vstart_col_num = sname.getRange().get().begin.column;
         int vend_col_num = sname.getRange().get().end.column;
 
-        Boolean flag = compare(name);
+        Boolean flag = verifyUserDefinedClass(name);
         if (flag) {
             ReplacementDataNode rnode = new ReplacementDataNode();
             rnode.setLineNo(vstart_line_num);
             rnode.setStartColNo(vstart_col_num);
             rnode.setEndColNo(vend_col_num);
             rnode.setReplacementString(getHexValue(name));
-            obfuscator.setArrayList(rnode);
+            Obfuscator.updateObfuscatorConfig(rnode);
         }
         //eg: m.behaviour(Mammal.count);
-        handleExpression(exp.asFieldAccessExpr().getScope());
+        handleExpression(exp.asFieldAccessExpr().getScope(),parentScope);
     }
 
     @Override
@@ -88,14 +100,14 @@ public class ClassExpressionHandler extends ExpressionHandler {
         int vstart_col_num = exp.getRange().get().begin.column;
         int vend_col_num = exp.getRange().get().end.column;
 
-        Boolean flag = compare(name);
+        Boolean flag = verifyUserDefinedClass(name);
         if (flag) {
             ReplacementDataNode rnode = new ReplacementDataNode();
             rnode.setLineNo(vstart_line_num);
             rnode.setStartColNo(vstart_col_num);
             rnode.setEndColNo(vend_col_num);
             rnode.setReplacementString(getHexValue(name));
-            //obfuscator.setArrayList(rnode);
+            Obfuscator.updateObfuscatorConfig(rnode);
         }
     }
 
@@ -111,14 +123,14 @@ public class ClassExpressionHandler extends ExpressionHandler {
         int vstart_col_num = expr.getType().getRange().get().begin.column;
         int vend_col_num = expr.getType().getRange().get().end.column;
 
-        Boolean flag = compare(type);
+        Boolean flag = verifyUserDefinedClass(type);
         if (flag) {
             ReplacementDataNode rnode = new ReplacementDataNode();
             rnode.setLineNo(vstart_line_num);
             rnode.setStartColNo(vstart_col_num);
             rnode.setEndColNo(vend_col_num);
             rnode.setReplacementString(getHexValue(type));
-            //obfuscator.setArrayList(rnode);
+            Obfuscator.updateObfuscatorConfig(rnode);
         }
 
         if (expr.getType().isClassOrInterfaceType())
@@ -127,14 +139,14 @@ public class ClassExpressionHandler extends ExpressionHandler {
         List<Expression> expList = expr.getArguments();
         if (expList != null) {
             for (Expression e : expList)
-                handleExpression(e);
+                handleExpression(e,parentScope);
         }
 
         List<BodyDeclaration<?>> bodyList = expr.getAnonymousClassBody().orElse(null);
         if (bodyList != null) {
             for (BodyDeclaration<?> e : bodyList)
                 if (e.isMethodDeclaration())
-                    handleMethodDeclaration(e.asMethodDeclaration());
+                    ClassObfuscator.handleMethodDeclaration(e.asMethodDeclaration(),parentScope);
         }
     }
 
@@ -150,10 +162,10 @@ public class ClassExpressionHandler extends ExpressionHandler {
         List<ArrayCreationLevel> acl = expr.getLevels();
         if (!acl.isEmpty()) {
             for (ArrayCreationLevel ac : acl)
-                handleExpression(ac.getDimension().orElse(null));
+                handleExpression(ac.getDimension().orElse(null),parentScope);
         }
 
-        handleExpression(expr.getInitializer().orElse(null));
+        handleExpression(expr.getInitializer().orElse(null),parentScope);
     }
 
     @Override
