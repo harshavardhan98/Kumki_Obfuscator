@@ -13,6 +13,8 @@ import java.util.List;
 import static utils.Encryption.getHexValue;
 
 public class MethodExpressionHandler extends ExpressionHandler {
+
+
     public void handleMethodCallExpr(Expression exp, Scope parentScope) {
         if (exp == null || !exp.isMethodCallExpr())
             return;
@@ -120,7 +122,7 @@ public class MethodExpressionHandler extends ExpressionHandler {
                     for (Parameter p : parameters)
                         handleParameter(p, parentScope);
 
-                    handleStatement(e.asMethodDeclaration().getBody().orElse(null), parentScope);
+                    StatementHandler.handleStatement(e.asMethodDeclaration().getBody().orElse(null), parentScope);
                 }
             }
         }
@@ -138,5 +140,17 @@ public class MethodExpressionHandler extends ExpressionHandler {
         }
 
         handleExpression(expr.getInitializer().orElse(null), parentScope);
+    }
+
+    @Override
+    public void handleParameter(Parameter p, Scope parentScope) {
+
+        if (p == null)
+            return;
+        if (p.getName()!=null) {
+            String pname=p.getNameAsString();
+            String ptype=p.getType().asString();
+            parentScope.setData(pname,ptype);
+        }
     }
 }

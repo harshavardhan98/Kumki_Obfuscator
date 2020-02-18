@@ -1,11 +1,18 @@
 package handler;
 
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import model.Scope;
 import java.util.List;
 
-public class ExpressionHandler {
+public class ExpressionHandler{
+
+
+
+    public ExpressionHandler() {
+    }
+
     public void handleExpression(Expression exp, Scope parentScope) {
 
         if (exp == null)
@@ -125,4 +132,6 @@ public class ExpressionHandler {
     public void handleFieldAccessExpr(Expression exp, Scope parentScope) { }
 
     public void handleNameExpr(Expression exp, Scope parentScope) { }
+
+    public void handleParameter(Parameter p, Scope parentScope){}
 }

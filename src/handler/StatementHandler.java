@@ -16,17 +16,20 @@ import java.util.List;
 
 import static utils.Encryption.getHexValue;
 
-public class StatementHandler {
-    private ExpressionHandler expressionHandler;
+public class StatementHandler{
 
-    public StatementHandler(Object object) {
-        if (object instanceof MethodObfuscator)
-            expressionHandler = new MethodExpressionHandler();
-        else if (object instanceof ClassObfuscator)
-            expressionHandler = new ClassExpressionHandler();
+    private static ExpressionHandler expressionHandler;
+
+
+    public StatementHandler(Object o) {
+
+        if(o instanceof MethodExpressionHandler)
+            expressionHandler=new MethodExpressionHandler();
+        else if(o instanceof ClassExpressionHandler)
+            expressionHandler=new ClassExpressionHandler();
     }
 
-    public void handleStatement(Statement statement, Scope parentScope) {
+    public static void handleStatement(Statement statement, Scope parentScope) {
         if (statement == null || statement.isEmptyStmt())
             return;
 
@@ -44,7 +47,7 @@ public class StatementHandler {
         handleExplicitConstructorInvocationStmt(statement, parentScope);
     }
 
-    public void handleBlockStatement(Statement statement, Scope parentScope) {
+     private static void handleBlockStatement(Statement statement, Scope parentScope) {
         if (statement == null || !statement.isBlockStmt())
             return;
 
@@ -58,15 +61,15 @@ public class StatementHandler {
         }
     }
 
-    public void handleExpressionStatement(Statement st, Scope parentScope) {
+     private static void handleExpressionStatement(Statement st, Scope parentScope) {
         if (st == null || !st.isExpressionStmt())
             return;
 
         Expression exp = st.asExpressionStmt().getExpression();
-        handleExpression(exp, parentScope);
+         expressionHandler.handleExpression(exp, parentScope);
     }
 
-    public void handleIfStatement(Statement st, Scope parentScope) {
+    private static void handleIfStatement(Statement st, Scope parentScope) {
         if (st == null || !st.isIfStmt())
             return;
 
@@ -86,7 +89,7 @@ public class StatementHandler {
         handleStatement(elseStmt, ifScope);
     }
 
-    private void handleForStatement(Statement st, Scope parentScope) {
+    private static void handleForStatement(Statement st, Scope parentScope) {
         if (st == null || !st.isForStmt())
             return;
 
@@ -111,7 +114,7 @@ public class StatementHandler {
         handleStatement(forStmt, forLoopScope);
     }
 
-    private void handleForEachStatement(Statement st, Scope parentScope) {
+    private static void handleForEachStatement(Statement st, Scope parentScope) {
         if (st == null || !st.isForeachStmt())
             return;
 
@@ -125,7 +128,7 @@ public class StatementHandler {
         handleStatement(forEach, forEachScope);
     }
 
-    public void handleWhileStatement(Statement statement, Scope parentScope) {
+    private static void handleWhileStatement(Statement statement, Scope parentScope) {
         if (statement == null || !statement.isWhileStmt())
             return;
 
@@ -137,7 +140,7 @@ public class StatementHandler {
         handleBlockStatement(whileStmt.getBody(), whileScope);
     }
 
-    private void handleDoWhileStatement(Statement st, Scope parentScope) {
+    private static void handleDoWhileStatement(Statement st, Scope parentScope) {
         if (st == null || !st.isDoStmt())
             return;
 
@@ -145,14 +148,14 @@ public class StatementHandler {
         expressionHandler.handleExpression(st.asDoStmt().getCondition(), parentScope);
     }
 
-    private void handleReturnStatement(Statement st, Scope parentScope) {
+    private static void handleReturnStatement(Statement st, Scope parentScope) {
         if (st == null || !st.isReturnStmt())
             return;
 
         expressionHandler.handleExpression(st.asReturnStmt().getExpression().orElse(null), parentScope);
     }
 
-    public void handleSwitchStatement(Statement st, Scope parentScope) {
+    private static void handleSwitchStatement(Statement st, Scope parentScope) {
         if (st == null || !st.isSwitchStmt())
             return;
 
@@ -172,7 +175,7 @@ public class StatementHandler {
         }
     }
 
-    private void handleTryCatchStatement(Statement st, Scope parentScope) {
+    private static void handleTryCatchStatement(Statement st, Scope parentScope) {
         if (st == null || !st.isTryStmt())
             return;
 
@@ -187,7 +190,7 @@ public class StatementHandler {
         }
     }
 
-    private void handleSynchronisedStatement(Statement st, Scope parentScope) {
+    private static void handleSynchronisedStatement(Statement st, Scope parentScope) {
         if (st == null || !st.isSynchronizedStmt())
             return;
 
@@ -195,7 +198,7 @@ public class StatementHandler {
         handleStatement(st.asSynchronizedStmt().getBody(), parentScope);
     }
 
-    public void handleExplicitConstructorInvocationStmt(Statement st, Scope parentScope) {
+    private static void handleExplicitConstructorInvocationStmt(Statement st, Scope parentScope) {
         if (st == null || !st.isExplicitConstructorInvocationStmt())
             return;
 
@@ -207,16 +210,13 @@ public class StatementHandler {
         }
     }
 
-    public void handleParameter(Parameter p) {
+    private static void handleParameter(Parameter p,Scope parentScope) {
         if (p == null)
             return;
-        if (p.getType().isClassOrInterfaceType()) {
-            ClassOrInterfaceType type = p.getType().asClassOrInterfaceType();
-            handleClassInterfaceType(type);
-        }
+        expressionHandler.handleParameter(p,parentScope);
     }
 
-    public void handleClassInterfaceType(ClassOrInterfaceType cit) {
+    private static void handleClassInterfaceType(ClassOrInterfaceType cit) {
         if (cit == null)
             return;
 

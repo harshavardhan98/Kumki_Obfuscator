@@ -12,7 +12,10 @@ import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import handler.ClassExpressionHandler;
+import handler.StatementHandler;
 import model.ReplacementDataNode;
+import model.Scope;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +25,13 @@ import static utils.Encryption.*;
 
 public class ClassObfuscator extends Obfuscator implements Obfuscate {
 
-    public ClassObfuscator(){
+    public static StatementHandler statementHandler;
+
+    public ClassObfuscator() {
         super();
+
+        statementHandler = new StatementHandler(new ClassExpressionHandler());
+
     }
 
     /*********************************************/
@@ -60,9 +68,10 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
         //Method Arguments
         List<Parameter> parameterList = method.getParameters();
 
+        // todo 3: check id handleParamter works properly
         if (!parameterList.isEmpty()) {
             for (Parameter p : parameterList)
-                handleParameter(p);
+                statementHandler.handleParameter(p);
         }
 
     }
@@ -83,7 +92,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
         if (!stList.isEmpty()) {
             for (int i = 0; i < stList.size(); i++) {
                 Statement st = stList.get(i);
-                handleStatement(st);
+                statementHandler.handleStatement(st);
             }
         }
     }
@@ -229,7 +238,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                     List<Parameter> parameterList = constructor.getParameters();
                     if (!parameterList.isEmpty()) {
                         for (Parameter p : parameterList)
-                            handleParameter(p);
+                            statementHandler.handleParameter(p);
                     }
 
                     BlockStmt block = constructor.getBody();

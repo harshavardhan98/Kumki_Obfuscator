@@ -2,7 +2,9 @@ package handler;
 
 import com.github.javaparser.ast.ArrayCreationLevel;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import model.ReplacementDataNode;
 import model.Scope;
 
@@ -152,5 +154,17 @@ public class ClassExpressionHandler extends ExpressionHandler {
         }
 
         handleExpression(expr.getInitializer().orElse(null));
+    }
+
+    @Override
+    public void handleParameter(Parameter p, Scope parentScope) {
+
+        if (p == null)
+            return;
+        if (p.getType().isClassOrInterfaceType()) {
+            ClassOrInterfaceType type = p.getType().asClassOrInterfaceType();
+            handleClassInterfaceType(type);
+        }
+
     }
 }
