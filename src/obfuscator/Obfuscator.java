@@ -32,6 +32,7 @@ public class Obfuscator {
     public static ArrayList<String> classNameList;
     public ArrayList<String> packageNameList;
     public ArrayList<String> folderList;
+    public ArrayList<String> folderNameList;
     public Map<String, ArrayList<String>> methodMap;
     public ArrayList<String> keepClass;
 
@@ -110,6 +111,7 @@ public class Obfuscator {
 
         ArrayList<FileSystem> fsTemp = parseFileStructureJson(projectDirectory + (jsonFileNameCount - 1) + fileStructureJsonPath);
         folderList = new ArrayList<>();
+        folderNameList = new ArrayList<>();
         classList = new ArrayList<>();
         packageNameList = new ArrayList<>();
         classNameList = new ArrayList<>();
@@ -158,14 +160,17 @@ public class Obfuscator {
                     e.printStackTrace();
                 }
             } else if (f.getType().equals("directory")) {
-                folderList.add(f.getPath() + File.separator + f.getName());
-                packageNameList.add(getPackageNameFromPath(f.getPath() + File.separator + f.getName()));
+                String path = f.getPath() + File.separator + f.getName();
+                folderList.add(path);
+                packageNameList.add(getPackageNameFromPath(path));
+                String arr[]=(getPackageNameFromPath(path)).split("\\.");
+                folderNameList.add(arr[arr.length-1]);
             }
-
 
             if (f.getFiles() != null)
                 getFilesList(f.getFiles());
         }
+        Collections.sort(folderNameList);
     }
 
     public static void updateObfuscatorConfig(ReplacementDataNode r) {

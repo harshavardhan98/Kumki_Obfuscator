@@ -90,7 +90,7 @@ public class PackageObfuscator extends Obfuscator implements Obfuscate {
     private void handlePackageDeclaration(Name name) {
 
         if (name != null) {
-            if (name.getIdentifier() != null && Collections.binarySearch(classNameList, name.getIdentifier()) >= 0) {
+            if (name.getIdentifier() != null && Collections.binarySearch(folderNameList, name.getIdentifier()) >= 0) {
                 TokenRange tokenRange = name.getTokenRange().orElse(null);
                 if (tokenRange != null) {
                     Range range = tokenRange.getEnd().getRange().orElse(null);

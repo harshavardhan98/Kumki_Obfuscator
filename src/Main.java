@@ -13,9 +13,9 @@ public class Main {
         obfuscator.init();
         obfuscator.performObfuscation(obfuscator);
 
-//        obfuscator = new PackageObfuscator();
-//        obfuscator.init();
-//        obfuscator.performObfuscation(obfuscator);
+        obfuscator = new PackageObfuscator();
+        obfuscator.init();
+        obfuscator.performObfuscation(obfuscator);
     }
 
     public static void init(){
