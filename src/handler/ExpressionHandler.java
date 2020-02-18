@@ -5,18 +5,21 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import model.Scope;
 import obfuscator.ClassObfuscator;
+import utils.Constants.*;
 
 import java.util.List;
 
-public class ExpressionHandler{
+public class ExpressionHandler {
+    Mode currentMode;
 
+    public ExpressionHandler() {
+    }
 
-    Object object;
-
-    public ExpressionHandler(){}
-
-    public ExpressionHandler(Object object) {
-            this.object=object;
+    public ExpressionHandler(ExpressionHandler object) {
+        if (object instanceof ClassExpressionHandler)
+            this.currentMode = Mode.CLASS;
+        else if (object instanceof MethodExpressionHandler)
+            this.currentMode = Mode.METHOD;
     }
 
     public void handleExpression(Expression exp, Scope parentScope) {
@@ -49,11 +52,9 @@ public class ExpressionHandler{
         VariableDeclarationExpr vdexp = exp.asVariableDeclarationExpr();
         List<VariableDeclarator> variables = vdexp.getVariables();
 
-        // todo check the conditions
-        if(((Class) object).getName().contains("ClassExpressionHandler"))
+        if (currentMode == Mode.CLASS)
             ClassObfuscator.handleVariables(variables, parentScope);
-        else if(((Class) object).getName().contains("MethodExpressionHandler"))
-            ;
+        else if (currentMode == Mode.METHOD);
     }
 
     public void handleAssignExpr(Expression exp, Scope parentScope) {
@@ -130,19 +131,27 @@ public class ExpressionHandler{
 
     /*******************************************************************/
 
-    public void handleMethodCallExpr(Expression exp, Scope parentScope) { }
+    public void handleMethodCallExpr(Expression exp, Scope parentScope) {
+    }
 
-    public void handleCastExpr(Expression exp, Scope parentScope) { }
+    public void handleCastExpr(Expression exp, Scope parentScope) {
+    }
 
-    public void handleObjectCreationExpr(Expression exp, Scope parentScope) { }
+    public void handleObjectCreationExpr(Expression exp, Scope parentScope) {
+    }
 
-    public void handleArrayCreationExpr(Expression exp, Scope parentScope) { }
+    public void handleArrayCreationExpr(Expression exp, Scope parentScope) {
+    }
 
-    public void handleClassExpr(Expression exp, Scope parentScope) { }
+    public void handleClassExpr(Expression exp, Scope parentScope) {
+    }
 
-    public void handleFieldAccessExpr(Expression exp, Scope parentScope) { }
+    public void handleFieldAccessExpr(Expression exp, Scope parentScope) {
+    }
 
-    public void handleNameExpr(Expression exp, Scope parentScope) { }
+    public void handleNameExpr(Expression exp, Scope parentScope) {
+    }
 
-    public void handleParameter(Parameter p, Scope parentScope){}
+    public void handleParameter(Parameter p, Scope parentScope) {
+    }
 }

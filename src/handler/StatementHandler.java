@@ -18,17 +18,16 @@ import java.util.List;
 
 import static utils.Encryption.getHexValue;
 
-public class StatementHandler{
+public class StatementHandler {
 
     private static ExpressionHandler expressionHandler;
 
+    public StatementHandler(ExpressionHandler object) {
 
-    public StatementHandler(Object o) {
-
-        if(((Class) o).getName().contains("MethodExpressionHandler"))
-            expressionHandler=new MethodExpressionHandler(o);
-        else if(((Class) o).getName().contains("ClassExpressionHandler"))
-            expressionHandler=new ClassExpressionHandler(o);
+        if(object instanceof ClassExpressionHandler)
+            expressionHandler = new ClassExpressionHandler(object);
+        else if(object instanceof MethodExpressionHandler)
+            expressionHandler = new MethodExpressionHandler(object);
     }
 
     public static void handleStatement(Statement statement, Scope parentScope) {
@@ -49,7 +48,7 @@ public class StatementHandler{
         handleExplicitConstructorInvocationStmt(statement, parentScope);
     }
 
-     private static void handleBlockStatement(Statement statement, Scope parentScope) {
+    private static void handleBlockStatement(Statement statement, Scope parentScope) {
         if (statement == null || !statement.isBlockStmt())
             return;
 
@@ -63,12 +62,12 @@ public class StatementHandler{
         }
     }
 
-     private static void handleExpressionStatement(Statement st, Scope parentScope) {
+    private static void handleExpressionStatement(Statement st, Scope parentScope) {
         if (st == null || !st.isExpressionStmt())
             return;
 
         Expression exp = st.asExpressionStmt().getExpression();
-         expressionHandler.handleExpression(exp, parentScope);
+        expressionHandler.handleExpression(exp, parentScope);
     }
 
     private static void handleIfStatement(Statement st, Scope parentScope) {
@@ -125,10 +124,10 @@ public class StatementHandler{
 
         NodeList<VariableDeclarator> variableDeclarators = st.asForeachStmt().getVariable().getVariables();
         //todo check
-        if(expressionHandler instanceof ClassExpressionHandler)
+        if (expressionHandler instanceof ClassExpressionHandler)
             ClassObfuscator.handleVariables(variableDeclarators, forEachScope);
-        else if(expressionHandler instanceof MethodExpressionHandler)
-            ;
+        //else if (expressionHandler instanceof MethodExpressionHandler);
+
         expressionHandler.handleExpression(st.asForeachStmt().getIterable(), forEachScope);
         Statement forEach = st.asForeachStmt().getBody();
         handleStatement(forEach, forEachScope);
@@ -216,15 +215,14 @@ public class StatementHandler{
         }
     }
 
-    public static void handleParameter(Parameter p,Scope parentScope) {
+    public static void handleParameter(Parameter p, Scope parentScope) {
         if (p == null)
             return;
-        expressionHandler.handleParameter(p,parentScope);
+        expressionHandler.handleParameter(p, parentScope);
     }
 
 
-
-    public ExpressionHandler getExpressionHandler(){
+    public ExpressionHandler getExpressionHandler() {
         return expressionHandler;
     }
 }

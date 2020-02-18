@@ -6,7 +6,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 public class MethodObfuscator extends Obfuscator implements Obfuscate {
 
     @Override
-    public void Obfuscate(CompilationUnit cu) {
+    public void obfuscate(CompilationUnit cu) {
 
     }
 

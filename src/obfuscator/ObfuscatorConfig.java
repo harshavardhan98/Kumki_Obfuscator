@@ -58,5 +58,7 @@ public class ObfuscatorConfig {
             System.out.print(r1.getLineNo());
             System.out.println(e.getMessage());
         }
+
+        arrayList.clear();
     }
 }

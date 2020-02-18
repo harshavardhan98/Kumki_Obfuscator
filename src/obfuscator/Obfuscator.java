@@ -8,11 +8,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import handler.ClassExpressionHandler;
 import model.FileSystem;
 import model.ReplacementDataNode;
 import utils.CommonUtils;
 import utils.Encryption;
 import utils.visitor.MethodVisitor;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
@@ -20,7 +22,6 @@ import java.util.*;
 import static utils.CommonUtils.*;
 import static utils.CommonUtils.getClassNameFromFilePath;
 import static utils.Constants.*;
-
 
 public class Obfuscator {
 
@@ -44,11 +45,14 @@ public class Obfuscator {
         getDependencyData();
     }
 
-    public void performObfuscation(Object p) {
+    public void performObfuscation(Obfuscator object) {
 
         for (String s : classList) {
             File file = new File(s);
             String className = getClassNameFromFilePath(file.getName());
+
+            //if(!className.contains("MainActivity"))
+            //continue;
 
             try {
                 CompilationUnit cu = JavaParser.parse(file);
@@ -56,9 +60,9 @@ public class Obfuscator {
                 if (clas == null)
                     clas = cu.getInterfaceByName(className).orElse(null);
 
-                if (((Class) p).getName().contains("ClassObfuscator")) {
-                    ((ClassObfuscator) p).Obfuscate(cu);
-                    ((ClassObfuscator) p).handleClass(clas);
+                if (object instanceof ClassObfuscator) {
+                    ((ClassObfuscator) object).obfuscate(cu);
+                    ((ClassObfuscator) object).handleClass(clas);
                 }
 
                 obfuscatorConfig.replaceInFiles(file);
@@ -66,7 +70,7 @@ public class Obfuscator {
                 e.printStackTrace();
             }
 
-            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + Encryption.getHexValue(className) + ".java");
+            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + Encryption.getHexValue(className) + ".java");
         }
     }
 
@@ -117,18 +121,14 @@ public class Obfuscator {
         for (FileSystem f : fs) {
             if (f.getType().equals("file") && f.getName().endsWith(".java")) {
                 classList.add(f.getPath() + File.separator + f.getName());
-                //TODO: CHECK (2)
                 classNameList.add(getClassNameFromFilePath(f.getName()));
 
                 try {
                     File file = new File(f.getPath() + File.separator + f.getName());
                     CompilationUnit cu = JavaParser.parse(file);
 
-                    if (!keepClass.contains(getClassNameFromFilePath(file.getAbsolutePath()))) {
+                    if (!keepClass.contains(getClassNameFromFilePath(file.getAbsolutePath())))
                         cu.accept(new MethodVisitor(methodMap), file.getAbsolutePath());
-                        //TODO: CHECK (1)
-                        System.out.println(methodMap);
-                    }
 
                     ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
                     if (clas == null)
@@ -155,21 +155,21 @@ public class Obfuscator {
         }
     }
 
-    public static void updateObfuscatorConfig(ReplacementDataNode r){
+    public static void updateObfuscatorConfig(ReplacementDataNode r) {
         obfuscatorConfig.setArrayList(r);
     }
 
     public static Boolean verifyUserDefinedClass(String ObjType) {
         // todo write as lambda
         for (int x = 0; x < classNameList.size(); x++) {
-            if (classNameList.equals(ObjType))
+            if (classNameList.get(x).equals(ObjType))
                 return true;
         }
         return false;
     }
 
-    public void initialiseKeepClass(){
-        keepClass=new ArrayList<>();
+    public void initialiseKeepClass() {
+        keepClass = new ArrayList<>();
         keepClass.add("NewMessageEvent");
         keepClass.add("Comments");
         keepClass.add("ClubPost");

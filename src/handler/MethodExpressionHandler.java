@@ -14,7 +14,7 @@ import static utils.Encryption.getHexValue;
 
 public class MethodExpressionHandler extends ExpressionHandler {
 
-    public MethodExpressionHandler(Object object) {
+    public MethodExpressionHandler(ExpressionHandler object) {
         super(object);
     }
 

@@ -3,7 +3,6 @@ package obfuscator;
 import com.github.javaparser.Position;
 import com.github.javaparser.Range;
 import com.github.javaparser.TokenRange;
-import com.github.javaparser.ast.ArrayCreationLevel;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
@@ -12,15 +11,10 @@ import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
-import handler.ClassExpressionHandler;
-import handler.StatementHandler;
-import model.ReplacementDataNode;
-import model.Scope;
-
+import handler.*;
+import model.*;
 import java.util.ArrayList;
 import java.util.List;
-
-
 import static utils.CommonUtils.*;
 import static utils.Encryption.*;
 
@@ -35,7 +29,6 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
 
     /*********************************************/
 
-
     public static void handleArrayType(ArrayType cit) {
         if (cit == null)
             return;
@@ -43,7 +36,6 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
         if (cit.getComponentType().isClassOrInterfaceType())
             handleClassInterfaceType(cit.getComponentType().asClassOrInterfaceType());
     }
-
 
     /*********************************************/
 
@@ -77,21 +69,13 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
         }
     }
 
-
-
-
-
     /*********************************************/
 
-
-
-
-    public void handleImport(Name name, ArrayList<String> replacementPattern) {
-
+    public void handleImport(Name name) {
         if (name == null)
             return;
 
-        for (String str : replacementPattern) {
+        for (String str : classNameList) {
             if (str.equals(name.getIdentifier())) {
                 TokenRange tokenRange = name.getTokenRange().orElse(null);
                 if (tokenRange != null) {
@@ -112,15 +96,15 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
             }
         }
 
-        handleImport(name.getQualifier().orElse(null), replacementPattern);
+        handleImport(name.getQualifier().orElse(null));
     }
 
     @Override
-    public void Obfuscate(CompilationUnit cu) {
+    public void obfuscate(CompilationUnit cu) {
         for (int i = 0; i < cu.getImports().size(); i++) {
             String imports = cu.getImports().get(i).getName().toString();
             if (imports.startsWith(getBasePackage()))
-                handleImport(cu.getImports().get(i).getName(),classList);
+                handleImport(cu.getImports().get(i).getName());
         }
     }
 
@@ -284,6 +268,5 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
             for (Parameter p : parameterList)
                 statementHandler.handleParameter(p,parentScope);
         }
-
     }
 }

@@ -9,20 +9,17 @@ import model.ReplacementDataNode;
 import model.Scope;
 import obfuscator.ClassObfuscator;
 import obfuscator.Obfuscator;
-
 import java.util.List;
-
-import static obfuscator.ClassObfuscator.handleClassInterfaceType;
-import static obfuscator.Obfuscator.verifyUserDefinedClass;
+import static obfuscator.ClassObfuscator.*;
+import static obfuscator.Obfuscator.*;
 import static utils.Encryption.*;
 
 public class ClassExpressionHandler extends ExpressionHandler {
 
     public ClassExpressionHandler() {
-
     }
 
-    public ClassExpressionHandler(Object p) {
+    public ClassExpressionHandler(ExpressionHandler p) {
         super(p);
     }
 
@@ -40,7 +37,7 @@ public class ClassExpressionHandler extends ExpressionHandler {
 
     @Override
     public void handleClassExpr(Expression exp, Scope parentScope) {
-        if (exp == null || !exp.isCastExpr())
+        if (exp == null || !exp.isClassExpr())
             return;
 
         ClassExpr expr = exp.asClassExpr();
@@ -50,7 +47,7 @@ public class ClassExpressionHandler extends ExpressionHandler {
 
     @Override
     public void handleMethodCallExpr(Expression exp, Scope parentScope) {
-        if (exp == null || !exp.isCastExpr())
+        if (exp == null || !exp.isMethodCallExpr())
             return;
 
         //TODO: CHECK
@@ -68,7 +65,7 @@ public class ClassExpressionHandler extends ExpressionHandler {
 
     @Override
     public void handleFieldAccessExpr(Expression exp, Scope parentScope) {
-        if (exp == null || !exp.isCastExpr())
+        if (exp == null || !exp.isFieldAccessExpr())
             return;
 
         SimpleName sname = exp.asFieldAccessExpr().getName();
@@ -92,7 +89,7 @@ public class ClassExpressionHandler extends ExpressionHandler {
 
     @Override
     public void handleNameExpr(Expression exp, Scope parentScope) {
-        if (exp == null || !exp.isCastExpr())
+        if (exp == null || !exp.isNameExpr())
             return;
 
         String name = exp.asNameExpr().getName().getIdentifier();
@@ -113,7 +110,7 @@ public class ClassExpressionHandler extends ExpressionHandler {
 
     @Override
     public void handleObjectCreationExpr(Expression exp, Scope parentScope) {
-        if (exp == null || !exp.isCastExpr())
+        if (exp == null || !exp.isObjectCreationExpr())
             return;
 
         //TODO: CHECK
@@ -152,7 +149,7 @@ public class ClassExpressionHandler extends ExpressionHandler {
 
     @Override
     public void handleArrayCreationExpr(Expression exp, Scope parentScope) {
-        if (exp == null || !exp.isCastExpr())
+        if (exp == null || !exp.isArrayCreationExpr())
             return;
 
         ArrayCreationExpr expr = exp.asArrayCreationExpr();
@@ -170,9 +167,9 @@ public class ClassExpressionHandler extends ExpressionHandler {
 
     @Override
     public void handleParameter(Parameter p, Scope parentScope) {
-
         if (p == null)
             return;
+
         if (p.getType().isClassOrInterfaceType()) {
             ClassOrInterfaceType type = p.getType().asClassOrInterfaceType();
             handleClassInterfaceType(type);
