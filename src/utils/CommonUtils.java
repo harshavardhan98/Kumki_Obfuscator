@@ -17,10 +17,10 @@ import static utils.Constants.*;
 
 public class CommonUtils {
 
-    public static String getBasePackage(){
+    public static String getBasePackage() {
         char[] myNameChars = packageName.toCharArray();
         for (int i = 0; i < myNameChars.length; i++) {
-            if(File.separator.equals(myNameChars[i] + ""))
+            if (File.separator.equals(myNameChars[i] + ""))
                 myNameChars[i] = '.';
         }
         return String.valueOf(myNameChars);
@@ -37,13 +37,12 @@ public class CommonUtils {
         return filePath.substring(filePath.lastIndexOf(File.separator) + 1);
     }
 
-
     public static String getPackageNameFromPath(String path) {
         String[] arr = path.split("java");
         char[] myNameChars = arr[1].toCharArray();
         myNameChars[0] = '\0';
         for (int i = 1; i < myNameChars.length; i++) {
-            if(File.separator.equals(myNameChars[i] + ""))
+            if (File.separator.equals(myNameChars[i] + ""))
                 myNameChars[i] = '.';
         }
 
@@ -59,6 +58,7 @@ public class CommonUtils {
 
         return packageNameToRename;
     }
+
     /****************************************************************************/
 
     public static ArrayList<String> loadPredefinedClassList() {
@@ -141,8 +141,6 @@ public class CommonUtils {
 
     /****************************************************************************/
 
-
-
     public static void renameFile(String src, String dst) {
         //https://www.inf.unibz.it/~calvanese/teaching/06-07-ip/lecture-notes/uni09/node12.html
 
@@ -150,6 +148,4 @@ public class CommonUtils {
         File destinationFolder = new File(dst);
         sourceFolder.renameTo(destinationFolder);
     }
-
-
 }

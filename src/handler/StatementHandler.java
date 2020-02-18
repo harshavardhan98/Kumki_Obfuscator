@@ -24,9 +24,9 @@ public class StatementHandler {
 
     public StatementHandler(ExpressionHandler object) {
 
-        if(object instanceof ClassExpressionHandler)
+        if (object instanceof ClassExpressionHandler)
             expressionHandler = new ClassExpressionHandler(object);
-        else if(object instanceof MethodExpressionHandler)
+        else if (object instanceof MethodExpressionHandler)
             expressionHandler = new MethodExpressionHandler(object);
     }
 

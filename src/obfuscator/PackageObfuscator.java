@@ -19,7 +19,7 @@ public class PackageObfuscator extends Obfuscator implements Obfuscate {
     @Override
     public void obfuscate(CompilationUnit cu) {
 
-        if(cu.getPackageDeclaration().orElse(null)!=null) {
+        if (cu.getPackageDeclaration().orElse(null) != null) {
             handlePackageDeclaration(cu.getPackageDeclaration().orElse(null).getName());
         }
         handleImport(cu);
@@ -87,17 +87,16 @@ public class PackageObfuscator extends Obfuscator implements Obfuscate {
     }
 
 
-    private void handlePackageDeclaration(Name name){
+    private void handlePackageDeclaration(Name name) {
 
-        if(name!=null){
-            if(name.getIdentifier()!=null && Collections.binarySearch(classNameList,name.getIdentifier())>=0){
-                TokenRange tokenRange=name.getTokenRange().orElse(null);
-                if(tokenRange!=null){
-                    Range range=tokenRange.getEnd().getRange().orElse(null);
+        if (name != null) {
+            if (name.getIdentifier() != null && Collections.binarySearch(classNameList, name.getIdentifier()) >= 0) {
+                TokenRange tokenRange = name.getTokenRange().orElse(null);
+                if (tokenRange != null) {
+                    Range range = tokenRange.getEnd().getRange().orElse(null);
 
-                    if(range!=null)
-                    {
-                        ReplacementDataNode r=new ReplacementDataNode();
+                    if (range != null) {
+                        ReplacementDataNode r = new ReplacementDataNode();
                         r.setLineNo(range.begin.line);
                         r.setStartColNo(range.begin.column);
                         r.setEndColNo(range.end.column);

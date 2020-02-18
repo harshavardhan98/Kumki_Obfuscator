@@ -9,15 +9,13 @@ public class Main {
 
         init();
 
-//        Obfuscator obfuscator = new ClassObfuscator();
-//        obfuscator.init();
-//        obfuscator.performObfuscation(obfuscator);
-
-        Obfuscator obfuscator = new PackageObfuscator();
+        Obfuscator obfuscator = new ClassObfuscator();
         obfuscator.init();
         obfuscator.performObfuscation(obfuscator);
 
-
+//        obfuscator = new PackageObfuscator();
+//        obfuscator.init();
+//        obfuscator.performObfuscation(obfuscator);
     }
 
     public static void init(){

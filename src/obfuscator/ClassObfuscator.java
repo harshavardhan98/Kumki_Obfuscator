@@ -13,8 +13,10 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import handler.*;
 import model.*;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import static utils.CommonUtils.*;
 import static utils.Encryption.*;
 
@@ -39,7 +41,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
 
     /*********************************************/
 
-    public static void handleVariables(List<VariableDeclarator> variables,Scope parentScope) {
+    public static void handleVariables(List<VariableDeclarator> variables, Scope parentScope) {
         if (!variables.isEmpty()) {
             for (VariableDeclarator variable : variables) {
 
@@ -64,7 +66,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
 
                 //Object Initialisation
                 Expression expression = variable.getInitializer().orElse(null);
-                statementHandler.getExpressionHandler().handleExpression(expression,parentScope);
+                statementHandler.getExpressionHandler().handleExpression(expression, parentScope);
             }
         }
     }
@@ -112,7 +114,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
     public void handleClass(ClassOrInterfaceDeclaration clas) {
         if (clas != null) {
 
-            Scope classScope=new Scope();
+            Scope classScope = new Scope();
             classScope.setParentScope(null);
 
             //Class name
@@ -150,7 +152,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
             if (!global_fields.isEmpty()) {
                 for (FieldDeclaration field : global_fields) {
                     List<VariableDeclarator> global_variables = field.getVariables();
-                    handleVariables(global_variables,classScope);
+                    handleVariables(global_variables, classScope);
                 }
             }
 
@@ -176,12 +178,12 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                     List<Parameter> parameterList = constructor.getParameters();
                     if (!parameterList.isEmpty()) {
                         for (Parameter p : parameterList)
-                            statementHandler.handleParameter(p,classScope);
+                            statementHandler.handleParameter(p, classScope);
                     }
 
                     BlockStmt block = constructor.getBody();
 
-                    statementHandler.handleStatement(block,classScope);
+                    statementHandler.handleStatement(block, classScope);
                 }
             }
 
@@ -191,7 +193,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                 for (BodyDeclaration<?> bd : members) {
                     //Methods
                     if (bd.isMethodDeclaration())
-                        handleMethodDeclaration(bd.asMethodDeclaration(),classScope);
+                        handleMethodDeclaration(bd.asMethodDeclaration(), classScope);
 
                         //Inner Class
                     else if (bd.isClassOrInterfaceDeclaration())
@@ -232,7 +234,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
         handleClassInterfaceType(scope);
     }
 
-    public static void handleMethodDeclaration(MethodDeclaration method,Scope parentScope) {
+    public static void handleMethodDeclaration(MethodDeclaration method, Scope parentScope) {
         if (method.getType().isClassOrInterfaceType()) {
             ClassOrInterfaceType cit = method.getType().asClassOrInterfaceType();
             handleClassInterfaceType(cit);
@@ -259,14 +261,14 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
         }
 
         BlockStmt block = method.getBody().orElse(null);
-        statementHandler.handleStatement(block,parentScope);
+        statementHandler.handleStatement(block, parentScope);
 
         //Method Arguments
         List<Parameter> parameterList = method.getParameters();
 
         if (!parameterList.isEmpty()) {
             for (Parameter p : parameterList)
-                statementHandler.handleParameter(p,parentScope);
+                statementHandler.handleParameter(p, parentScope);
         }
     }
 }

@@ -54,7 +54,7 @@ public class ExpressionHandler {
 
         if (currentMode == Mode.CLASS)
             ClassObfuscator.handleVariables(variables, parentScope);
-        else if (currentMode == Mode.METHOD);
+        else if (currentMode == Mode.METHOD) ;
     }
 
     public void handleAssignExpr(Expression exp, Scope parentScope) {
