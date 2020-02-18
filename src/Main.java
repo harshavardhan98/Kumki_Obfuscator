@@ -1,5 +1,7 @@
 import obfuscator.ClassObfuscator;
 import obfuscator.Obfuscator;
+import obfuscator.PackageObfuscator;
+
 import static utils.Backup.*;
 
 public class Main {
@@ -7,9 +9,15 @@ public class Main {
 
         init();
 
-        Obfuscator obfuscator = new ClassObfuscator();
+//        Obfuscator obfuscator = new ClassObfuscator();
+//        obfuscator.init();
+//        obfuscator.performObfuscation(obfuscator);
+
+        Obfuscator obfuscator = new PackageObfuscator();
         obfuscator.init();
         obfuscator.performObfuscation(obfuscator);
+
+
     }
 
     public static void init(){

@@ -38,6 +38,27 @@ public class CommonUtils {
     }
 
 
+    public static String getPackageNameFromPath(String path) {
+        String[] arr = path.split("java");
+        char[] myNameChars = arr[1].toCharArray();
+        myNameChars[0] = '\0';
+        for (int i = 1; i < myNameChars.length; i++) {
+            if(File.separator.equals(myNameChars[i] + ""))
+                myNameChars[i] = '.';
+        }
+
+        String packageName = String.valueOf(myNameChars);
+        return packageName;
+    }
+
+    public static ArrayList<String> getPackageName(ArrayList<String> folderList) {
+        ArrayList<String> packageNameToRename = new ArrayList<>();
+
+        for (String s : folderList)
+            packageNameToRename.add(getPackageNameFromPath(s));
+
+        return packageNameToRename;
+    }
     /****************************************************************************/
 
     public static ArrayList<String> loadPredefinedClassList() {

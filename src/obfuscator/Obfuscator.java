@@ -22,6 +22,7 @@ import java.util.*;
 import static utils.CommonUtils.*;
 import static utils.CommonUtils.getClassNameFromFilePath;
 import static utils.Constants.*;
+import static utils.Encryption.getHexValue;
 
 public class Obfuscator {
 
@@ -29,6 +30,7 @@ public class Obfuscator {
 
     public ArrayList<String> classList;
     public static ArrayList<String> classNameList;
+    public ArrayList<String> packageNameList;
     public ArrayList<String> folderList;
     public Map<String, ArrayList<String>> methodMap;
     public ArrayList<String> keepClass;
@@ -65,12 +67,29 @@ public class Obfuscator {
                     ((ClassObfuscator) object).handleClass(clas);
                 }
 
+                else if(object instanceof PackageObfuscator){
+                    ((PackageObfuscator)object).obfuscate(cu);
+
+                }
+
                 obfuscatorConfig.replaceInFiles(file);
+
+
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + Encryption.getHexValue(className) + ".java");
+            if(object instanceof ClassObfuscator)
+                renameFile(file.getAbsolutePath(), file.getParent() + File.separator + getHexValue(className) + ".java");
+        }
+
+        if(object instanceof PackageObfuscator){
+            for (String s : folderList) {
+                File f = new File(s);
+                String className = getFileNameFromFilePath(f.getAbsolutePath());
+                renameFile(f.getAbsolutePath(), f.getParent() + File.separator + getHexValue(className));
+            }
         }
     }
 
@@ -102,6 +121,7 @@ public class Obfuscator {
         ArrayList<FileSystem> fsTemp = parseFileStructureJson(projectDirectory + (jsonFileNameCount - 1) + fileStructureJsonPath);
         folderList = new ArrayList<>();
         classList = new ArrayList<>();
+        packageNameList=new ArrayList<>();
         classNameList = new ArrayList<>();
         methodMap = new HashMap<>();
         getFilesList(fsTemp);
@@ -147,8 +167,11 @@ public class Obfuscator {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (f.getType().equals("directory"))
+            } else if (f.getType().equals("directory")){
                 folderList.add(f.getPath() + File.separator + f.getName());
+                packageNameList.add(getPackageNameFromPath(f.getPath() + File.separator + f.getName()));
+            }
+
 
             if (f.getFiles() != null)
                 getFilesList(f.getFiles());
