@@ -4,8 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static refactor.utils.Constants.classList;
-import static refactor.utils.Constants.innerClassList;
+
 
 public class Scope {
     private HashMap<String, String> data;
@@ -81,32 +80,32 @@ public class Scope {
             return false;
     }
 
-    public boolean checkIfGivenVariableIsFromUserDefinedClass(String identifierName){
-
-        if(data.containsKey(identifierName)){
-
-            String dataType=data.get(identifierName);
-            // check if the variable belongs to user defined class
-
-            for(String s:classList){
-                File f=new File(s);
-                if(f.getName().equals(dataType+".java")){
-                    return true;
-                }
-            }
-
-            for(String s:innerClassList){
-                if(s.equals(dataType))
-                    return true;
-            }
-
-            return  false;
-        }
-
-
-        if(parentScope!=null)
-            return parentScope.checkIfGivenVariableIsFromUserDefinedClass(identifierName);
-        else
-            return false;
-    }
+//    public boolean checkIfGivenVariableIsFromUserDefinedClass(String identifierName){
+//
+//        if(data.containsKey(identifierName)){
+//
+//            String dataType=data.get(identifierName);
+//            // check if the variable belongs to user defined class
+//
+//            for(String s:classList){
+//                File f=new File(s);
+//                if(f.getName().equals(dataType+".java")){
+//                    return true;
+//                }
+//            }
+//
+//            for(String s:innerClassList){
+//                if(s.equals(dataType))
+//                    return true;
+//            }
+//
+//            return  false;
+//        }
+//
+//
+//        if(parentScope!=null)
+//            return parentScope.checkIfGivenVariableIsFromUserDefinedClass(identifierName);
+//        else
+//            return false;
+//    }
 };

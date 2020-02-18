@@ -15,7 +15,7 @@ import obfuscator.Obfuscator;
 
 import java.util.List;
 
-import static refactor.utils.CommonUtils.compare;
+
 import static utils.Encryption.getHexValue;
 
 public class StatementHandler{
@@ -24,9 +24,10 @@ public class StatementHandler{
 
 
     public StatementHandler(Object o) {
-        if(o instanceof MethodExpressionHandler)
+
+        if(((Class) o).getName().contains("MethodExpressionHandler"))
             expressionHandler=new MethodExpressionHandler(o);
-        else if(o instanceof ClassExpressionHandler)
+        else if(((Class) o).getName().contains("ClassExpressionHandler"))
             expressionHandler=new ClassExpressionHandler(o);
     }
 
@@ -123,6 +124,7 @@ public class StatementHandler{
         forEachScope.setScope(parentScope);
 
         NodeList<VariableDeclarator> variableDeclarators = st.asForeachStmt().getVariable().getVariables();
+        //todo check
         if(expressionHandler instanceof ClassExpressionHandler)
             ClassObfuscator.handleVariables(variableDeclarators, forEachScope);
         else if(expressionHandler instanceof MethodExpressionHandler)
@@ -220,36 +222,6 @@ public class StatementHandler{
         expressionHandler.handleParameter(p,parentScope);
     }
 
-    private static void handleClassInterfaceType(ClassOrInterfaceType cit) {
-        if (cit == null)
-            return;
-
-        String name = cit.getName().getIdentifier();
-        int start_line_num = cit.getName().getRange().get().begin.line;
-        int start_col_num = cit.getName().getRange().get().begin.column;
-        int end_col_num = cit.getName().getRange().get().end.column;
-
-        Boolean flag = compare(name);
-        if (flag) {
-            ReplacementDataNode rnode = new ReplacementDataNode();
-            rnode.setLineNo(start_line_num);
-            rnode.setStartColNo(start_col_num);
-            rnode.setEndColNo(end_col_num);
-            rnode.setReplacementString(getHexValue(name));
-            Obfuscator.updateObfuscatorConfig(rnode);
-        }
-
-        NodeList<Type> args = cit.getTypeArguments().orElse(null);
-        if (args != null) {
-            for (Type t : args) {
-                if (t.isClassOrInterfaceType())
-                    handleClassInterfaceType(t.asClassOrInterfaceType());
-            }
-        }
-
-        ClassOrInterfaceType scope = cit.getScope().orElse(null);
-        handleClassInterfaceType(scope);
-    }
 
 
     public ExpressionHandler getExpressionHandler(){

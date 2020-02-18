@@ -49,9 +49,10 @@ public class ExpressionHandler{
         VariableDeclarationExpr vdexp = exp.asVariableDeclarationExpr();
         List<VariableDeclarator> variables = vdexp.getVariables();
 
-        if(object instanceof ClassExpressionHandler)
+        // todo check the conditions
+        if(((Class) object).getName().contains("ClassExpressionHandler"))
             ClassObfuscator.handleVariables(variables, parentScope);
-        else if(object instanceof MethodExpressionHandler)
+        else if(((Class) object).getName().contains("MethodExpressionHandler"))
             ;
     }
 

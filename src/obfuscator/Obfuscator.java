@@ -8,21 +8,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import handler.StatementHandler;
 import model.FileSystem;
 import model.ReplacementDataNode;
-import refactor.utils.CommonUtils;
-import refactor.utils.FileOperation;
+import utils.CommonUtils;
+import utils.Encryption;
 import utils.visitor.MethodVisitor;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
 
-import static refactor.utils.CommonUtils.*;
+import static utils.CommonUtils.*;
 import static utils.CommonUtils.getClassNameFromFilePath;
 import static utils.Constants.*;
-import static refactor.utils.FileOperation.*;
+
 
 public class Obfuscator {
 
@@ -41,6 +39,7 @@ public class Obfuscator {
     }
 
     public void init() {
+        initialiseKeepClass();
         analyseProjectStructure();
         getDependencyData();
     }
@@ -57,7 +56,7 @@ public class Obfuscator {
                 if (clas == null)
                     clas = cu.getInterfaceByName(className).orElse(null);
 
-                if (p instanceof ClassObfuscator) {
+                if (((Class) p).getName().contains("ClassObfuscator")) {
                     ((ClassObfuscator) p).Obfuscate(cu);
                     ((ClassObfuscator) p).handleClass(clas);
                 }
@@ -67,17 +66,13 @@ public class Obfuscator {
                 e.printStackTrace();
             }
 
-            renameFile(file.getAbsolutePath(), file.getParent() + File.separator + CommonUtils.getHexValue(className) + ".java");
+            //renameFile(file.getAbsolutePath(), file.getParent() + File.separator + Encryption.getHexValue(className) + ".java");
         }
     }
 
     /***********************************************************/
 
     public void analyseProjectStructure() {
-        keepClass.add("NewMessageEvent");
-        keepClass.add("Comments");
-        keepClass.add("ClubPost");
-
         File f = new File(projectRootDirectory + packageName);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonObject rootJO = new JsonObject();
@@ -105,7 +100,6 @@ public class Obfuscator {
         classList = new ArrayList<>();
         classNameList = new ArrayList<>();
         methodMap = new HashMap<>();
-        keepClass = new ArrayList<>();
         getFilesList(fsTemp);
 
         for (int i = 0; i < classList.size(); i++) {
@@ -136,15 +130,15 @@ public class Obfuscator {
                         System.out.println(methodMap);
                     }
 
-                    ClassOrInterfaceDeclaration clas = cu.getClassByName(FileOperation.getClassNameFromFilePath(f.getName())).orElse(null);
+                    ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
                     if (clas == null)
-                        clas = cu.getInterfaceByName(FileOperation.getClassNameFromFilePath(f.getName())).orElse(null);
+                        clas = cu.getInterfaceByName(getClassNameFromFilePath(f.getName())).orElse(null);
 
                     List<BodyDeclaration<?>> members = clas.getMembers();
                     if (!members.isEmpty()) {
                         for (BodyDeclaration<?> bd : members) {
                             if (bd.isClassOrInterfaceDeclaration()) {
-                                FileOperation.getClassNameFromFilePath(file.getAbsolutePath());
+                                getClassNameFromFilePath(file.getAbsolutePath());
                                 classNameList.add(bd.asClassOrInterfaceDeclaration().getName().asString());
                             }
                         }
@@ -172,5 +166,12 @@ public class Obfuscator {
                 return true;
         }
         return false;
+    }
+
+    public void initialiseKeepClass(){
+        keepClass=new ArrayList<>();
+        keepClass.add("NewMessageEvent");
+        keepClass.add("Comments");
+        keepClass.add("ClubPost");
     }
 }

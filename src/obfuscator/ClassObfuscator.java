@@ -20,7 +20,7 @@ import model.Scope;
 import java.util.ArrayList;
 import java.util.List;
 
-import static refactor.utils.CommonUtils.getHexValue;
+
 import static utils.CommonUtils.*;
 import static utils.Encryption.*;
 
