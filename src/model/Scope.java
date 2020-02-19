@@ -1,10 +1,7 @@
 package model;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-
 
 public class Scope {
     private HashMap<String, String> data;
@@ -55,57 +52,17 @@ public class Scope {
         // P -> C and C -> P
 
         this.setParentScope(parentScope);
-
         if (parentScope != null)
             parentScope.setChildScope(this);
     }
 
-    public String findDataTypeOfIdentifier(String name) {
-        if (data.containsKey(name))
-            return data.get(name);
-
-        if(parentScope != null)
-            return parentScope.findDataTypeOfIdentifier(name);
-        else
-            return null;
-    }
-
-    public boolean checkIfGivenVariableExistsInScope(String identifierName){
-        if(data.containsKey(identifierName))
+    public boolean checkIfGivenVariableExistsInScope(String identifierName) {
+        if (data.containsKey(identifierName))
             return true;
 
-        if(parentScope!=null)
+        if (parentScope != null)
             return parentScope.checkIfGivenVariableExistsInScope(identifierName);
         else
             return false;
     }
-
-//    public boolean checkIfGivenVariableIsFromUserDefinedClass(String identifierName){
-//
-//        if(data.containsKey(identifierName)){
-//
-//            String dataType=data.get(identifierName);
-//            // check if the variable belongs to user defined class
-//
-//            for(String s:classList){
-//                File f=new File(s);
-//                if(f.getName().equals(dataType+".java")){
-//                    return true;
-//                }
-//            }
-//
-//            for(String s:innerClassList){
-//                if(s.equals(dataType))
-//                    return true;
-//            }
-//
-//            return  false;
-//        }
-//
-//
-//        if(parentScope!=null)
-//            return parentScope.checkIfGivenVariableIsFromUserDefinedClass(identifierName);
-//        else
-//            return false;
-//    }
-};
+}

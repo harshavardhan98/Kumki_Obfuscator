@@ -4,11 +4,9 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.Type;
-import utils.Constants.*;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashSet;
 
 public class MethodModel {
 
@@ -16,8 +14,6 @@ public class MethodModel {
     Type returnType;
     ArrayList<Modifier> accessModifiers;
     ArrayList<Parameter> parameters;
-
-
 
     public MethodModel(){
         accessModifiers=new ArrayList<>();

@@ -5,18 +5,9 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.*;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.Type;
-import model.ReplacementDataNode;
-import model.Scope;
+import model.*;
 import obfuscator.ClassObfuscator;
-import obfuscator.MethodObfuscator;
-import obfuscator.Obfuscator;
-
 import java.util.List;
-
-
-import static utils.Encryption.getHexValue;
 
 public class StatementHandler {
 
