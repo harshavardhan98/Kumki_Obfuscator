@@ -2,15 +2,20 @@ package obfuscator;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import handler.ClassExpressionHandler;
 import model.FileSystem;
+import model.MethodModel;
 import model.ReplacementDataNode;
+import model.Scope;
 import utils.CommonUtils;
 import utils.Encryption;
 import utils.visitor.MethodVisitor;
@@ -33,8 +38,15 @@ public class Obfuscator {
     public ArrayList<String> packageNameList;
     public ArrayList<String> folderList;
     public ArrayList<String> folderNameList;
-    public Map<String, ArrayList<String>> methodMap;
+    public Map<String, ArrayList<MethodModel>> methodMap;
+
+
+    // keep data
     public ArrayList<String> keepClass;
+    public ArrayList<String> keepMethod;
+
+
+
 
     private static int jsonFileNameCount = 0;
 
@@ -44,11 +56,15 @@ public class Obfuscator {
 
     public void init() {
         initialiseKeepClass();
+        initialiseKeepMethods();
         analyseProjectStructure();
         getDependencyData();
+
+
     }
 
     public void performObfuscation(Obfuscator object) {
+
 
         for (String s : classList) {
             File file = new File(s);
@@ -63,9 +79,11 @@ public class Obfuscator {
                 if (object instanceof ClassObfuscator) {
                     ((ClassObfuscator) object).obfuscate(cu);
                     ((ClassObfuscator) object).handleClass(clas);
-                } else if (object instanceof PackageObfuscator)
+                } else if (object instanceof PackageObfuscator) {
                     ((PackageObfuscator) object).obfuscate(cu);
+                } else if (object instanceof MethodObfuscator) {
 
+                }
                 obfuscatorConfig.replaceInFiles(file);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -139,6 +157,7 @@ public class Obfuscator {
                     File file = new File(f.getPath() + File.separator + f.getName());
                     CompilationUnit cu = JavaParser.parse(file);
 
+
                     if (!keepClass.contains(getClassNameFromFilePath(file.getAbsolutePath())))
                         cu.accept(new MethodVisitor(methodMap), file.getAbsolutePath());
 
@@ -163,8 +182,8 @@ public class Obfuscator {
                 String path = f.getPath() + File.separator + f.getName();
                 folderList.add(path);
                 packageNameList.add(getPackageNameFromPath(path));
-                String arr[]=(getPackageNameFromPath(path)).split("\\.");
-                folderNameList.add(arr[arr.length-1]);
+                String arr[] = (getPackageNameFromPath(path)).split("\\.");
+                folderNameList.add(arr[arr.length - 1]);
             }
 
             if (f.getFiles() != null)
@@ -191,5 +210,11 @@ public class Obfuscator {
         keepClass.add("NewMessageEvent");
         keepClass.add("Comments");
         keepClass.add("ClubPost");
+    }
+
+    public void initialiseKeepMethods() {
+        keepMethod = new ArrayList<>();
+        keepMethod.add("getString");
+        keepMethod.add("compare");
     }
 }

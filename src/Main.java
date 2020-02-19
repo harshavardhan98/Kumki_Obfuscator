@@ -11,11 +11,11 @@ public class Main {
 
         Obfuscator obfuscator = new ClassObfuscator();
         obfuscator.init();
-        obfuscator.performObfuscation(obfuscator);
+//        obfuscator.performObfuscation(obfuscator);
 
-        obfuscator = new PackageObfuscator();
-        obfuscator.init();
-        obfuscator.performObfuscation(obfuscator);
+//        obfuscator = new PackageObfuscator();
+//        obfuscator.init();
+//        obfuscator.performObfuscation(obfuscator);
     }
 
     public static void init(){
