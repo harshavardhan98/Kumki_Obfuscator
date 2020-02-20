@@ -195,7 +195,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                     //Methods
                     if (bd.isMethodDeclaration())
                         handleMethodDeclaration(bd.asMethodDeclaration(), classScope);
-                    //Inner Class
+                        //Inner Class
                     else if (bd.isClassOrInterfaceDeclaration())
                         handleClass(bd.asClassOrInterfaceDeclaration());
                 }
@@ -208,11 +208,17 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
             return;
 
         String name = cit.getName().getIdentifier();
+        ClassOrInterfaceType scope = cit.getScope().orElse(null);
         int start_line_num = cit.getName().getRange().get().begin.line;
         int start_col_num = cit.getName().getRange().get().begin.column;
         int end_col_num = cit.getName().getRange().get().end.column;
 
         Boolean flag = verifyUserDefinedClass(name);
+        if (!flag) {
+            if (scope != null && (scope.asString() + ".").contains(getBasePackage()) && folderNameList.contains(name))
+                flag = true;
+        }
+
         if (flag) {
             ReplacementDataNode rnode = new ReplacementDataNode();
             rnode.setLineNo(start_line_num);
@@ -230,7 +236,6 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
             }
         }
 
-        ClassOrInterfaceType scope = cit.getScope().orElse(null);
         handleClassInterfaceType(scope);
     }
 

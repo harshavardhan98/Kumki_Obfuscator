@@ -27,7 +27,7 @@ public class Obfuscator {
     public static ArrayList<String> classNameList;
     public ArrayList<String> packageNameList;
     public ArrayList<String> folderList;
-    public HashSet<String> folderNameList;
+    public static HashSet<String> folderNameList;
     public static Map<String, ArrayList<MethodModel>> methodMap;
 
     // keep data
@@ -52,8 +52,8 @@ public class Obfuscator {
             File file = new File(s);
             String className = getClassNameFromFilePath(file.getName());
 
-//            if(!className.equals("BaseActivity"))
-//                continue;
+            if(!className.equals("BaseActivity"))
+                continue;
 
             try {
                 CompilationUnit cu = JavaParser.parse(file);
