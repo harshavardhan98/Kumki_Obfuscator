@@ -77,6 +77,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
         if (name == null)
             return;
 
+        // todo optimise the function
         for (String str : classNameList) {
             if (str.equals(name.getIdentifier())) {
                 TokenRange tokenRange = name.getTokenRange().orElse(null);

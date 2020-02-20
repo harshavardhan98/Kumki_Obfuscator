@@ -25,8 +25,8 @@ public class Obfuscator {
     public static ArrayList<String> classNameList;
     public ArrayList<String> packageNameList;
     public ArrayList<String> folderList;
-    public ArrayList<String> folderNameList;
-    public Map<String, ArrayList<MethodModel>> methodMap;
+    public HashSet<String> folderNameList;
+    public static Map<String, ArrayList<MethodModel>> methodMap;
 
     // keep data
     public ArrayList<String> keepClass;
@@ -77,6 +77,8 @@ public class Obfuscator {
         if (object instanceof PackageObfuscator) {
             for (String s : folderList) {
                 File f = new File(s);
+                if(!folderNameList.contains(f.getName()))
+                    continue;
                 String className = getFileNameFromFilePath(f.getAbsolutePath());
                 renameFile(f.getAbsolutePath(), f.getParent() + File.separator + getHexValue(className));
             }
@@ -106,26 +108,39 @@ public class Obfuscator {
     }
 
     public void getDependencyData() {
-        ArrayList<String> predefinedClassList = loadPredefinedClassList();
+        ArrayList<String> predefinedClassList = loadFromFile("androidClassList.txt");
+        ArrayList<String> predefinedMethodList = loadFromFile("androidMethodList.txt");
 
         ArrayList<FileSystem> fsTemp = parseFileStructureJson(projectDirectory + (jsonFileNameCount - 1) + fileStructureJsonPath);
         folderList = new ArrayList<>();
-        folderNameList = new ArrayList<>();
+        folderNameList = new HashSet<>();
         classList = new ArrayList<>();
         packageNameList = new ArrayList<>();
         classNameList = new ArrayList<>();
         methodMap = new HashMap<>();
         getFilesList(fsTemp);
 
-        for (int i = 0; i < classList.size(); i++) {
-            if (Collections.binarySearch(predefinedClassList, classList.get(i)) >= 0)
-                classList.remove(i--);
+
+
+        for (int i =0; i <classNameList.size() ; i++) {
+            for(String s:predefinedClassList){
+                if(classNameList.get(i).equals(s))
+                    classNameList.remove(i--);
+            }
         }
 
-        for (int i = 0; i < folderList.size(); i++) {
-            if (Collections.binarySearch(predefinedClassList, folderList.get(i)) >= 0)
-                folderList.remove(i--);
-        }
+        // in.edu.ssn.ssnapp.
+        String basePackage=getBasePackage();
+        String[] arr=basePackage.substring(0,basePackage.length()-1).split("[.]");
+        System.out.print("dsfsd");
+
+        for(String s:arr)
+            folderNameList.remove(s);
+
+        for(String s:predefinedClassList)
+            folderNameList.remove(s);
+
+        System.out.print("");
     }
 
     public void getFilesList(ArrayList<FileSystem> fs) {
@@ -162,14 +177,15 @@ public class Obfuscator {
                 String path = f.getPath() + File.separator + f.getName();
                 folderList.add(path);
                 packageNameList.add(getPackageNameFromPath(path));
-                String arr[] = (getPackageNameFromPath(path)).split("\\.");
+                String[] arr = (getPackageNameFromPath(path)).split("\\.");
                 folderNameList.add(arr[arr.length - 1]);
             }
 
             if (f.getFiles() != null)
                 getFilesList(f.getFiles());
         }
-        Collections.sort(folderNameList);
+
+        Collections.sort(classNameList);
     }
 
     public static void updateObfuscatorConfig(ReplacementDataNode r) {
@@ -185,16 +201,41 @@ public class Obfuscator {
         return false;
     }
 
+    public static Boolean verifyUserDefinedMethod(MethodModel input) {
+
+        // TODO write a comparator
+        for (Map.Entry<String, ArrayList<MethodModel>> entry : methodMap.entrySet()) {
+            ArrayList<MethodModel> temp = entry.getValue();
+            for (int i = 0; i < temp.size(); i++) {
+                MethodModel m = temp.get(i);
+                if (m.getName().equals(input.getName()) && m.getNoOfParameters() == input.getNoOfParameters())
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public static Boolean verifyUserDefinedMethodbyName(String input) {
+
+        // TODO write a comparator
+        for (Map.Entry<String, ArrayList<MethodModel>> entry : methodMap.entrySet()) {
+            ArrayList<MethodModel> temp = entry.getValue();
+            for (int i = 0; i < temp.size(); i++) {
+                MethodModel m = temp.get(i);
+                if (m.getName().equals(input))
+                    return true;
+            }
+        }
+        return false;
+    }
+
     public void initialiseKeepClass() {
         keepClass = new ArrayList<>();
-        keepClass.add("NewMessageEvent");
-        keepClass.add("Comments");
-        keepClass.add("ClubPost");
     }
 
     public void initialiseKeepMethod() {
         keepMethod = new ArrayList<>();
-        keepMethod.add("getString");
-        keepMethod.add("compare");
+        keepMethod.add("getTime");
+
     }
 }

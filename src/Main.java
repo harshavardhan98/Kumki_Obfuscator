@@ -10,17 +10,18 @@ public class Main {
 
         init();
 
-        Obfuscator obfuscator = new ClassObfuscator();
+        Obfuscator obfuscator;
+//        obfuscator = new ClassObfuscator();
 //        obfuscator.init();
 //        obfuscator.performObfuscation(obfuscator);
 
-//        obfuscator = new PackageObfuscator();
-//        obfuscator.init();
-//        obfuscator.performObfuscation(obfuscator);
-
-        obfuscator = new MethodObfuscator();
+        obfuscator = new PackageObfuscator();
         obfuscator.init();
         obfuscator.performObfuscation(obfuscator);
+
+//        obfuscator = new MethodObfuscator();
+//        obfuscator.init();
+//        obfuscator.performObfuscation(obfuscator);
     }
 
     public static void init() {

@@ -61,11 +61,11 @@ public class CommonUtils {
 
     /****************************************************************************/
 
-    public static ArrayList<String> loadPredefinedClassList() {
+    public static ArrayList<String> loadFromFile(String fileName) {
         ArrayList<String> temp = new ArrayList<>();
 
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("src/assets/androidClassList.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader("src/assets/"+fileName));
             String line = reader.readLine();
 
             while (line != null) {

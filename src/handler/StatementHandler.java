@@ -7,6 +7,8 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.*;
 import model.*;
 import obfuscator.ClassObfuscator;
+import obfuscator.MethodObfuscator;
+
 import java.util.List;
 
 public class StatementHandler {
@@ -65,7 +67,8 @@ public class StatementHandler {
         if (st == null || !st.isIfStmt())
             return;
 
-        Scope ifScope;
+        Scope ifScope=new Scope();
+        ifScope.setScope(parentScope);
 
         Expression condition = st.asIfStmt().getCondition();
         expressionHandler.handleExpression(condition, parentScope);
@@ -116,7 +119,8 @@ public class StatementHandler {
         NodeList<VariableDeclarator> variableDeclarators = st.asForeachStmt().getVariable().getVariables();
         if (expressionHandler instanceof ClassExpressionHandler)
             ClassObfuscator.handleVariables(variableDeclarators, forEachScope);
-        else if (expressionHandler instanceof MethodExpressionHandler);
+        else if (expressionHandler instanceof MethodExpressionHandler)
+            MethodObfuscator.handleVariables(variableDeclarators,forEachScope);
 
         expressionHandler.handleExpression(st.asForeachStmt().getIterable(), forEachScope);
         Statement forEach = st.asForeachStmt().getBody();

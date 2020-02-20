@@ -3,7 +3,9 @@ package model;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.type.Type;
+import com.sun.jdi.connect.Connector;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -13,7 +15,7 @@ public class MethodModel {
     String name;
     Type returnType;
     ArrayList<Modifier> accessModifiers;
-    ArrayList<Parameter> parameters;
+    int noOfParameters;
 
     public MethodModel(){
         accessModifiers=new ArrayList<>();
@@ -43,11 +45,11 @@ public class MethodModel {
         accessModifiers.addAll(accessModifierSet);
     }
 
-    public ArrayList<Parameter> getParameters() {
-        return parameters;
+    public int getNoOfParameters() {
+        return noOfParameters;
     }
 
-    public void setParameters(NodeList<Parameter> params) {
-        this.parameters.addAll(params);
+    public void setNoOfParameters(int noOfParameters) {
+        this.noOfParameters = noOfParameters;
     }
 }

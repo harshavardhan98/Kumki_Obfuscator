@@ -25,7 +25,8 @@ public class MethodVisitor extends VoidVisitorAdapter {
         MethodModel model=new MethodModel();
         model.setName(n.getNameAsString());
         model.setAccessModifiers(n.getModifiers());
-        model.setParameters(n.getParameters());
+        if(n.getParameters()!=null)
+            model.setNoOfParameters(n.getParameters().size());
         model.setReturnType(n.getType());
 
         //Methods list
@@ -48,7 +49,7 @@ public class MethodVisitor extends VoidVisitorAdapter {
         methodMap.put(fileName, methodList);
     }
 
-    public Boolean isOverride(MethodDeclaration n) {
+    public static Boolean isOverride(MethodDeclaration n) {
         List<AnnotationExpr> annotationExpr = n.getAnnotations();
         if (annotationExpr != null) {
             String annotations = annotationExpr.toString();
