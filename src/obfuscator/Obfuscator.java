@@ -10,9 +10,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import model.*;
 import utils.visitor.MethodVisitor;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
+
 import static utils.CommonUtils.*;
 import static utils.Constants.*;
 import static utils.Encryption.*;
@@ -50,6 +52,9 @@ public class Obfuscator {
             File file = new File(s);
             String className = getClassNameFromFilePath(file.getName());
 
+//            if(!className.equals("BaseActivity"))
+//                continue;
+
             try {
                 CompilationUnit cu = JavaParser.parse(file);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(className).orElse(null);
@@ -77,7 +82,7 @@ public class Obfuscator {
         if (object instanceof PackageObfuscator) {
             for (String s : folderList) {
                 File f = new File(s);
-                if(!folderNameList.contains(f.getName()))
+                if (!folderNameList.contains(f.getName()))
                     continue;
                 String className = getFileNameFromFilePath(f.getAbsolutePath());
                 renameFile(f.getAbsolutePath(), f.getParent() + File.separator + getHexValue(className));
@@ -120,24 +125,22 @@ public class Obfuscator {
         methodMap = new HashMap<>();
         getFilesList(fsTemp);
 
-
-
-        for (int i =0; i <classNameList.size() ; i++) {
-            for(String s:predefinedClassList){
-                if(classNameList.get(i).equals(s))
+        for (int i = 0; i < classNameList.size(); i++) {
+            for (String s : predefinedClassList) {
+                if (classNameList.get(i).equals(s))
                     classNameList.remove(i--);
             }
         }
 
         // in.edu.ssn.ssnapp.
-        String basePackage=getBasePackage();
-        String[] arr=basePackage.substring(0,basePackage.length()-1).split("[.]");
+        String basePackage = getBasePackage();
+        String[] arr = basePackage.substring(0, basePackage.length() - 1).split("[.]");
         System.out.print("dsfsd");
 
-        for(String s:arr)
+        for (String s : arr)
             folderNameList.remove(s);
 
-        for(String s:predefinedClassList)
+        for (String s : predefinedClassList)
             folderNameList.remove(s);
 
         System.out.print("");
@@ -177,7 +180,7 @@ public class Obfuscator {
                 String path = f.getPath() + File.separator + f.getName();
                 folderList.add(path);
                 packageNameList.add(getPackageNameFromPath(path));
-                String[] arr = (getPackageNameFromPath(path)).split("\\.");
+                String[] arr = (getPackageNameFromPath(path)).split("[.]");
                 folderNameList.add(arr[arr.length - 1]);
             }
 

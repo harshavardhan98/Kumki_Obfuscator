@@ -6,7 +6,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.Name;
 import model.*;
-import java.util.*;
+import utils.CommonUtils;
+
 import static utils.Encryption.*;
 
 public class PackageObfuscator extends Obfuscator implements Obfuscate {
@@ -24,7 +25,7 @@ public class PackageObfuscator extends Obfuscator implements Obfuscate {
     }
 
     private void handleRange(TokenRange tokenRange, String identifier) {
-        if (tokenRange != null) {
+        if (tokenRange != null && folderNameList.contains(identifier)) {
             Range range = tokenRange.getEnd().getRange().orElse(null);
             if (range != null) {
                 int start_line_no = range.begin.line;
@@ -52,6 +53,9 @@ public class PackageObfuscator extends Obfuscator implements Obfuscate {
 
                 if (isAsterisk)
                     temp += "." + identifier;
+
+                if((temp + ".").equals(CommonUtils.getBasePackage()))
+                    break;
 
                 for (String str : packageNameList) {
                     if (str.trim().compareTo(temp) == 0) {

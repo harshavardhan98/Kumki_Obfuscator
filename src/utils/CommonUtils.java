@@ -38,16 +38,14 @@ public class CommonUtils {
     }
 
     public static String getPackageNameFromPath(String path) {
-        String[] arr = path.split("java");
+        String[] arr = path.split("java" + File.separator);
         char[] myNameChars = arr[1].toCharArray();
-        myNameChars[0] = '\0';
-        for (int i = 1; i < myNameChars.length; i++) {
+        for (int i = 0; i < myNameChars.length; i++) {
             if (File.separator.equals(myNameChars[i] + ""))
                 myNameChars[i] = '.';
         }
 
-        String packageName = String.valueOf(myNameChars);
-        return packageName;
+        return String.valueOf(myNameChars);
     }
 
     public static ArrayList<String> getPackageName(ArrayList<String> folderList) {
