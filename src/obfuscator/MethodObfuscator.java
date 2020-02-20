@@ -14,18 +14,11 @@ import model.MethodModel;
 import model.ReplacementDataNode;
 import model.Scope;
 import utils.visitor.MethodVisitor;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-
 import static utils.CommonUtils.getBasePackage;
 import static utils.Encryption.getHexValue;
 
-
 public class MethodObfuscator extends Obfuscator implements Obfuscate {
-
 
     public static StatementHandler statementHandler;
 
@@ -100,7 +93,6 @@ public class MethodObfuscator extends Obfuscator implements Obfuscate {
         }
 
         List<MethodDeclaration> methods = clas.getMethods();
-
         if (!methods.isEmpty()) {
             for (MethodDeclaration method : methods) {
 
@@ -108,11 +100,9 @@ public class MethodObfuscator extends Obfuscator implements Obfuscate {
                 methodScope.setScope(methodScope);
 
                 BlockStmt block = method.getBody().orElse(null);
-
                 if (block != null) {
 
                     List<Statement> stList = block.getStatements();
-
                     if (!stList.isEmpty()) {
                         for (int i = 0; i < stList.size(); i++) {
                             Statement st = stList.get(i);
@@ -121,20 +111,17 @@ public class MethodObfuscator extends Obfuscator implements Obfuscate {
                     }
                 }
 
-
                 String name = method.getName().getIdentifier();
                 MethodModel input = new MethodModel();
                 input.setName(name);
                 if (method.getParameters() != null)
                     input.setNoOfParameters(method.getParameters().size());
 
-
                 int start_line_num = method.getName().getRange().get().begin.line;
                 int start_col_num = method.getName().getRange().get().begin.column;
                 int end_col_num = method.getName().getRange().get().end.column;
 
-
-                if (!MethodVisitor.isOverride(method) || verifyUserDefinedMethod(input)) {
+                if (verifyUserDefinedMethod(input)) {
                     ReplacementDataNode rnode = new ReplacementDataNode();
                     rnode.setLineNo(start_line_num);
                     rnode.setStartColNo(start_col_num);

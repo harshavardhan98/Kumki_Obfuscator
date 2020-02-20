@@ -52,9 +52,6 @@ public class Obfuscator {
             File file = new File(s);
             String className = getClassNameFromFilePath(file.getName());
 
-            if(!className.equals("BaseActivity"))
-                continue;
-
             try {
                 CompilationUnit cu = JavaParser.parse(file);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(className).orElse(null);
@@ -126,16 +123,13 @@ public class Obfuscator {
         getFilesList(fsTemp);
 
         for (int i = 0; i < classNameList.size(); i++) {
-            for (String s : predefinedClassList) {
-                if (classNameList.get(i).equals(s))
-                    classNameList.remove(i--);
-            }
+            if (predefinedClassList.contains(classNameList.get(i)) || keepClass.contains(classNameList.get(i)))
+                classNameList.remove(i--);
         }
 
         // in.edu.ssn.ssnapp.
         String basePackage = getBasePackage();
         String[] arr = basePackage.substring(0, basePackage.length() - 1).split("[.]");
-        System.out.print("dsfsd");
 
         for (String s : arr)
             folderNameList.remove(s);
@@ -143,7 +137,15 @@ public class Obfuscator {
         for (String s : predefinedClassList)
             folderNameList.remove(s);
 
-        System.out.print("");
+        for (Map.Entry<String, ArrayList<MethodModel>> entry : methodMap.entrySet()) {
+            ArrayList<MethodModel> temp = entry.getValue();
+            for (int i = 0; i < temp.size(); i++) {
+                MethodModel m = temp.get(i);
+                if (predefinedMethodList.contains(m.getName()) || keepMethod.contains(m.getName()))
+                    temp.remove(i--);
+            }
+            methodMap.put(entry.getKey(), temp);
+        }
     }
 
     public void getFilesList(ArrayList<FileSystem> fs) {
@@ -156,6 +158,7 @@ public class Obfuscator {
                     File file = new File(f.getPath() + File.separator + f.getName());
                     CompilationUnit cu = JavaParser.parse(file);
 
+                    //Don't visit methods in keep class
                     if (!keepClass.contains(getClassNameFromFilePath(file.getAbsolutePath())))
                         cu.accept(new MethodVisitor(methodMap), file.getAbsolutePath());
 
@@ -187,8 +190,6 @@ public class Obfuscator {
             if (f.getFiles() != null)
                 getFilesList(f.getFiles());
         }
-
-        Collections.sort(classNameList);
     }
 
     public static void updateObfuscatorConfig(ReplacementDataNode r) {
@@ -238,7 +239,5 @@ public class Obfuscator {
 
     public void initialiseKeepMethod() {
         keepMethod = new ArrayList<>();
-        keepMethod.add("getTime");
-
     }
 }
