@@ -10585,4 +10585,3 @@ glDisableClientState
 forEachXor
 stopPreviousRingtone
 startsWith
-getEmail

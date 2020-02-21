@@ -11,6 +11,7 @@ public class Main {
         init();
 
         Obfuscator obfuscator;
+
         obfuscator = new ClassObfuscator();
         obfuscator.init();
         obfuscator.performObfuscation(obfuscator);
@@ -22,6 +23,7 @@ public class Main {
         obfuscator = new MethodObfuscator();
         obfuscator.init();
         obfuscator.performObfuscation(obfuscator);
+
     }
 
     public static void init() {

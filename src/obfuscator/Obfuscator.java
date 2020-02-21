@@ -4,6 +4,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -52,6 +53,10 @@ public class Obfuscator {
             File file = new File(s);
             String className = getClassNameFromFilePath(file.getName());
 
+//            if(!file.getName().contains("GroupChatActivity"))
+//                continue;
+
+
             try {
                 CompilationUnit cu = JavaParser.parse(file);
                 ClassOrInterfaceDeclaration clas = cu.getClassByName(className).orElse(null);
@@ -72,8 +77,9 @@ public class Obfuscator {
                 e.printStackTrace();
             }
 
-            if (object instanceof ClassObfuscator)
+            if (object instanceof ClassObfuscator && classNameList.contains(getClassNameFromFilePath(file.getAbsolutePath()))){
                 renameFile(file.getAbsolutePath(), file.getParent() + File.separator + getHexValue(className) + ".java");
+            }
         }
 
         if (object instanceof PackageObfuscator) {
@@ -239,5 +245,7 @@ public class Obfuscator {
 
     public void initialiseKeepMethod() {
         keepMethod = new ArrayList<>();
+        keepMethod.add("getEmail");
+        keepMethod.add("setCount");
     }
 }

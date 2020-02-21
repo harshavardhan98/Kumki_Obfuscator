@@ -8,6 +8,7 @@ import com.github.javaparser.ast.expr.*;
 import model.MethodModel;
 import model.ReplacementDataNode;
 import model.Scope;
+import obfuscator.MethodObfuscator;
 import obfuscator.Obfuscator;
 
 import java.util.List;
@@ -61,12 +62,6 @@ public class MethodExpressionHandler extends ExpressionHandler {
         handleExpression(obj_name_exp, parentScope);
     }
 
-    @Override
-    public void handleNameExpr(Expression exp, Scope parentScope) {
-
-        //System.out.print("Name");
-
-    }
 
     public void handleCastExpr(Expression exp, Scope parentScope) {
         if (exp == null || !exp.isCastExpr())
@@ -96,6 +91,7 @@ public class MethodExpressionHandler extends ExpressionHandler {
                     for (Parameter p : parameters)
                         handleParameter(p, parentScope);
 
+                    MethodObfuscator.handleMethodDeclaration(e.asMethodDeclaration());
                     StatementHandler.handleStatement(e.asMethodDeclaration().getBody().orElse(null), parentScope);
                 }
             }

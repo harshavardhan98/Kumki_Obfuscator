@@ -14,7 +14,9 @@ import model.MethodModel;
 import model.ReplacementDataNode;
 import model.Scope;
 import utils.visitor.MethodVisitor;
+
 import java.util.List;
+
 import static utils.CommonUtils.getBasePackage;
 import static utils.Encryption.getHexValue;
 
@@ -111,24 +113,7 @@ public class MethodObfuscator extends Obfuscator implements Obfuscate {
                     }
                 }
 
-                String name = method.getName().getIdentifier();
-                MethodModel input = new MethodModel();
-                input.setName(name);
-                if (method.getParameters() != null)
-                    input.setNoOfParameters(method.getParameters().size());
-
-                int start_line_num = method.getName().getRange().get().begin.line;
-                int start_col_num = method.getName().getRange().get().begin.column;
-                int end_col_num = method.getName().getRange().get().end.column;
-
-                if (verifyUserDefinedMethod(input)) {
-                    ReplacementDataNode rnode = new ReplacementDataNode();
-                    rnode.setLineNo(start_line_num);
-                    rnode.setStartColNo(start_col_num);
-                    rnode.setEndColNo(end_col_num);
-                    rnode.setReplacementString(getHexValue(name));
-                    obfuscatorConfig.setArrayList(rnode);
-                }
+                handleMethodDeclaration(method);
             }
         }
 
@@ -149,6 +134,32 @@ public class MethodObfuscator extends Obfuscator implements Obfuscate {
                 Expression expression = variable.getInitializer().orElse(null);
                 statementHandler.getExpressionHandler().handleExpression(expression, parentScope);
             }
+        }
+    }
+
+
+    public static void handleMethodDeclaration(MethodDeclaration method) {
+
+        if (method == null)
+            return;
+
+        String name = method.getName().getIdentifier();
+        MethodModel input = new MethodModel();
+        input.setName(name);
+        if (method.getParameters() != null)
+            input.setNoOfParameters(method.getParameters().size());
+
+        int start_line_num = method.getName().getRange().get().begin.line;
+        int start_col_num = method.getName().getRange().get().begin.column;
+        int end_col_num = method.getName().getRange().get().end.column;
+
+        if (verifyUserDefinedMethod(input)) {
+            ReplacementDataNode rnode = new ReplacementDataNode();
+            rnode.setLineNo(start_line_num);
+            rnode.setStartColNo(start_col_num);
+            rnode.setEndColNo(end_col_num);
+            rnode.setReplacementString(getHexValue(name));
+            obfuscatorConfig.setArrayList(rnode);
         }
     }
 
