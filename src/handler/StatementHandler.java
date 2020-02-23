@@ -21,6 +21,9 @@ public class StatementHandler {
             expressionHandler = new ClassExpressionHandler(object);
         else if (object instanceof MethodExpressionHandler)
             expressionHandler = new MethodExpressionHandler(object);
+        else if(object instanceof VariableExpressionHandler)
+            expressionHandler=new VariableExpressionHandler(object);
+
     }
 
     public static void handleStatement(Statement statement, Scope parentScope) {
@@ -39,6 +42,7 @@ public class StatementHandler {
         handleTryCatchStatement(statement, parentScope);
         handleSynchronisedStatement(statement, parentScope);
         handleExplicitConstructorInvocationStmt(statement, parentScope);
+        handleAssertStmt(statement,parentScope);
     }
 
     private static void handleBlockStatement(Statement statement, Scope parentScope) {
@@ -219,4 +223,11 @@ public class StatementHandler {
     public ExpressionHandler getExpressionHandler() {
         return expressionHandler;
     }
+
+    public static void handleAssertStmt(Statement statement, Scope parentScope) {
+        if(statement==null||!statement.isAssertStmt())
+            return;
+        expressionHandler.handleExpression(statement.asAssertStmt().getCheck(), parentScope);
+    }
+
 }

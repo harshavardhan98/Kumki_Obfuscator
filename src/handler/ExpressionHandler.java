@@ -6,6 +6,7 @@ import com.github.javaparser.ast.expr.*;
 import model.Scope;
 import obfuscator.ClassObfuscator;
 import obfuscator.MethodObfuscator;
+import obfuscator.VariableObfuscator;
 import utils.Constants.*;
 
 import java.util.List;
@@ -21,6 +22,9 @@ public class ExpressionHandler {
             this.currentMode = Mode.CLASS;
         else if (object instanceof MethodExpressionHandler)
             this.currentMode = Mode.METHOD;
+        else if (object instanceof VariableExpressionHandler)
+            this.currentMode = Mode.VARIABLE;
+
     }
 
     public void handleExpression(Expression exp, Scope parentScope) {
@@ -57,6 +61,8 @@ public class ExpressionHandler {
             ClassObfuscator.handleVariables(variables, parentScope);
         else if (currentMode == Mode.METHOD)
             MethodObfuscator.handleVariables(variables,parentScope);
+        else if (currentMode == Mode.VARIABLE)
+            VariableObfuscator.handleVariables(variables,parentScope);
     }
 
     public void handleAssignExpr(Expression exp, Scope parentScope) {

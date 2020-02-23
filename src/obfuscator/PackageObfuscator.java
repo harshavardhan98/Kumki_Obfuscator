@@ -20,7 +20,7 @@ public class PackageObfuscator extends Obfuscator implements Obfuscate {
     }
 
     @Override
-    public void handleClass(ClassOrInterfaceDeclaration clas) {
+    public void handleClass(ClassOrInterfaceDeclaration clas,Scope scope) {
 
     }
 

@@ -112,7 +112,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
     }
 
     @Override
-    public void handleClass(ClassOrInterfaceDeclaration clas) {
+    public void handleClass(ClassOrInterfaceDeclaration clas,Scope scope) {
         if (clas != null) {
 
             Scope classScope = new Scope();
@@ -183,7 +183,6 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                     }
 
                     BlockStmt block = constructor.getBody();
-
                     statementHandler.handleStatement(block, classScope);
                 }
             }
@@ -197,7 +196,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                         handleMethodDeclaration(bd.asMethodDeclaration(), classScope);
                         //Inner Class
                     else if (bd.isClassOrInterfaceDeclaration())
-                        handleClass(bd.asClassOrInterfaceDeclaration());
+                        handleClass(bd.asClassOrInterfaceDeclaration(),classScope);
                 }
             }
         }

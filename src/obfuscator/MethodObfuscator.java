@@ -7,13 +7,11 @@ import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.Statement;
 import handler.MethodExpressionHandler;
 import handler.StatementHandler;
 import model.MethodModel;
 import model.ReplacementDataNode;
 import model.Scope;
-import utils.visitor.MethodVisitor;
 
 import java.util.List;
 
@@ -68,13 +66,13 @@ public class MethodObfuscator extends Obfuscator implements Obfuscate {
     }
 
     @Override
-    public void handleClass(ClassOrInterfaceDeclaration clas) {
+    public void handleClass(ClassOrInterfaceDeclaration clas,Scope scope) {
 
         if (clas == null)
             return;
 
         Scope classScope = new Scope();
-        classScope.setParentScope(null);
+        classScope.setParentScope(scope);
 
         // variable declarator
         List<FieldDeclaration> global_fields = clas.getFields();
@@ -102,16 +100,7 @@ public class MethodObfuscator extends Obfuscator implements Obfuscate {
                 methodScope.setScope(methodScope);
 
                 BlockStmt block = method.getBody().orElse(null);
-                if (block != null) {
-
-                    List<Statement> stList = block.getStatements();
-                    if (!stList.isEmpty()) {
-                        for (int i = 0; i < stList.size(); i++) {
-                            Statement st = stList.get(i);
-                            statementHandler.handleStatement(st, methodScope);
-                        }
-                    }
-                }
+                statementHandler.handleStatement(block, methodScope);
 
                 handleMethodDeclaration(method);
             }
@@ -121,7 +110,7 @@ public class MethodObfuscator extends Obfuscator implements Obfuscate {
         if (!members.isEmpty()) {
             for (BodyDeclaration<?> bd : members) {
                 if (bd.isClassOrInterfaceDeclaration()) {
-                    handleClass(bd.asClassOrInterfaceDeclaration());
+                    handleClass(bd.asClassOrInterfaceDeclaration(),classScope);
                 }
             }
         }

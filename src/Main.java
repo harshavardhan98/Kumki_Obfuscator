@@ -1,7 +1,4 @@
-import obfuscator.ClassObfuscator;
-import obfuscator.MethodObfuscator;
-import obfuscator.Obfuscator;
-import obfuscator.PackageObfuscator;
+import obfuscator.*;
 
 import static utils.Backup.*;
 
@@ -12,15 +9,19 @@ public class Main {
 
         Obfuscator obfuscator;
 
-        obfuscator = new ClassObfuscator();
-        obfuscator.init();
-        obfuscator.performObfuscation(obfuscator);
+//        obfuscator = new ClassObfuscator();
+//        obfuscator.init();
+//        obfuscator.performObfuscation(obfuscator);
+//
+//        obfuscator = new PackageObfuscator();
+//        obfuscator.init();
+//        obfuscator.performObfuscation(obfuscator);
+//
+//        obfuscator = new MethodObfuscator();
+//        obfuscator.init();
+//        obfuscator.performObfuscation(obfuscator);
 
-        obfuscator = new PackageObfuscator();
-        obfuscator.init();
-        obfuscator.performObfuscation(obfuscator);
-
-        obfuscator = new MethodObfuscator();
+        obfuscator = new VariableObfuscator();
         obfuscator.init();
         obfuscator.performObfuscation(obfuscator);
 

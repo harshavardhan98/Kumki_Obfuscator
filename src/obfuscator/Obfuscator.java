@@ -2,9 +2,9 @@ package obfuscator;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.body.*;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -30,10 +30,12 @@ public class Obfuscator {
     public ArrayList<String> folderList;
     public static HashSet<String> folderNameList;
     public static Map<String, ArrayList<MethodModel>> methodMap;
+    Scope global_scope;
 
     // keep data
     public ArrayList<String> keepClass;
     public ArrayList<String> keepMethod;
+    public static ArrayList<String> keepField;
 
     private static int jsonFileNameCount = 0;
 
@@ -44,8 +46,12 @@ public class Obfuscator {
     public void init() {
         initialiseKeepClass();
         initialiseKeepMethod();
+        initialiseKeepField();
         analyseProjectStructure();
         getDependencyData();
+        global_scope=new Scope();
+        global_scope.setScope(null);
+        buildGlobalSymbolTable(global_scope);
     }
 
     public void performObfuscation(Obfuscator object) {
@@ -53,8 +59,8 @@ public class Obfuscator {
             File file = new File(s);
             String className = getClassNameFromFilePath(file.getName());
 
-//            if(!file.getName().contains("GroupChatActivity"))
-//                continue;
+            if (!file.getName().contains("BusRouteAdapter"))
+                continue;
 
 
             try {
@@ -65,19 +71,22 @@ public class Obfuscator {
 
                 if (object instanceof ClassObfuscator) {
                     ((ClassObfuscator) object).obfuscate(cu);
-                    ((ClassObfuscator) object).handleClass(clas);
+                    ((ClassObfuscator) object).handleClass(clas,global_scope);
                 } else if (object instanceof PackageObfuscator) {
                     ((PackageObfuscator) object).obfuscate(cu);
                 } else if (object instanceof MethodObfuscator) {
                     ((MethodObfuscator) object).obfuscate(cu);
-                    ((MethodObfuscator) object).handleClass(clas);
+                    ((MethodObfuscator) object).handleClass(clas,global_scope);
+                } else if (object instanceof VariableObfuscator) {
+                    ((VariableObfuscator) object).obfuscate(cu);
+                    ((VariableObfuscator) object).handleClass(clas,global_scope);
                 }
                 obfuscatorConfig.replaceInFiles(file);
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            if (object instanceof ClassObfuscator && classNameList.contains(getClassNameFromFilePath(file.getAbsolutePath()))){
+            if (object instanceof ClassObfuscator && classNameList.contains(getClassNameFromFilePath(file.getAbsolutePath()))) {
                 renameFile(file.getAbsolutePath(), file.getParent() + File.separator + getHexValue(className) + ".java");
             }
         }
@@ -153,6 +162,91 @@ public class Obfuscator {
             methodMap.put(entry.getKey(), temp);
         }
     }
+
+    void buildGlobalSymbolTable(Scope globalScope) {
+
+        for (String s : classList) {
+
+            try {
+                File f = new File(s);
+
+                CompilationUnit cu = JavaParser.parse(f);
+                ClassOrInterfaceDeclaration clas = cu.getClassByName(getClassNameFromFilePath(f.getName())).orElse(null);
+                if (clas == null)
+                    clas = cu.getInterfaceByName(getClassNameFromFilePath(f.getName())).orElse(null);
+
+                handleFieldDeclarationInClass(clas,globalScope);
+
+//                List<FieldDeclaration> global_fields = clas.getFields();
+//                if (!global_fields.isEmpty()) {
+//                    for (FieldDeclaration field : global_fields) {
+//                        List<VariableDeclarator> global_variables = field.getVariables();
+//                        EnumSet<Modifier> modifiers=field.getModifiers();
+//
+//                        boolean isPublic=false;
+//                        for(Modifier m:modifiers){
+//                            if(m.toString().equals("PUBLIC"))
+//                                isPublic=true;
+//                        }
+//
+//
+//                        if (!global_variables.isEmpty() && isPublic) {
+//                            for (VariableDeclarator variable : global_variables) {
+//                                String vtype = variable.getType().asString();
+//                                String vname = variable.getName().getIdentifier();
+//                                if(!keepField.contains(vname))
+//                                    globalScope.setData(vname, vtype);
+//                            }
+//                        }
+//                    }
+//                }
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void handleFieldDeclarationInClass(ClassOrInterfaceDeclaration clas,Scope scope){
+
+        if (clas == null)
+            return;
+
+        List<FieldDeclaration> global_fields = clas.getFields();
+        if (!global_fields.isEmpty()) {
+            for (FieldDeclaration field : global_fields) {
+                List<VariableDeclarator> global_variables = field.getVariables();
+                EnumSet<Modifier> modifiers=field.getModifiers();
+
+                boolean isPublic=false;
+                for(Modifier m:modifiers){
+                    if(m.toString().equals("PUBLIC"))
+                        isPublic=true;
+                }
+
+
+                if (!global_variables.isEmpty() && isPublic) {
+                    for (VariableDeclarator variable : global_variables) {
+                        String vtype = variable.getType().asString();
+                        String vname = variable.getName().getIdentifier();
+                        if(!keepField.contains(vname))
+                            scope.setData(vname, vtype);
+                    }
+                }
+            }
+        }
+
+        List<BodyDeclaration<?>> members = clas.getMembers();
+        if (!members.isEmpty()) {
+            for (BodyDeclaration<?> bd : members) {
+                if(bd.isClassOrInterfaceDeclaration()){
+                    handleFieldDeclarationInClass(bd.asClassOrInterfaceDeclaration(),scope);
+                }
+            }
+        }
+    }
+
 
     public void getFilesList(ArrayList<FileSystem> fs) {
         for (FileSystem f : fs) {
@@ -248,4 +342,10 @@ public class Obfuscator {
         keepMethod.add("getEmail");
         keepMethod.add("setCount");
     }
+
+    public void initialiseKeepField() {
+        keepField = new ArrayList<>();
+        keepField.add("id");
+    }
+
 }
