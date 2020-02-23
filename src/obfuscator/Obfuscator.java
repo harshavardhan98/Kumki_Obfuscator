@@ -59,9 +59,8 @@ public class Obfuscator {
             File file = new File(s);
             String className = getClassNameFromFilePath(file.getName());
 
-            if (!file.getName().contains("BusRouteAdapter"))
-                continue;
-
+//            if(!file.getName().contains("GPACalculatorActivity"))
+//                continue;
 
             try {
                 CompilationUnit cu = JavaParser.parse(file);
@@ -213,20 +212,21 @@ public class Obfuscator {
         if (clas == null)
             return;
 
+
         List<FieldDeclaration> global_fields = clas.getFields();
         if (!global_fields.isEmpty()) {
             for (FieldDeclaration field : global_fields) {
                 List<VariableDeclarator> global_variables = field.getVariables();
-                EnumSet<Modifier> modifiers=field.getModifiers();
 
-                boolean isPublic=false;
-                for(Modifier m:modifiers){
-                    if(m.toString().equals("PUBLIC"))
-                        isPublic=true;
-                }
+//                boolean isPublic=true;
+//                EnumSet<Modifier> modifiers=field.getModifiers();
+//                for(Modifier m:modifiers){
+//                    if(m.toString().equals("PUBLIC"))
+//                        isPublic=true;
+//                }
 
 
-                if (!global_variables.isEmpty() && isPublic) {
+                if (!global_variables.isEmpty()) {
                     for (VariableDeclarator variable : global_variables) {
                         String vtype = variable.getType().asString();
                         String vname = variable.getName().getIdentifier();
@@ -346,6 +346,11 @@ public class Obfuscator {
     public void initialiseKeepField() {
         keepField = new ArrayList<>();
         keepField.add("id");
+        keepField.add("itemView");
+        keepField.add("color");
+        keepField.add(("density"));
+        keepField.add("intent");
+        keepField.add("height");
     }
 
 }

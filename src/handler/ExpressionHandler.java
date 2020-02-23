@@ -48,6 +48,7 @@ public class ExpressionHandler {
         handleClassExpr(exp, parentScope);
         handleFieldAccessExpr(exp, parentScope);
         handleNameExpr(exp, parentScope);
+        handleInstanceOfExpr(exp,parentScope);
     }
 
     public void handleVariableDeclarationExpr(Expression exp, Scope parentScope) {
@@ -135,6 +136,16 @@ public class ExpressionHandler {
         handleExpression(conditionalExpr.getCondition(), parentScope);
         handleExpression(conditionalExpr.getThenExpr(), parentScope);
         handleExpression(conditionalExpr.getElseExpr(), parentScope);
+    }
+
+    public void handleInstanceOfExpr(Expression exp,Scope parentScope){
+
+        if(exp==null || !exp.isInstanceOfExpr())
+            return;
+
+        InstanceOfExpr instanceOfExpr=exp.asInstanceOfExpr();
+        handleExpression(instanceOfExpr.getExpression(),parentScope);
+
     }
 
     /*******************************************************************/

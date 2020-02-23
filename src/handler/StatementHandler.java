@@ -8,6 +8,7 @@ import com.github.javaparser.ast.stmt.*;
 import model.*;
 import obfuscator.ClassObfuscator;
 import obfuscator.MethodObfuscator;
+import obfuscator.VariableObfuscator;
 
 import java.util.List;
 
@@ -125,6 +126,8 @@ public class StatementHandler {
             ClassObfuscator.handleVariables(variableDeclarators, forEachScope);
         else if (expressionHandler instanceof MethodExpressionHandler)
             MethodObfuscator.handleVariables(variableDeclarators,forEachScope);
+        else if(expressionHandler instanceof VariableExpressionHandler)
+            VariableObfuscator.handleVariables(variableDeclarators,forEachScope);
 
         expressionHandler.handleExpression(st.asForeachStmt().getIterable(), forEachScope);
         Statement forEach = st.asForeachStmt().getBody();
@@ -140,7 +143,7 @@ public class StatementHandler {
 
         WhileStmt whileStmt = statement.asWhileStmt();
         expressionHandler.handleExpression(whileStmt.getCondition(), whileScope);
-        handleBlockStatement(whileStmt.getBody(), whileScope);
+        handleStatement(whileStmt.getBody(), whileScope);
     }
 
     private static void handleDoWhileStatement(Statement st, Scope parentScope) {

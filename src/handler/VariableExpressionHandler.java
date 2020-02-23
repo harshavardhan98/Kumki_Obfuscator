@@ -57,6 +57,13 @@ public class VariableExpressionHandler extends ExpressionHandler {
         handleExpression(fieldAccessExpr.getScope(),parentScope);
 
         FieldAccessExpr temp=fieldAccessExpr;
+        if(temp.getScope()!=null && temp.getScope().isFieldAccessExpr()){
+            temp= temp.getScope().asFieldAccessExpr();
+            if(temp!=null && temp.getScope().isNameExpr()){
+                if(temp.getScope().asNameExpr().getNameAsString().equals("R"))
+                    return;
+            }
+        }
 
 
         if(parentScope.checkIfGivenVariableExistsInScope(fieldAccessExpr.getNameAsString()) && condition ){
