@@ -52,7 +52,7 @@ public class VariableExpressionHandler extends ExpressionHandler {
         if (exp == null || !exp.isFieldAccessExpr())
             return;
 
-        boolean condition=true;
+
         FieldAccessExpr fieldAccessExpr = exp.asFieldAccessExpr();
         handleExpression(fieldAccessExpr.getScope(),parentScope);
 
@@ -66,7 +66,7 @@ public class VariableExpressionHandler extends ExpressionHandler {
         }
 
 
-        if(parentScope.checkIfGivenVariableExistsInScope(fieldAccessExpr.getNameAsString()) && condition ){
+        if(parentScope.checkIfGivenVariableExistsInScope(fieldAccessExpr.getNameAsString())){
             String name = fieldAccessExpr.getName().getIdentifier();
             int vstart_line_num = fieldAccessExpr.getName().getRange().get().begin.line;
             int vstart_col_num = fieldAccessExpr.getName().getRange().get().begin.column;

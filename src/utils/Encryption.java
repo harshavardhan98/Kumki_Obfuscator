@@ -37,6 +37,6 @@ public class Encryption {
                 text += c;
         }
 
-        return text;
+        return text+"_";
     }
 }

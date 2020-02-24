@@ -176,31 +176,6 @@ public class Obfuscator {
 
                 handleFieldDeclarationInClass(clas,globalScope);
 
-//                List<FieldDeclaration> global_fields = clas.getFields();
-//                if (!global_fields.isEmpty()) {
-//                    for (FieldDeclaration field : global_fields) {
-//                        List<VariableDeclarator> global_variables = field.getVariables();
-//                        EnumSet<Modifier> modifiers=field.getModifiers();
-//
-//                        boolean isPublic=false;
-//                        for(Modifier m:modifiers){
-//                            if(m.toString().equals("PUBLIC"))
-//                                isPublic=true;
-//                        }
-//
-//
-//                        if (!global_variables.isEmpty() && isPublic) {
-//                            for (VariableDeclarator variable : global_variables) {
-//                                String vtype = variable.getType().asString();
-//                                String vname = variable.getName().getIdentifier();
-//                                if(!keepField.contains(vname))
-//                                    globalScope.setData(vname, vtype);
-//                            }
-//                        }
-//                    }
-//                }
-
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
