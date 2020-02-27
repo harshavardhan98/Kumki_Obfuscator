@@ -10,6 +10,7 @@ import obfuscator.*;
 import java.util.List;
 import static obfuscator.ClassObfuscator.*;
 import static utils.Encryption.*;
+import static utils.CommonUtils.*;
 
 public class ClassExpressionHandler extends ExpressionHandler {
 

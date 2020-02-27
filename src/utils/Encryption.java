@@ -1,7 +1,5 @@
 package utils;
 
-
-
 public class Encryption {
     public static String getHexValue(String value) {
         String keyValue = Constants.keyValue;
@@ -37,6 +35,10 @@ public class Encryption {
                 text += c;
         }
 
-        return text+"_";
+        return text;
+    }
+
+    public static String appendUnderScore(String value){
+        return value + "_";
     }
 }

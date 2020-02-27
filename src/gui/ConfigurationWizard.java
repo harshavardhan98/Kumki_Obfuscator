@@ -26,7 +26,5 @@ public class ConfigurationWizard extends JFrame {
                 System.out.println("textArea1 "+textArea1.getText());
             }
         });
-
-
     }
 }

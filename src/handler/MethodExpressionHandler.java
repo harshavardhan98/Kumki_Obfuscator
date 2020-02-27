@@ -9,12 +9,12 @@ import model.MethodModel;
 import model.ReplacementDataNode;
 import model.Scope;
 import obfuscator.MethodObfuscator;
-import obfuscator.Obfuscator;
 
 import java.util.List;
 
 import static obfuscator.Obfuscator.*;
-import static utils.Encryption.getHexValue;
+import static utils.Encryption.*;
+import static utils.CommonUtils.*;
 
 public class MethodExpressionHandler extends ExpressionHandler {
 

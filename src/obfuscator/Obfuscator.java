@@ -2,13 +2,12 @@ package obfuscator;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.*;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import config.ObfuscatorConfig;
 import model.*;
 import utils.visitor.MethodVisitor;
 
@@ -44,23 +43,24 @@ public class Obfuscator {
     }
 
     public void init() {
+        initKeep();
+        analyseProjectStructure();
+        getDependencyData();
+        buildGlobalSymbolTable();
+    }
+
+    public void initKeep(){
         initialiseKeepClass();
         initialiseKeepMethod();
         initialiseKeepField();
-        analyseProjectStructure();
-        getDependencyData();
-        global_scope=new Scope();
-        global_scope.setScope(null);
-        buildGlobalSymbolTable(global_scope);
     }
+
+    /*****************************************/
 
     public void performObfuscation(Obfuscator object) {
         for (String s : classList) {
             File file = new File(s);
             String className = getClassNameFromFilePath(file.getName());
-
-//            if(!file.getName().contains("GPACalculatorActivity"))
-//                continue;
 
             try {
                 CompilationUnit cu = JavaParser.parse(file);
@@ -70,15 +70,14 @@ public class Obfuscator {
 
                 if (object instanceof ClassObfuscator) {
                     ((ClassObfuscator) object).obfuscate(cu);
-                    ((ClassObfuscator) object).handleClass(clas,global_scope);
+                    ((ClassObfuscator) object).handleClass(clas, global_scope);
                 } else if (object instanceof PackageObfuscator) {
                     ((PackageObfuscator) object).obfuscate(cu);
                 } else if (object instanceof MethodObfuscator) {
                     ((MethodObfuscator) object).obfuscate(cu);
-                    ((MethodObfuscator) object).handleClass(clas,global_scope);
+                    ((MethodObfuscator) object).handleClass(clas, global_scope);
                 } else if (object instanceof VariableObfuscator) {
-                    ((VariableObfuscator) object).obfuscate(cu);
-                    ((VariableObfuscator) object).handleClass(clas,global_scope);
+                    ((VariableObfuscator) object).handleClass(clas, global_scope);
                 }
                 obfuscatorConfig.replaceInFiles(file);
             } catch (Exception e) {
@@ -162,10 +161,11 @@ public class Obfuscator {
         }
     }
 
-    void buildGlobalSymbolTable(Scope globalScope) {
+    void buildGlobalSymbolTable() {
+        global_scope = new Scope();
+        global_scope.setScope(null);
 
         for (String s : classList) {
-
             try {
                 File f = new File(s);
 
@@ -174,38 +174,27 @@ public class Obfuscator {
                 if (clas == null)
                     clas = cu.getInterfaceByName(getClassNameFromFilePath(f.getName())).orElse(null);
 
-                handleFieldDeclarationInClass(clas,globalScope);
-
+                handleFieldDeclarationInClass(clas, global_scope);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void handleFieldDeclarationInClass(ClassOrInterfaceDeclaration clas,Scope scope){
-
+    public void handleFieldDeclarationInClass(ClassOrInterfaceDeclaration clas, Scope scope) {
         if (clas == null)
             return;
-
 
         List<FieldDeclaration> global_fields = clas.getFields();
         if (!global_fields.isEmpty()) {
             for (FieldDeclaration field : global_fields) {
                 List<VariableDeclarator> global_variables = field.getVariables();
 
-//                boolean isPublic=true;
-//                EnumSet<Modifier> modifiers=field.getModifiers();
-//                for(Modifier m:modifiers){
-//                    if(m.toString().equals("PUBLIC"))
-//                        isPublic=true;
-//                }
-
-
                 if (!global_variables.isEmpty()) {
                     for (VariableDeclarator variable : global_variables) {
                         String vtype = variable.getType().asString();
                         String vname = variable.getName().getIdentifier();
-                        if(!keepField.contains(vname))
+                        if (!keepField.contains(vname))
                             scope.setData(vname, vtype);
                     }
                 }
@@ -215,13 +204,12 @@ public class Obfuscator {
         List<BodyDeclaration<?>> members = clas.getMembers();
         if (!members.isEmpty()) {
             for (BodyDeclaration<?> bd : members) {
-                if(bd.isClassOrInterfaceDeclaration()){
-                    handleFieldDeclarationInClass(bd.asClassOrInterfaceDeclaration(),scope);
+                if (bd.isClassOrInterfaceDeclaration()) {
+                    handleFieldDeclarationInClass(bd.asClassOrInterfaceDeclaration(), scope);
                 }
             }
         }
     }
-
 
     public void getFilesList(ArrayList<FileSystem> fs) {
         for (FileSystem f : fs) {
@@ -271,42 +259,7 @@ public class Obfuscator {
         obfuscatorConfig.setArrayList(r);
     }
 
-    public static Boolean verifyUserDefinedClass(String ObjType) {
-        // todo write as lambda
-        for (int x = 0; x < classNameList.size(); x++) {
-            if (classNameList.get(x).equals(ObjType))
-                return true;
-        }
-        return false;
-    }
-
-    public static Boolean verifyUserDefinedMethod(MethodModel input) {
-
-        // TODO write a comparator
-        for (Map.Entry<String, ArrayList<MethodModel>> entry : methodMap.entrySet()) {
-            ArrayList<MethodModel> temp = entry.getValue();
-            for (int i = 0; i < temp.size(); i++) {
-                MethodModel m = temp.get(i);
-                if (m.getName().equals(input.getName()) && m.getNoOfParameters() == input.getNoOfParameters())
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    public static Boolean verifyUserDefinedMethodbyName(String input) {
-
-        // TODO write a comparator
-        for (Map.Entry<String, ArrayList<MethodModel>> entry : methodMap.entrySet()) {
-            ArrayList<MethodModel> temp = entry.getValue();
-            for (int i = 0; i < temp.size(); i++) {
-                MethodModel m = temp.get(i);
-                if (m.getName().equals(input))
-                    return true;
-            }
-        }
-        return false;
-    }
+    /*****************************************/
 
     public void initialiseKeepClass() {
         keepClass = new ArrayList<>();
@@ -327,5 +280,4 @@ public class Obfuscator {
         keepField.add("intent");
         keepField.add("height");
     }
-
 }

@@ -22,9 +22,8 @@ public class StatementHandler {
             expressionHandler = new ClassExpressionHandler(object);
         else if (object instanceof MethodExpressionHandler)
             expressionHandler = new MethodExpressionHandler(object);
-        else if(object instanceof VariableExpressionHandler)
-            expressionHandler=new VariableExpressionHandler(object);
-
+        else if (object instanceof VariableExpressionHandler)
+            expressionHandler = new VariableExpressionHandler(object);
     }
 
     public static void handleStatement(Statement statement, Scope parentScope) {
@@ -43,7 +42,7 @@ public class StatementHandler {
         handleTryCatchStatement(statement, parentScope);
         handleSynchronisedStatement(statement, parentScope);
         handleExplicitConstructorInvocationStmt(statement, parentScope);
-        handleAssertStmt(statement,parentScope);
+        handleAssertStmt(statement, parentScope);
     }
 
     private static void handleBlockStatement(Statement statement, Scope parentScope) {
@@ -72,7 +71,7 @@ public class StatementHandler {
         if (st == null || !st.isIfStmt())
             return;
 
-        Scope ifScope=new Scope();
+        Scope ifScope = new Scope();
         ifScope.setScope(parentScope);
 
         Expression condition = st.asIfStmt().getCondition();
@@ -125,9 +124,9 @@ public class StatementHandler {
         if (expressionHandler instanceof ClassExpressionHandler)
             ClassObfuscator.handleVariables(variableDeclarators, forEachScope);
         else if (expressionHandler instanceof MethodExpressionHandler)
-            MethodObfuscator.handleVariables(variableDeclarators,forEachScope);
-        else if(expressionHandler instanceof VariableExpressionHandler)
-            VariableObfuscator.handleVariables(variableDeclarators,forEachScope);
+            MethodObfuscator.handleVariables(variableDeclarators, forEachScope);
+        else if (expressionHandler instanceof VariableExpressionHandler)
+            VariableObfuscator.handleVariables(variableDeclarators, forEachScope);
 
         expressionHandler.handleExpression(st.asForeachStmt().getIterable(), forEachScope);
         Statement forEach = st.asForeachStmt().getBody();
@@ -216,6 +215,12 @@ public class StatementHandler {
         }
     }
 
+    public static void handleAssertStmt(Statement statement, Scope parentScope) {
+        if (statement == null || !statement.isAssertStmt())
+            return;
+        expressionHandler.handleExpression(statement.asAssertStmt().getCheck(), parentScope);
+    }
+
     public static void handleParameter(Parameter p, Scope parentScope) {
         if (p == null)
             return;
@@ -226,11 +231,4 @@ public class StatementHandler {
     public ExpressionHandler getExpressionHandler() {
         return expressionHandler;
     }
-
-    public static void handleAssertStmt(Statement statement, Scope parentScope) {
-        if(statement==null||!statement.isAssertStmt())
-            return;
-        expressionHandler.handleExpression(statement.asAssertStmt().getCheck(), parentScope);
-    }
-
 }

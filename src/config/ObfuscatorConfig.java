@@ -1,4 +1,4 @@
-package obfuscator;
+package config;
 
 import model.*;
 import java.io.File;

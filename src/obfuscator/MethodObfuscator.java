@@ -15,8 +15,8 @@ import model.Scope;
 
 import java.util.List;
 
-import static utils.CommonUtils.getBasePackage;
-import static utils.Encryption.getHexValue;
+import static utils.CommonUtils.*;
+import static utils.Encryption.*;
 
 public class MethodObfuscator extends Obfuscator implements Obfuscate {
 

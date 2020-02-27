@@ -20,7 +20,7 @@ public class PackageObfuscator extends Obfuscator implements Obfuscate {
     }
 
     @Override
-    public void handleClass(ClassOrInterfaceDeclaration clas,Scope scope) {
+    public void handleClass(ClassOrInterfaceDeclaration clas, Scope scope) {
 
     }
 
@@ -54,7 +54,7 @@ public class PackageObfuscator extends Obfuscator implements Obfuscate {
                 if (isAsterisk)
                     temp += "." + identifier;
 
-                if((temp + ".").equals(CommonUtils.getBasePackage()))
+                if ((temp + ".").equals(CommonUtils.getBasePackage()))
                     break;
 
                 for (String str : packageNameList) {

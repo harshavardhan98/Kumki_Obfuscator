@@ -24,7 +24,6 @@ public class ExpressionHandler {
             this.currentMode = Mode.METHOD;
         else if (object instanceof VariableExpressionHandler)
             this.currentMode = Mode.VARIABLE;
-
     }
 
     public void handleExpression(Expression exp, Scope parentScope) {
@@ -48,7 +47,7 @@ public class ExpressionHandler {
         handleClassExpr(exp, parentScope);
         handleFieldAccessExpr(exp, parentScope);
         handleNameExpr(exp, parentScope);
-        handleInstanceOfExpr(exp,parentScope);
+        handleInstanceOfExpr(exp, parentScope);
     }
 
     public void handleVariableDeclarationExpr(Expression exp, Scope parentScope) {
@@ -61,9 +60,9 @@ public class ExpressionHandler {
         if (currentMode == Mode.CLASS)
             ClassObfuscator.handleVariables(variables, parentScope);
         else if (currentMode == Mode.METHOD)
-            MethodObfuscator.handleVariables(variables,parentScope);
+            MethodObfuscator.handleVariables(variables, parentScope);
         else if (currentMode == Mode.VARIABLE)
-            VariableObfuscator.handleVariables(variables,parentScope);
+            VariableObfuscator.handleVariables(variables, parentScope);
     }
 
     public void handleAssignExpr(Expression exp, Scope parentScope) {
@@ -138,14 +137,12 @@ public class ExpressionHandler {
         handleExpression(conditionalExpr.getElseExpr(), parentScope);
     }
 
-    public void handleInstanceOfExpr(Expression exp,Scope parentScope){
-
-        if(exp==null || !exp.isInstanceOfExpr())
+    public void handleInstanceOfExpr(Expression exp, Scope parentScope) {
+        if (exp == null || !exp.isInstanceOfExpr())
             return;
 
-        InstanceOfExpr instanceOfExpr=exp.asInstanceOfExpr();
-        handleExpression(instanceOfExpr.getExpression(),parentScope);
-
+        InstanceOfExpr instanceOfExpr = exp.asInstanceOfExpr();
+        handleExpression(instanceOfExpr.getExpression(), parentScope);
     }
 
     /*******************************************************************/

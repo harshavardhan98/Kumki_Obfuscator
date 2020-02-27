@@ -7,5 +7,5 @@ import model.Scope;
 public interface Obfuscate {
     void obfuscate(CompilationUnit cu);
 
-    void handleClass(ClassOrInterfaceDeclaration clas,Scope scope);
+    void handleClass(ClassOrInterfaceDeclaration clas, Scope scope);
 }

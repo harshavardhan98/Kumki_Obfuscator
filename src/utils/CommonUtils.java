@@ -5,15 +5,16 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import model.FileSystem;
+import model.MethodModel;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
-
-
+import java.util.Map;
 import static utils.Constants.*;
+import static obfuscator.Obfuscator.*;
 
 public class CommonUtils {
 
@@ -48,13 +49,41 @@ public class CommonUtils {
         return String.valueOf(myNameChars);
     }
 
-    public static ArrayList<String> getPackageName(ArrayList<String> folderList) {
-        ArrayList<String> packageNameToRename = new ArrayList<>();
+    /****************************************************************************/
 
-        for (String s : folderList)
-            packageNameToRename.add(getPackageNameFromPath(s));
+    public static Boolean verifyUserDefinedClass(String ObjType) {
+        // todo write as lambda
+        for (int x = 0; x < classNameList.size(); x++) {
+            if (classNameList.get(x).equals(ObjType))
+                return true;
+        }
+        return false;
+    }
 
-        return packageNameToRename;
+    public static Boolean verifyUserDefinedMethod(MethodModel input) {
+        // TODO write a comparator
+        for (Map.Entry<String, ArrayList<MethodModel>> entry : methodMap.entrySet()) {
+            ArrayList<MethodModel> temp = entry.getValue();
+            for (int i = 0; i < temp.size(); i++) {
+                MethodModel m = temp.get(i);
+                if (m.getName().equals(input.getName()) && m.getNoOfParameters() == input.getNoOfParameters())
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public static Boolean verifyUserDefinedMethodbyName(String input) {
+        // TODO write a comparator
+        for (Map.Entry<String, ArrayList<MethodModel>> entry : methodMap.entrySet()) {
+            ArrayList<MethodModel> temp = entry.getValue();
+            for (int i = 0; i < temp.size(); i++) {
+                MethodModel m = temp.get(i);
+                if (m.getName().equals(input))
+                    return true;
+            }
+        }
+        return false;
     }
 
     /****************************************************************************/
@@ -77,7 +106,6 @@ public class CommonUtils {
 
         return temp;
     }
-
 
     /****************************************************************************/
 

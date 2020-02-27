@@ -112,7 +112,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
     }
 
     @Override
-    public void handleClass(ClassOrInterfaceDeclaration clas,Scope scope) {
+    public void handleClass(ClassOrInterfaceDeclaration clas, Scope scope) {
         if (clas != null) {
 
             Scope classScope = new Scope();
@@ -196,7 +196,7 @@ public class ClassObfuscator extends Obfuscator implements Obfuscate {
                         handleMethodDeclaration(bd.asMethodDeclaration(), classScope);
                         //Inner Class
                     else if (bd.isClassOrInterfaceDeclaration())
-                        handleClass(bd.asClassOrInterfaceDeclaration(),classScope);
+                        handleClass(bd.asClassOrInterfaceDeclaration(), classScope);
                 }
             }
         }
