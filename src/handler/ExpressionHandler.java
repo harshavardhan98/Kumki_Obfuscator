@@ -48,6 +48,11 @@ public class ExpressionHandler {
         handleFieldAccessExpr(exp, parentScope);
         handleNameExpr(exp, parentScope);
         handleInstanceOfExpr(exp, parentScope);
+        handleStringLiteralExpr(exp,parentScope);
+        handleDoubleLiteralExpr(exp,parentScope);
+        handleIntegerLiteralExpr(exp,parentScope);
+        handleCharLiteralExpr(exp,parentScope);
+
     }
 
     public void handleVariableDeclarationExpr(Expression exp, Scope parentScope) {
@@ -170,4 +175,21 @@ public class ExpressionHandler {
 
     public void handleParameter(Parameter p, Scope parentScope) {
     }
+
+    public void handleStringLiteralExpr(Expression exp,Scope parentScope){
+
+    }
+
+    public void handleIntegerLiteralExpr(Expression exp,Scope parentScope){
+
+    }
+
+    public void handleDoubleLiteralExpr(Expression exp,Scope parentScope){
+
+    }
+
+    public void handleCharLiteralExpr(Expression exp,Scope parentScope){
+
+    }
+
 }

@@ -1,5 +1,7 @@
 package utils;
 
+import utils.Constants.*;
+
 public class Encryption {
     public static String getHexValue(String value) {
         String keyValue = Constants.keyValue;
@@ -41,4 +43,36 @@ public class Encryption {
     public static String appendUnderScore(String value){
         return value + "_";
     }
+
+    /******************************************************************/
+
+    public static String getUnicodeExpression(String val, Mode m){
+
+        String str="";
+
+        if(m==Mode.INTEGER_CONSTANT_OBFUSCATION || m==Mode.DOUBLE_CONSTANT_OBFUSCATION || m==Mode.CHAR_CONSTANT_OBFUSCATION) {
+            return toUnicode (val);
+        }
+        else if(m==Mode.STRING_CONSTANT_OBFUSCATION){
+            val="\""+val+"\"";
+            return toUnicode(val);
+        }
+
+        return str;
+    }
+
+    private static String toUnicode(String uString) {
+        String unicode = "";
+        for (char c: uString.toCharArray()) {
+            unicode += toUnicode(c);
+        }
+        return unicode;
+    }
+
+    private static String toUnicode(Character uChar) {
+        return "\\u" + Integer.toHexString(uChar | 0x10000).substring(1);
+    }
+
+    /******************************************************************/
+
 }
