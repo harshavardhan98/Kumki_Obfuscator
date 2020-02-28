@@ -25,11 +25,15 @@ public class Main {
         obfuscator = new VariableObfuscator();
         obfuscator.init();
         obfuscator.performObfuscation(obfuscator);
+
+        obfuscator = new CommentObfuscator();
+        obfuscator.init();
+        obfuscator.performObfuscation(obfuscator);
     }
 
     public static void init() {
-        //backupProject();
-        //initUI();
+        backupProject();
+        initUI();
     }
 
     public static void initUI() {

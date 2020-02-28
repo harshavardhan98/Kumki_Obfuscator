@@ -50,7 +50,7 @@ public class Obfuscator {
         buildGlobalSymbolTable();
     }
 
-    public void initKeep(){
+    public void initKeep() {
         initialiseKeepClass();
         initialiseKeepMethod();
         initialiseKeepField();
@@ -79,6 +79,9 @@ public class Obfuscator {
                     ((MethodObfuscator) object).handleClass(clas, global_scope);
                 } else if (object instanceof VariableObfuscator) {
                     ((VariableObfuscator) object).handleClass(clas, global_scope);
+                } else if (object instanceof CommentObfuscator) {
+                    ((CommentObfuscator) object).obfuscate(cu);
+                    obfuscatorConfig.replaceComments(file);
                 }
                 obfuscatorConfig.replaceInFiles(file);
             } catch (Exception e) {
