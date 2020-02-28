@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import config.ObfuscatorConfig;
+import handler.LayoutHandler;
 import handler.ManifestHandler;
 import model.*;
 import utils.visitor.MethodVisitor;
@@ -88,13 +89,15 @@ public class Obfuscator {
                 e.printStackTrace();
             }
 
-            if (object instanceof ClassObfuscator && classNameList.contains(getClassNameFromFilePath(file.getAbsolutePath()))) {
+            if (object instanceof ClassObfuscator && classNameList.contains(getClassNameFromFilePath(file.getAbsolutePath())))
                 renameFile(file.getAbsolutePath(), file.getParent() + File.separator + getHexValue(className) + ".java");
-                ManifestHandler.performObfuscation();
-            }
         }
 
-        if (object instanceof PackageObfuscator) {
+        if(object instanceof ClassObfuscator){
+            performManifestObfuscation();
+            performLayoutObfuscation();
+        }
+        else if (object instanceof PackageObfuscator) {
             for (String s : folderList) {
                 File f = new File(s);
                 if (!folderNameList.contains(f.getName()))
@@ -103,6 +106,23 @@ public class Obfuscator {
                 renameFile(f.getAbsolutePath(), f.getParent() + File.separator + getHexValue(className));
             }
         }
+    }
+
+    public void performManifestObfuscation() {
+        ManifestHandler.performObfuscation();
+    }
+
+    public void performLayoutObfuscation() {
+        File folder = new File(projectResDirectory);
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (!file.getName().startsWith(".") && file.getName().endsWith("xml") && file.isFile())
+                    LayoutHandler.performObfuscation(file.getAbsolutePath());
+            }
+        }
+
     }
 
     /***********************************************************/

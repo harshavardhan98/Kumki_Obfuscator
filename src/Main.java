@@ -33,7 +33,7 @@ public class Main {
 
     public static void init() {
         backupProject();
-        initUI();
+        //initUI();
     }
 
     public static void initUI() {

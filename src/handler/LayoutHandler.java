@@ -1,22 +1,21 @@
 package handler;
 
 import obfuscator.Obfuscator;
+import utils.Encryption;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static utils.Constants.*;
-import static utils.Encryption.*;
 
-public class ManifestHandler {
+public class LayoutHandler {
 
-    public static void performObfuscation() {
+    public static void performObfuscation(String filePath) {
         String fileContent = "";
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(manifestPath));
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
             StringBuilder stringBuilder = new StringBuilder();
             String line = null;
             String ls = System.getProperty("line.separator");
@@ -33,10 +32,10 @@ public class ManifestHandler {
         }
 
         String patternString = "(";
-        for (String i : Obfuscator.classNameList)
-            patternString += "android:name.*=.*\".*[.]" + i + "\"" + "|";
+        for(String i : Obfuscator.classNameList)
+            patternString += "tools:context.*=.*\".*[.]" + i + "\"" + "|";
 
-        patternString = patternString.substring(0, patternString.length() - 1);
+        patternString = patternString.substring(0,patternString.length() - 1);
         patternString += ")";
 
         Pattern pattern = Pattern.compile(patternString);
@@ -46,20 +45,20 @@ public class ManifestHandler {
         while (matcher.find()) {
             String fullMatcher = matcher.group(1);
 
-            String patternString1 = "\"[.](.*)\"";
+            String patternString1 = "\"[.].*\"";
             Pattern pattern1 = Pattern.compile(patternString1);
             Matcher matcher1 = pattern1.matcher(fullMatcher);
             StringBuffer sb1 = new StringBuffer();
 
             while (matcher1.find())
-                matcher1.appendReplacement(sb1, getHexValue(matcher1.group(0)));
+                matcher1.appendReplacement(sb1, Encryption.getHexValue(matcher1.group(0)));
             matcher1.appendTail(sb1);
             matcher.appendReplacement(sb, sb1.toString());
         }
         matcher.appendTail(sb);
 
         try {
-            PrintWriter out = new PrintWriter(manifestPath);
+            PrintWriter out = new PrintWriter(filePath);
             out.println(sb.toString());
             out.close();
         } catch (Exception e) {

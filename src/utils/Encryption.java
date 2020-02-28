@@ -15,9 +15,9 @@ public class Encryption {
             keyValue += tempKey;
 
         String text = "";
-        for (int i = 0; i < value.length(); i++) {
+        for (int i = 0, j=0; i < value.length(); i++, j++) {
             char c = value.charAt(i);
-            char k = keyValue.charAt(i);
+            char k = keyValue.charAt(j);
             if (Character.isAlphabetic(c)) {
                 if (Character.isUpperCase(c)) {
                     int cix = c - 65;
@@ -31,8 +31,10 @@ public class Encryption {
                     cix = (cix + key) % 26 + 97;
                     text += (char) (cix);
                 }
-            } else
+            } else {
                 text += c;
+                j=-1;
+            }
         }
 
         return text;
