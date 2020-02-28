@@ -18,42 +18,40 @@ public class Encryption {
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
             char k = keyValue.charAt(i);
-            if(Character.isAlphabetic(c)) {
-                if(Character.isUpperCase(c)){
+            if (Character.isAlphabetic(c)) {
+                if (Character.isUpperCase(c)) {
                     int cix = c - 65;
                     int key = k - 65;
                     cix = (cix + key) % 26 + 65;
                     text += (char) (cix);
 
-                }else{
+                } else {
                     int cix = c - 97;
                     int key = k - 97;
                     cix = (cix + key) % 26 + 97;
                     text += (char) (cix);
                 }
-            }
-            else
+            } else
                 text += c;
         }
 
         return text;
     }
 
-    public static String appendUnderScore(String value){
+    public static String appendUnderScore(String value) {
         return value + "_";
     }
 
     /******************************************************************/
 
-    public static String getUnicodeExpression(String val, Mode m){
+    public static String getUnicodeExpression(String val, Mode m) {
 
-        String str="";
+        String str = "";
 
-        if(m==Mode.INTEGER_CONSTANT_OBFUSCATION || m==Mode.DOUBLE_CONSTANT_OBFUSCATION || m==Mode.CHAR_CONSTANT_OBFUSCATION) {
-            return toUnicode (val);
-        }
-        else if(m==Mode.STRING_CONSTANT_OBFUSCATION){
-            val="\""+val+"\"";
+        if (m == Mode.INTEGER_CONSTANT_OBFUSCATION || m == Mode.DOUBLE_CONSTANT_OBFUSCATION || m == Mode.CHAR_CONSTANT_OBFUSCATION) {
+            return toUnicode(val);
+        } else if (m == Mode.STRING_CONSTANT_OBFUSCATION) {
+            val = "\"" + val + "\"";
             return toUnicode(val);
         }
 
@@ -62,14 +60,9 @@ public class Encryption {
 
     private static String toUnicode(String uString) {
         String unicode = "";
-        for (char c: uString.toCharArray()) {
-            unicode += toUnicode(c);
-        }
+        for (char c : uString.toCharArray())
+            unicode += "\\u" + Integer.toHexString(c | 0x10000).substring(1);
         return unicode;
-    }
-
-    private static String toUnicode(Character uChar) {
-        return "\\u" + Integer.toHexString(uChar | 0x10000).substring(1);
     }
 
     /******************************************************************/

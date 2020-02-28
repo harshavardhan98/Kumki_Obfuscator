@@ -11,6 +11,7 @@ import obfuscator.VariableObfuscator;
 import utils.Constants.*;
 
 import java.util.List;
+
 import static utils.Encryption.*;
 
 public class VariableExpressionHandler extends ExpressionHandler {
@@ -138,24 +139,24 @@ public class VariableExpressionHandler extends ExpressionHandler {
         handleExpression(expr.getInitializer().orElse(null), parentScope);
     }
 
+    /**********************************************************/
+    //Constant Obfuscation
+
     @Override
     public void handleStringLiteralExpr(Expression exp, Scope parentScope) {
         if (exp == null || !exp.isStringLiteralExpr())
             return;
 
-        StringLiteralExpr sExpr=exp.asStringLiteralExpr();
-
-        if(sExpr.getValue().contains("\\u"))
+        StringLiteralExpr sExpr = exp.asStringLiteralExpr();
+        if (sExpr.getValue().contains("\\u"))
             return;
 
-
-        ReplacementDataNode replacementDataNode=new ReplacementDataNode();
-        replacementDataNode.setReplacementString(getUnicodeExpression(sExpr.getValue(),Mode.STRING_CONSTANT_OBFUSCATION));
+        ReplacementDataNode replacementDataNode = new ReplacementDataNode();
+        replacementDataNode.setReplacementString(getUnicodeExpression(sExpr.getValue(), Mode.STRING_CONSTANT_OBFUSCATION));
         replacementDataNode.setLineNo(sExpr.getRange().get().begin.line);
         replacementDataNode.setStartColNo(sExpr.getRange().get().begin.column);
         replacementDataNode.setEndColNo(sExpr.getRange().get().end.column);
         Obfuscator.updateObfuscatorConfig(replacementDataNode);
-
     }
 
     @Override
@@ -163,14 +164,13 @@ public class VariableExpressionHandler extends ExpressionHandler {
         if (exp == null || !exp.isIntegerLiteralExpr())
             return;
 
-        IntegerLiteralExpr iExpr=exp.asIntegerLiteralExpr();
-        ReplacementDataNode replacementDataNode=new ReplacementDataNode();
-        replacementDataNode.setReplacementString(getUnicodeExpression(iExpr.getValue(),Mode.INTEGER_CONSTANT_OBFUSCATION));
+        IntegerLiteralExpr iExpr = exp.asIntegerLiteralExpr();
+        ReplacementDataNode replacementDataNode = new ReplacementDataNode();
+        replacementDataNode.setReplacementString(getUnicodeExpression(iExpr.getValue(), Mode.INTEGER_CONSTANT_OBFUSCATION));
         replacementDataNode.setLineNo(iExpr.getRange().get().begin.line);
         replacementDataNode.setStartColNo(iExpr.getRange().get().begin.column);
         replacementDataNode.setEndColNo(iExpr.getRange().get().end.column);
         Obfuscator.updateObfuscatorConfig(replacementDataNode);
-
     }
 
     @Override
@@ -178,9 +178,9 @@ public class VariableExpressionHandler extends ExpressionHandler {
         if (exp == null || !exp.isDoubleLiteralExpr())
             return;
 
-        DoubleLiteralExpr dExpr=exp.asDoubleLiteralExpr();
-        ReplacementDataNode replacementDataNode=new ReplacementDataNode();
-        replacementDataNode.setReplacementString(getUnicodeExpression(dExpr.getValue(),Mode.DOUBLE_CONSTANT_OBFUSCATION));
+        DoubleLiteralExpr dExpr = exp.asDoubleLiteralExpr();
+        ReplacementDataNode replacementDataNode = new ReplacementDataNode();
+        replacementDataNode.setReplacementString(getUnicodeExpression(dExpr.getValue(), Mode.DOUBLE_CONSTANT_OBFUSCATION));
         replacementDataNode.setLineNo(dExpr.getRange().get().begin.line);
         replacementDataNode.setStartColNo(dExpr.getRange().get().begin.column);
         replacementDataNode.setEndColNo(dExpr.getRange().get().end.column);
@@ -192,14 +192,16 @@ public class VariableExpressionHandler extends ExpressionHandler {
         if (exp == null || !exp.isCharLiteralExpr())
             return;
 
-        CharLiteralExpr cExpr=exp.asCharLiteralExpr();
-        ReplacementDataNode replacementDataNode=new ReplacementDataNode();
-        replacementDataNode.setReplacementString(getUnicodeExpression(cExpr.getValue(),Mode.CHAR_CONSTANT_OBFUSCATION));
+        CharLiteralExpr cExpr = exp.asCharLiteralExpr();
+        ReplacementDataNode replacementDataNode = new ReplacementDataNode();
+        replacementDataNode.setReplacementString(getUnicodeExpression(cExpr.getValue(), Mode.CHAR_CONSTANT_OBFUSCATION));
         replacementDataNode.setLineNo(cExpr.getRange().get().begin.line);
         replacementDataNode.setStartColNo(cExpr.getRange().get().begin.column);
         replacementDataNode.setEndColNo(cExpr.getRange().get().end.column);
         Obfuscator.updateObfuscatorConfig(replacementDataNode);
     }
+
+    /**********************************************************/
 
     public void handleParameter(Parameter p, Scope parentScope) {
 
