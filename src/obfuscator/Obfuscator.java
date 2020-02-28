@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import config.ObfuscatorConfig;
+import handler.ManifestHandler;
 import model.*;
 import utils.visitor.MethodVisitor;
 
@@ -86,6 +87,7 @@ public class Obfuscator {
 
             if (object instanceof ClassObfuscator && classNameList.contains(getClassNameFromFilePath(file.getAbsolutePath()))) {
                 renameFile(file.getAbsolutePath(), file.getParent() + File.separator + getHexValue(className) + ".java");
+                ManifestHandler.performObfuscation();
             }
         }
 

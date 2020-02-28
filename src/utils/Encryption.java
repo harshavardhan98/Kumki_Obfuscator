@@ -17,7 +17,6 @@ public class Encryption {
             char c = value.charAt(i);
             char k = keyValue.charAt(i);
             if(Character.isAlphabetic(c)) {
-
                 if(Character.isUpperCase(c)){
                     int cix = c - 65;
                     int key = k - 65;

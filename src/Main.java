@@ -28,8 +28,8 @@ public class Main {
     }
 
     public static void init() {
-        backupProject();
-        initUI();
+        //backupProject();
+        //initUI();
     }
 
     public static void initUI() {
