@@ -287,7 +287,22 @@ public class Obfuscator {
     /*****************************************/
 
     public void initialiseKeepClass() {
+
         keepClass = new ArrayList<>();
+
+        keepClass.add("AlumniDetails");
+        keepClass.add("BusPost");
+        keepClass.add("BusRoute");
+        keepClass.add("Club");
+        keepClass.add("ClubPost");
+        keepClass.add("Comments");
+        keepClass.add("DepartmentSubjects");
+        keepClass.add("Faculty");
+        keepClass.add("FuncHeadDetails");
+        keepClass.add("Post");
+        keepClass.add("Subject");
+        keepClass.add("TeamDetails");
+
     }
 
     public void initialiseKeepMethod() {
