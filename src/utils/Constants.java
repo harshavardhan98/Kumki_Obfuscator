@@ -9,6 +9,7 @@ public class Constants {
 
     public static final String manifestPath = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "AndroidManifest.xml";
     public static final String projectRootDirectory = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "java" + File.separator;
+    public static final String projectResDirectory = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "res" + File.separator + "layout" + File.separator;
 
     public static final String packageName = "in" + File.separator + "edu" + File.separator + "ssn" + File.separator + "ssnapp" + File.separator;
     //public static String packageName = "com" + File.separator + "example" + File.separator + "dsc_onboarding" + File.separator;
