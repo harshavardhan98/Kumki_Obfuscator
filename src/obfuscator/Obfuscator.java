@@ -52,9 +52,9 @@ public class Obfuscator {
     }
 
     public void initKeep() {
-        initialiseKeepClass();
-        initialiseKeepMethod();
-        initialiseKeepField();
+//        initialiseKeepClass();
+//        initialiseKeepMethod();
+//        initialiseKeepField();
     }
 
     /*****************************************/
@@ -290,34 +290,46 @@ public class Obfuscator {
 
         keepClass = new ArrayList<>();
 
-        keepClass.add("AlumniDetails");
-        keepClass.add("BusPost");
-        keepClass.add("BusRoute");
-        keepClass.add("Club");
-        keepClass.add("ClubPost");
-        keepClass.add("Comments");
-        keepClass.add("DepartmentSubjects");
-        keepClass.add("Faculty");
-        keepClass.add("FuncHeadDetails");
-        keepClass.add("Post");
-        keepClass.add("Subject");
-        keepClass.add("TeamDetails");
+//        keepClass.add("AlumniDetails");
+//        keepClass.add("BusPost");
+//        keepClass.add("BusRoute");
+//        keepClass.add("Club");
+//        keepClass.add("ClubPost");
+//        keepClass.add("Comments");
+//        keepClass.add("DepartmentSubjects");
+//        keepClass.add("Faculty");
+//        keepClass.add("FuncHeadDetails");
+//        keepClass.add("Post");
+//        keepClass.add("Subject");
+//        keepClass.add("TeamDetails");
 
     }
 
     public void initialiseKeepMethod() {
         keepMethod = new ArrayList<>();
-        keepMethod.add("getEmail");
-        keepMethod.add("setCount");
+//        keepMethod.add("getEmail");
+//        keepMethod.add("setCount");
     }
 
     public void initialiseKeepField() {
         keepField = new ArrayList<>();
-        keepField.add("id");
-        keepField.add("itemView");
-        keepField.add("color");
-        keepField.add(("density"));
-        keepField.add("intent");
-        keepField.add("height");
+//        keepField.add("id");
+//        keepField.add("itemView");
+//        keepField.add("color");
+//        keepField.add(("density"));
+//        keepField.add("intent");
+//        keepField.add("height");
+    }
+
+    public void setKeepMethod(ArrayList<String> keepMethodList){
+        keepMethod=keepMethodList;
+    }
+
+    public void setKeepClass(ArrayList<String> classList){
+        keepClass=classList;
+    }
+
+    public void setKeepField(ArrayList<String> fieldList){
+        keepField=fieldList;
     }
 }
