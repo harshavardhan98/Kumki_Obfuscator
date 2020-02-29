@@ -44,7 +44,7 @@ public class IntroScreen extends JFrame {
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     File file = fc.getSelectedFile();
                     chooseTheFolderButton.setText(file.getAbsolutePath());
-                    guiConfiguration.setRootFolder(file.getAbsolutePath());
+                    guiConfiguration.setRootFolder(file.getAbsolutePath()+"/");
                     System.out.println("Opening: " + file.getName() + "." );
                 } else {
                     System.out.println("Open command cancelled by user." );

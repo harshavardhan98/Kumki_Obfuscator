@@ -302,13 +302,14 @@ public class Obfuscator {
 //        keepClass.add("Post");
 //        keepClass.add("Subject");
 //        keepClass.add("TeamDetails");
-
+//  AlumniDetails,BusPost,BusRoute,Club,ClubPost,Comments,DepartmentSubjects,Faculty,FuncHeadDetails,Post,Subject,TeamDetails
     }
 
     public void initialiseKeepMethod() {
         keepMethod = new ArrayList<>();
 //        keepMethod.add("getEmail");
 //        keepMethod.add("setCount");
+//          getEmail,setCount
     }
 
     public void initialiseKeepField() {
@@ -319,17 +320,27 @@ public class Obfuscator {
 //        keepField.add(("density"));
 //        keepField.add("intent");
 //        keepField.add("height");
+//        id,itemView,color,density,intent,height
     }
 
     public void setKeepMethod(ArrayList<String> keepMethodList){
-        keepMethod=keepMethodList;
+        if(keepMethodList!=null && keepMethodList.size()>0)
+            keepMethod=keepMethodList;
+        else
+            keepMethod=new ArrayList<>();
     }
 
     public void setKeepClass(ArrayList<String> classList){
-        keepClass=classList;
+        if(classList!=null && classList.size()>0)
+            keepClass=classList;
+        else
+            keepClass=new ArrayList<>();
     }
 
     public void setKeepField(ArrayList<String> fieldList){
-        keepField=fieldList;
+        if(fieldList!=null && fieldList.size()>0)
+            keepField=fieldList;
+        else
+            keepField=new ArrayList<>();
     }
 }

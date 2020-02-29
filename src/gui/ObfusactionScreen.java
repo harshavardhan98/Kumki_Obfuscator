@@ -19,29 +19,31 @@ public class ObfusactionScreen extends JFrame{
 
         add(panel1);
         guiConfiguration=gui;
-
+        setSize(600,600);
 
         obfuscateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-                setSize(600,600);
-
                 Obfuscator obfuscator=new Obfuscator();
-                obfuscator.setKeepClass(guiConfiguration.getKeepClasses());
-                obfuscator.setKeepField(guiConfiguration.getKeepFields());
-                obfuscator.setKeepMethod(guiConfiguration.getKeepMethods());
 
+
+
+                if(guiConfiguration.getObfuscationMode().contains(Mode.COMMENT)){
+                    obfuscator = new CommentObfuscator();
+                    postObfuscationRoutine(obfuscator,Mode.COMMENT);
+                }
+
+
+                if(guiConfiguration.getObfuscationMode().contains(Mode.PACKAGE)){
+                    obfuscator = new PackageObfuscator();
+                    postObfuscationRoutine(obfuscator,Mode.PACKAGE);
+                }
 
                 if(guiConfiguration.getObfuscationMode().contains(Mode.CLASS)){
                     obfuscator = new ClassObfuscator();
                     postObfuscationRoutine(obfuscator,Mode.CLASS);
                 }
 
-                if(guiConfiguration.getObfuscationMode().contains(Mode.PACKAGE)){
-                    obfuscator = new PackageObfuscator();
-                    postObfuscationRoutine(obfuscator,Mode.PACKAGE);
-                }
 
                 if(guiConfiguration.getObfuscationMode().contains(Mode.METHOD)){
                     obfuscator = new MethodObfuscator();
@@ -53,32 +55,31 @@ public class ObfusactionScreen extends JFrame{
                     postObfuscationRoutine(obfuscator,Mode.VARIABLE);
                 }
 
-                if(guiConfiguration.getObfuscationMode().contains(Mode.COMMENT)){
-                    obfuscator = new CommentObfuscator();
-                    postObfuscationRoutine(obfuscator,Mode.COMMENT);
-                }
-
-
-                setVisible(false);
+                textField1.setText(textField1.getText()+"\n"+"Completed the process");
             }
         });
 
     }
 
     void postObfuscationRoutine(Obfuscator obfuscator, Mode m){
+
+        obfuscator.setKeepClass(guiConfiguration.getKeepClasses());
+        obfuscator.setKeepField(guiConfiguration.getKeepFields());
+        obfuscator.setKeepMethod(guiConfiguration.getKeepMethods());
+
         obfuscator.init();
         obfuscator.performObfuscation(obfuscator);
 
         if(m.equals(Mode.PACKAGE))
-            textField1.setText("Package Obfuscation Completed");
+            textField1.setText(textField1.getText()+"\n"+"Package Obfuscation Completed\n");
         else if(m.equals(Mode.CLASS))
-            textField1.setText("Class Obfuscation Completed");
+            textField1.setText(textField1.getText()+"\n"+"Class Obfuscation Completed\n");
         else if(m.equals(Mode.METHOD))
-            textField1.setText("Method Obfuscation Completed");
+            textField1.setText(textField1.getText()+"\n"+"Method Obfuscation Completed\n");
         else if(m.equals(Mode.VARIABLE))
-            textField1.setText("Variable Obfuscation Completed");
+            textField1.setText(textField1.getText()+"\n"+"Variable Obfuscation Completed\n");
         else if(m.equals(Mode.COMMENT))
-            textField1.setText("Comment Obfuscation Completed");
+            textField1.setText(textField1.getText()+"\n"+"Comment Obfuscation Completed\n");
 
     }
 
