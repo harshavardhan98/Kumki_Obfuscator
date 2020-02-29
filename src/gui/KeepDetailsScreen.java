@@ -16,6 +16,7 @@ public class KeepDetailsScreen extends JFrame {
     private JTextArea keepMethods;
     private JTextArea keepFields;
     private JButton nextButton;
+    private JTextArea encryptionKeyField;
     private JButton backButton;
 
 
@@ -25,16 +26,14 @@ public class KeepDetailsScreen extends JFrame {
         setTitle("Configuration Wizard");
         setSize(600,600);
 
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
-        });
 
         nextButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
+                if(encryptionKeyField.getText().length()<=0)
+                    return;
+                Constants.keyValue=encryptionKeyField.getText();
                 guiConfiguration.setKeepClasses(extractClassName(keepClasses.getText()));
                 guiConfiguration.setKeepMethods(extractMethodName(keepMethods.getText()));
                 guiConfiguration.setKeepFields(extractFieldName(keepFields.getText()));

@@ -12,7 +12,7 @@
       <grid id="e6c83" layout-manager="FormLayout">
         <rowspec value="center:d:grow"/>
         <rowspec value="top:3dlu:noGrow"/>
-        <rowspec value="center:max(d;4px):noGrow"/>
+        <rowspec value="center:d:grow"/>
         <rowspec value="top:3dlu:noGrow"/>
         <rowspec value="center:max(d;4px):noGrow"/>
         <colspec value="fill:d:grow"/>
@@ -40,13 +40,16 @@
               <forms defaultalign-horz="false"/>
             </constraints>
           </hspacer>
-          <component id="c5301" class="javax.swing.JLabel" binding="textField1">
+          <component id="15044" class="javax.swing.JTextArea" binding="textField1">
             <constraints>
-              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="50"/>
+              </grid>
+              <forms defaultalign-horz="false" defaultalign-vert="false"/>
             </constraints>
             <properties>
-              <text value="Status of the Obfuscation"/>
+              <editable value="false"/>
+              <enabled value="false"/>
             </properties>
           </component>
         </children>

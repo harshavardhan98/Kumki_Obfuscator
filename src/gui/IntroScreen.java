@@ -24,6 +24,7 @@ public class IntroScreen extends JFrame {
     private JCheckBox variableObfuscationCheckBox;
     private JCheckBox commentObfuscationCheckBox;
     private JButton nextButton;
+    private JTextField packageTextField;
     final JFileChooser fc;
 
 
@@ -62,6 +63,12 @@ public class IntroScreen extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
+                if(chooseTheFolderButton.getText().contains("folder") || packageTextField.getText().length()==0){
+                    return;
+                }
+
+
+                updatePackageName(packageTextField.getText());
                 ArrayList<Mode> selectedMode=new ArrayList<>();
                 if(packageObfusactionCheckBox.isSelected())
                     selectedMode.add(Mode.PACKAGE);
@@ -88,12 +95,28 @@ public class IntroScreen extends JFrame {
     }
 
 
+    void updatePackageName(String data){
+        if(data==null || data.length()==0){
+            Constants.packageName="";
+            return;
+        }
+
+        String[] folderNames=data.split("[.]");
+
+        Constants.packageName="";
+        for(int i=0;i<folderNames.length;i++)
+            Constants.packageName+=folderNames[i]+File.separator;
+
+        System.out.println("");
+    }
+
+
+
     void updateDirectoryPath(){
         projectDirectory=guiConfiguration.getRootFolder();
         Constants.manifestPath = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "AndroidManifest.xml";
         Constants.projectRootDirectory = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "java" + File.separator;
         Constants.projectResDirectory = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "res" + File.separator + "layout" + File.separator;
-
     }
 
 

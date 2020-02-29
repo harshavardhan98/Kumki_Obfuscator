@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 public class GUIConfiguration {
     String rootFolder;
+    String packageName;
     ArrayList<Mode> obfuscationMode;
     ArrayList<String> keepClasses;
     ArrayList<String> keepMethods;
@@ -56,5 +57,13 @@ public class GUIConfiguration {
 
     public void setKeepFields(ArrayList<String> keepFields) {
         this.keepFields = keepFields;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
     }
 }

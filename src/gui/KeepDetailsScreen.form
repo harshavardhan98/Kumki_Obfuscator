@@ -10,6 +10,8 @@
     <rowspec value="center:max(d;4px):noGrow"/>
     <rowspec value="top:3dlu:noGrow"/>
     <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:3dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
     <colspec value="fill:max(d;4px):noGrow"/>
     <colspec value="left:4dlu:noGrow"/>
     <colspec value="fill:d:grow"/>
@@ -85,10 +87,8 @@
       <grid id="653d5" layout-manager="FormLayout">
         <rowspec value="center:d:noGrow"/>
         <colspec value="fill:d:grow"/>
-        <colspec value="left:4dlu:noGrow"/>
-        <colspec value="fill:d:grow"/>
         <constraints>
-          <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="10" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
           <forms/>
         </constraints>
         <properties/>
@@ -96,24 +96,33 @@
         <children>
           <component id="b9578" class="javax.swing.JButton" binding="nextButton">
             <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
               <forms/>
             </constraints>
             <properties>
               <text value="Next"/>
             </properties>
           </component>
-          <component id="e1d41" class="javax.swing.JButton" binding="backButton">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-              <forms/>
-            </constraints>
-            <properties>
-              <text value="Back"/>
-            </properties>
-          </component>
         </children>
       </grid>
+      <component id="37e5a" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <text value="Enter the encryption key"/>
+        </properties>
+      </component>
+      <component id="dbcfb" class="javax.swing.JTextArea" binding="encryptionKeyField">
+        <constraints>
+          <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="50"/>
+          </grid>
+          <forms defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
+        <properties/>
+      </component>
     </children>
   </grid>
 </form>

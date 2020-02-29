@@ -11,7 +11,7 @@ public class Constants {
     public static String projectRootDirectory = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "java" + File.separator;
     public static String projectResDirectory = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "res" + File.separator + "layout" + File.separator;
 
-    public static final String packageName = "in" + File.separator + "edu" + File.separator + "ssn" + File.separator + "ssnapp" + File.separator;
+    public static String packageName = "in" + File.separator + "edu" + File.separator + "ssn" + File.separator + "ssnapp" + File.separator;
     //public static String packageName = "com" + File.separator + "example" + File.separator + "dsc_onboarding" + File.separator;
 
     public static final String fileStructureJsonPath = "originalFileStructure.json";
@@ -19,7 +19,7 @@ public class Constants {
     /**************************************************************************/
     //Vignere cipher key
 
-    public static final String keyValue = "givemearupee";
+    public static String keyValue = "givemearupee";
 
     public enum Mode {
         CLASS, METHOD,PACKAGE,COMMENT,VARIABLE, STRING_CONSTANT_OBFUSCATION, INTEGER_CONSTANT_OBFUSCATION, DOUBLE_CONSTANT_OBFUSCATION, CHAR_CONSTANT_OBFUSCATION

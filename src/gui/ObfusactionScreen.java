@@ -11,8 +11,9 @@ public class ObfusactionScreen extends JFrame{
 
     GUIConfiguration guiConfiguration;
     private JPanel panel1;
-    private JLabel textField1;
+    //private JLabel textField1;
     private JButton obfuscateButton;
+    private JTextArea textField1;
 
 
     public ObfusactionScreen(GUIConfiguration gui) throws HeadlessException {
@@ -24,9 +25,7 @@ public class ObfusactionScreen extends JFrame{
         obfuscateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Obfuscator obfuscator=new Obfuscator();
-
-
+                Obfuscator obfuscator;
 
                 if(guiConfiguration.getObfuscationMode().contains(Mode.COMMENT)){
                     obfuscator = new CommentObfuscator();
