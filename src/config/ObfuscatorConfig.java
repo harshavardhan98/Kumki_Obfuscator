@@ -20,7 +20,6 @@ public class ObfuscatorConfig {
     public void replaceInFiles(File file) {
 
         String currentLine;
-        ReplacementDataNode debugReplacementDataNode = new ReplacementDataNode();
 
         try {
             List<String> fileContent = new ArrayList<>(Files.readAllLines(file.toPath()));
@@ -33,15 +32,12 @@ public class ObfuscatorConfig {
             });
 
             for (ReplacementDataNode r : arrayList) {
-                debugReplacementDataNode = r;
                 currentLine = fileContent.get(r.getLineNo() - 1);
                 currentLine = currentLine.substring(0, r.getStartColNo() - 1) + r.getReplacementString() + currentLine.substring(r.getEndColNo());
                 fileContent.set(r.getLineNo() - 1, currentLine);
             }
             Files.write(file.toPath(), fileContent);
         } catch (Exception e) {
-            System.out.print(debugReplacementDataNode.getLineNo());
-            System.out.println(e.getMessage());
         }
 
         arrayList.clear();

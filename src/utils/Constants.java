@@ -4,8 +4,8 @@ import java.io.File;
 
 public class Constants {
     public static String projectDirectory = "/Users/harshavardhanp/final_year_project/bkp/ssn-app/";
-    //public static final String projectDirectory = "/Users/logesh/Documents/SSN/kumkiTest/";
-    //public static final String projectDirectory = "/Users/logesh/Documents/SSN/kumkiTestSSN/";
+    //public static String projectDirectory = "/Users/logesh/Documents/SSN/kumkiTest/";
+    //public static String projectDirectory = "/Users/logesh/Documents/SSN/kumkiTestSSN/";
 
     public static String manifestPath = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "AndroidManifest.xml";
     public static String projectRootDirectory = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "java" + File.separator;

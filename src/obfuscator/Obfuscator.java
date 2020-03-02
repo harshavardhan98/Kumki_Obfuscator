@@ -52,9 +52,9 @@ public class Obfuscator {
     }
 
     public void initKeep() {
-//        initialiseKeepClass();
-//        initialiseKeepMethod();
-//        initialiseKeepField();
+        initialiseKeepClass();
+        initialiseKeepMethod();
+        initialiseKeepField();
     }
 
     /*****************************************/
@@ -288,7 +288,7 @@ public class Obfuscator {
 
     public void initialiseKeepClass() {
 
-        keepClass = new ArrayList<>();
+//        keepClass = new ArrayList<>();
 
 //        keepClass.add("AlumniDetails");
 //        keepClass.add("BusPost");
@@ -306,14 +306,14 @@ public class Obfuscator {
     }
 
     public void initialiseKeepMethod() {
-        keepMethod = new ArrayList<>();
+//        keepMethod = new ArrayList<>();
 //        keepMethod.add("getEmail");
 //        keepMethod.add("setCount");
 //          getEmail,setCount
     }
 
     public void initialiseKeepField() {
-        keepField = new ArrayList<>();
+//        keepField = new ArrayList<>();
 //        keepField.add("id");
 //        keepField.add("itemView");
 //        keepField.add("color");
