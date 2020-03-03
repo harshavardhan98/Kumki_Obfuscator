@@ -25,6 +25,8 @@
           <forms defaultalign-horz="false" defaultalign-vert="false"/>
         </constraints>
         <properties>
+          <editable value="false"/>
+          <enabled value="false"/>
           <rows value="2"/>
           <text value="Welcome to Kumki Obfuscator, "/>
         </properties>

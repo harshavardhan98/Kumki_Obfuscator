@@ -36,17 +36,13 @@ public class Main {
     }
 
     public static void init() {
-        backupProject();
+        //backupProject();
         initUI();
     }
 
     public static void initUI() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            //ConfigurationWizard configurationWizard = new ConfigurationWizard();
-            //configurationWizard.setVisible(true);
-
-
             guiConfiguration=new GUIConfiguration();
             IntroScreen introScreen=new IntroScreen(guiConfiguration);
             introScreen.setVisible(true);

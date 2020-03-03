@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 
+import static utils.Backup.backupProject;
 import static utils.Constants.projectDirectory;
 
 public class IntroScreen extends JFrame {
@@ -69,6 +70,7 @@ public class IntroScreen extends JFrame {
 
 
                 updatePackageName(packageTextField.getText());
+                backupProject();
                 ArrayList<Mode> selectedMode=new ArrayList<>();
                 if(packageObfusactionCheckBox.isSelected())
                     selectedMode.add(Mode.PACKAGE);
@@ -118,26 +120,4 @@ public class IntroScreen extends JFrame {
         Constants.projectRootDirectory = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "java" + File.separator;
         Constants.projectResDirectory = projectDirectory + "app" + File.separator + "src" + File.separator + "main" + File.separator + "res" + File.separator + "layout" + File.separator;
     }
-
-
-
-
 }
-
-/*
-screen 1:
-Hello,
-project root directory  -> test the directory exists
-Levels of obfuscation:
-
-
-Screen 2:
-keep classes,methods and
-encryption key -> validate use only alphabetic and minimum size
-finish button
-
-Screen 3:
-Progress screen
-print the status of the GUI
-
-*/
