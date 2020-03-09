@@ -17,7 +17,6 @@ public class IntroScreen extends JFrame {
 
     private GUIConfiguration guiConfiguration;
     private JPanel panel1;
-    private JTextArea welcomeToKumkiObfuscatorTextArea;
     private JButton chooseTheFolderButton;
     private JCheckBox classObfuscationCheckBox;
     private JCheckBox packageObfusactionCheckBox;
