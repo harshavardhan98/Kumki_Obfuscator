@@ -288,38 +288,38 @@ public class Obfuscator {
 
     public void initialiseKeepClass() {
 
-//        keepClass = new ArrayList<>();
+        keepClass = new ArrayList<>();
 
-//        keepClass.add("AlumniDetails");
-//        keepClass.add("BusPost");
-//        keepClass.add("BusRoute");
-//        keepClass.add("Club");
-//        keepClass.add("ClubPost");
-//        keepClass.add("Comments");
-//        keepClass.add("DepartmentSubjects");
-//        keepClass.add("Faculty");
-//        keepClass.add("FuncHeadDetails");
-//        keepClass.add("Post");
-//        keepClass.add("Subject");
-//        keepClass.add("TeamDetails");
+        keepClass.add("AlumniDetails");
+        keepClass.add("BusPost");
+        keepClass.add("BusRoute");
+        keepClass.add("Club");
+        keepClass.add("ClubPost");
+        keepClass.add("Comments");
+        keepClass.add("DepartmentSubjects");
+        keepClass.add("Faculty");
+        keepClass.add("FuncHeadDetails");
+        keepClass.add("Post");
+        keepClass.add("Subject");
+        keepClass.add("TeamDetails");
 //  AlumniDetails,BusPost,BusRoute,Club,ClubPost,Comments,DepartmentSubjects,Faculty,FuncHeadDetails,Post,Subject,TeamDetails
     }
 
     public void initialiseKeepMethod() {
-//        keepMethod = new ArrayList<>();
-//        keepMethod.add("getEmail");
-//        keepMethod.add("setCount");
+        keepMethod = new ArrayList<>();
+        keepMethod.add("getEmail");
+        keepMethod.add("setCount");
 //          getEmail,setCount
     }
 
     public void initialiseKeepField() {
-//        keepField = new ArrayList<>();
-//        keepField.add("id");
-//        keepField.add("itemView");
-//        keepField.add("color");
-//        keepField.add(("density"));
-//        keepField.add("intent");
-//        keepField.add("height");
+        keepField = new ArrayList<>();
+        keepField.add("id");
+        keepField.add("itemView");
+        keepField.add("color");
+        keepField.add(("density"));
+        keepField.add("intent");
+        keepField.add("height");
 //        id,itemView,color,density,intent,height
     }
 

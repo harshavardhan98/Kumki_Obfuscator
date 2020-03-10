@@ -1,0 +1,13 @@
+
+
+in.edu.ssn.ssnapp
+
+AlumniDetails,BusPost,BusRoute,Club,ClubPost,Comments,DepartmentSubjects,Faculty,FuncHeadDetails,Post,Subject,TeamDetails
+
+getEmail,setCount
+
+id,itemView,color,density,intent,height
+
+givemearupee
+
+ ./gradlew sonarqube -Dsonar.host.url=http://localhost:9000 
