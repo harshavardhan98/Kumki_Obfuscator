@@ -15,8 +15,8 @@ public class Main {
 
     public static void init() {
         backupProject();
-        //initUI();
-        initCLIObfuscation();
+        initUI();
+        //initCLIObfuscation();
     }
 
     public static void initUI() {

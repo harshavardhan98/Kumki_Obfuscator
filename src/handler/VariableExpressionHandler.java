@@ -139,7 +139,7 @@ public class VariableExpressionHandler extends ExpressionHandler {
         handleExpression(expr.getInitializer().orElse(null), parentScope);
     }
 
-    /*********************************************************/
+    /*********************************************************
     //Constant Obfuscation
 
     @Override
